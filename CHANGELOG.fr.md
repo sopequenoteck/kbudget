@@ -7,6 +7,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.13.1] - 2026-10-24
+
 ### Fixed
 
 - **App mobile : les échecs des actions d'administration et de taux de change
@@ -1751,7 +1753,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
