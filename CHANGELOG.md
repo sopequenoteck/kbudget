@@ -23,6 +23,12 @@ This project follows [Semantic Versioning](https://semver.org/).
   their outcome** (KKS-415): these actions gave no feedback, and a failed
   payment was not handled. The panel now closes and a message says whether the
   action succeeded or failed.
+- **Invitation links copied from the mobile app now open the sign-up page**
+  (KKS-519): the mobile app built invitation links in a format the web app did
+  not recognise, so the invitee landed on the sign-in page and could not create
+  an account. Links now use the web app's format. The Android app no longer
+  declares a link handler for a fixed domain, which did not fit self-hosted
+  instances; an invitation link opened on a phone goes to the browser.
 
 ## [6.13.0] - 2026-10-22
 
