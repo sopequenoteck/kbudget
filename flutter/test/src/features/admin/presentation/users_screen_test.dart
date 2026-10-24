@@ -113,7 +113,7 @@ void main() {
       await tester.tap(find.byTooltip('Copier le lien'));
       await tester.pumpAndSettle();
 
-      expect(clipboard, 'https://budget.example.com/accept-invite/tok');
+      expect(clipboard, 'https://budget.example.com/auth/accept-invite/tok');
       expect(find.text('Lien copié dans le presse-papiers.'), findsOneWidget);
     });
 
@@ -125,7 +125,7 @@ void main() {
       await tester.tap(find.byTooltip('Copier le lien'));
       await tester.pumpAndSettle();
 
-      expect(clipboard, 'http://localhost:8080/accept-invite/tok');
+      expect(clipboard, 'http://localhost:8080/auth/accept-invite/tok');
     });
 
     testWidgets('should_revokeInvitation_when_revokeTapped', (tester) async {
@@ -373,7 +373,7 @@ void main() {
 
       await submitInvite(tester);
 
-      expect(clipboard, 'https://budget.example.com/accept-invite/abc');
+      expect(clipboard, 'https://budget.example.com/auth/accept-invite/abc');
       expect(
         find.text('Invitation créée et lien copié dans le presse-papiers.'),
         findsOneWidget,

@@ -89,10 +89,11 @@
 | A-5 | Login succes | Credentials corrects | Redirect `/dashboard` | -- |
 | A-6 | Toggle visibility mdp | Tap icone oeil | Toggle masquage/affichage | -- |
 | A-7 | Login mdp court accepte | Compte dont le mdp fait moins de 12 caracteres | Connexion acceptee — le login n'impose aucune longueur (KKS-351) | -- |
-| A-8 | Invitation : lien valide | Ouvrir `/invite/TOKEN` avec un token valide | Ecran d'acceptation, email pre-rempli et non modifiable | -- |
+| A-8 | Invitation : lien valide | Ouvrir `/auth/accept-invite/TOKEN` avec un token valide | Ecran d'acceptation, email pre-rempli et non modifiable | -- |
 | A-9 | Invitation : mdp trop court | Saisir 11 caracteres | "12 caracteres minimum", soumission bloquee cote client | -- |
 | A-10 | Invitation : mdp a la limite | Saisir exactement 12 caracteres | Accepte, compte cree, redirect `/dashboard` | -- |
-| A-11 | Invitation : lien invalide | Ouvrir `/invite/TOKEN-INEXISTANT` | Message d'invitation invalide, pas de formulaire | -- |
+| A-11 | Invitation : lien invalide | Ouvrir `/auth/accept-invite/TOKEN-INEXISTANT` | Message d'invitation invalide, pas de formulaire | -- |
+| A-13 | Invitation creee depuis l'app mobile | Administration Flutter → creer une invitation (lien copie) → ouvrir le lien dans un navigateur | Ecran d'acceptation web, email pre-rempli (KKS-519) | -- |
 | A-12 | Logout | Menu utilisateur → Logout | Retour `/login`, tokens invalides | -- |
 
 ### 2.1 — Reinitialisation a la premiere connexion (KKS-309)

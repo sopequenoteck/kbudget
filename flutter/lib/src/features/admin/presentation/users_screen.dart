@@ -60,7 +60,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
     final serverUrl = await configRepo.getServerUrl();
     final baseUrl = serverUrl ?? 'http://localhost:8080/api';
     final frontendBase = baseUrl.replaceFirst(RegExp(r'/api$'), '');
-    return '$frontendBase/accept-invite/$token';
+    // Route d'Angular, client de reference : un lien ouvert dans un
+    // navigateur doit mener a l'ecran d'acceptation du web (KKS-519).
+    return '$frontendBase/auth/accept-invite/$token';
   }
 
   Future<void> _copyLink(String token) async {
