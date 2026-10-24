@@ -64,6 +64,7 @@
   "commonValueInactive": "Inactif",
   "subscriptionsActionPay": "Payer",
   "subscriptionsFeedbackPaid": "Paiement enregistré",
+  "subscriptionsFeedbackPayError": "Impossible d'enregistrer le paiement",
   "subscriptionsDetailHistory": "Historique",
   "subscriptionsDetailPaymentCount": "{count, plural, one {{count} paiement} other {{count} paiements}}",
   "debtsFormPersonPlaceholder": "Personne",

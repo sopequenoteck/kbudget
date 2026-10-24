@@ -71,6 +71,7 @@
   "commonValueInactive": "Inactive",
   "subscriptionsActionPay": "Pay",
   "subscriptionsFeedbackPaid": "Payment recorded",
+  "subscriptionsFeedbackPayError": "Unable to record the payment",
   "subscriptionsDetailHistory": "History",
   "subscriptionsDetailPaymentCount": "{count, plural, one {{count} payment} other {{count} payments}}",
   "@subscriptionsDetailPaymentCount": {

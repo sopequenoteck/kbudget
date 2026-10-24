@@ -84,12 +84,19 @@ void main() {
       expect(state().items, [updated]);
     });
 
-    test('should_setLocalizedSaveError_when_repositoryThrows', () async {
+    test('should_rethrowWithoutStateError_when_repositoryThrows', () async {
+      final existing = [rateOf(Currency.usd, 1.1)];
+      when(repo.getAll()).thenAnswer((_) async => existing);
+      await notifier().loadItems();
       when(repo.upsert(any, any, any)).thenThrow(Exception('boom'));
 
-      await notifier().upsert(Currency.eur, Currency.usd, 1.1);
+      await expectLater(
+        notifier().upsert(Currency.eur, Currency.usd, 1.2),
+        throwsException,
+      );
 
-      expect(state().error, "Erreur lors de l'enregistrement du taux.");
+      expect(state().error, isNull);
+      expect(state().items, existing);
     });
   });
 
@@ -106,12 +113,19 @@ void main() {
       expect(state().items.map((r) => r.targetCurrency), [Currency.gbp]);
     });
 
-    test('should_setLocalizedDeleteError_when_repositoryThrows', () async {
+    test('should_rethrowWithoutStateError_when_repositoryThrows', () async {
+      final existing = [rateOf(Currency.usd, 1.1)];
+      when(repo.getAll()).thenAnswer((_) async => existing);
+      await notifier().loadItems();
       when(repo.delete(any, any)).thenThrow(Exception('boom'));
 
-      await notifier().delete(Currency.eur, Currency.usd);
+      await expectLater(
+        notifier().delete(Currency.eur, Currency.usd),
+        throwsException,
+      );
 
-      expect(state().error, 'Erreur lors de la suppression');
+      expect(state().error, isNull);
+      expect(state().items, existing);
     });
   });
 

@@ -7,6 +7,31 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.13.1] - 2026-10-24
+
+### Fixed
+
+- **Mobile app: failed administration and exchange-rate actions now say so**
+  (KKS-422): re-enabling a user or revoking an invitation failed silently,
+  saving an exchange rate closed the form even when it failed, and a failed
+  save or deletion hid the whole list of rates. The failure is now shown, the
+  rate form stays open with the error, and the lists stay visible.
+- **Mobile app: duplicate category name and failed recurring transaction now
+  reported** (KKS-412): a category name already in use showed "Error while
+  saving" instead of saying so; it is now flagged under the name field before
+  anything is sent. Creating a transaction with a recurrence no longer hides a
+  failure of the recurrence.
+- **Mobile app: Validate, Skip and Pay in the notifications panel now report
+  their outcome** (KKS-415): these actions gave no feedback, and a failed
+  payment was not handled. The panel now closes and a message says whether the
+  action succeeded or failed.
+- **Invitation links copied from the mobile app now open the sign-up page**
+  (KKS-519): the mobile app built invitation links in a format the web app did
+  not recognise, so the invitee landed on the sign-in page and could not create
+  an account. Links now use the web app's format. The Android app no longer
+  declares a link handler for a fixed domain, which did not fit self-hosted
+  instances; an invitation link opened on a phone goes to the browser.
+
 ## [6.13.0] - 2026-10-22
 
 ### Fixed
@@ -198,7 +223,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0

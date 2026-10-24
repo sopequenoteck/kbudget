@@ -7,6 +7,33 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.13.1] - 2026-10-24
+
+### Fixed
+
+- **App mobile : les échecs des actions d'administration et de taux de change
+  s'affichent** (KKS-422) : réactiver un compte ou révoquer une invitation
+  échouait sans rien dire, enregistrer un taux fermait le formulaire même en
+  cas d'échec, et un enregistrement ou une suppression ratés masquaient toute la
+  liste des taux. L'échec est désormais annoncé, le formulaire de taux reste
+  ouvert avec l'erreur, et les listes restent affichées.
+- **App mobile : nom de catégorie déjà pris et échec de récurrence signalés**
+  (KKS-412) : un nom de catégorie déjà utilisé affichait « Erreur lors de la
+  sauvegarde » sans dire pourquoi ; il est désormais signalé sous le champ du
+  nom, avant tout envoi. Créer une transaction avec une récurrence ne masque
+  plus l'échec de la récurrence.
+- **App mobile : Valider, Passer et Payer du panneau de notifications
+  annoncent leur issue** (KKS-415) : ces actions ne donnaient aucun retour, et
+  un échec de paiement n'était pas géré. Le panneau se ferme désormais et un
+  message indique si l'action a réussi ou échoué.
+- **Les liens d'invitation copiés depuis l'app mobile ouvrent la page
+  d'inscription** (KKS-519) : l'app mobile construisait les liens d'invitation
+  dans un format que l'app web ne reconnaissait pas ; l'invité arrivait sur la
+  page de connexion sans pouvoir créer son compte. Les liens suivent désormais
+  le format de l'app web. L'app Android ne déclare plus de gestionnaire de liens
+  pour un domaine fixe, inadapté aux instances auto-hébergées : un lien
+  d'invitation ouvert sur téléphone part dans le navigateur.
+
 ## [6.13.0] - 2026-10-22
 
 ### Fixed
@@ -1726,7 +1753,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0

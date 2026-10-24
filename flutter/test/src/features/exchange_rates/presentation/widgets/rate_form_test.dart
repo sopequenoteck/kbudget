@@ -105,7 +105,9 @@ void main() {
     expect(saved, 1);
   });
 
-  testWidgets('should_showSaveErrorSnackbar_when_upsertThrows', (tester) async {
+  testWidgets('should_showErrorInFormAndStayOpen_when_upsertThrows', (
+    tester,
+  ) async {
     await pumpForm(tester, upsertError: Exception('boom'));
 
     await submit(tester, '1.5');
@@ -115,7 +117,35 @@ void main() {
       find.text("Erreur lors de l'enregistrement du taux."),
       findsOneWidget,
     );
+    expect(find.byType(SnackBar), findsNothing);
     expect(saved, 0);
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNotNull,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('should_clearError_when_resubmittedAfterFailure', (
+    tester,
+  ) async {
+    await pumpForm(tester, upsertError: Exception('boom'));
+    await submit(tester, '1.5');
+    await tester.pump();
+    expect(
+      find.text("Erreur lors de l'enregistrement du taux."),
+      findsOneWidget,
+    );
+
+    fake.upsertError = null;
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pump();
+
+    expect(
+      find.text("Erreur lors de l'enregistrement du taux."),
+      findsNothing,
+    );
+    expect(saved, 1);
   });
 
   testWidgets('should_prefillRateAndDisableTarget_when_editing', (

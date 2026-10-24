@@ -22,11 +22,12 @@ void main() {
     ListState<ExchangeRate> ratesState = const ListState(),
     List<Currency> configured = const [Currency.eur, Currency.usd],
     List<Account> accounts = const [],
+    Exception? deleteError,
   }) async {
     tester.view.physicalSize = const Size(1000, 3000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    rates = FakeExchangeRateNotifier(ratesState);
+    rates = FakeExchangeRateNotifier(ratesState, deleteError: deleteError);
     currencies = FakeCurrencyConfigNotifier(configured);
     await tester.pumpApp(
       const CurrencySettingsScreen(),
@@ -225,6 +226,31 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Supprimer'));
       await tester.pumpAndSettle();
       expect(rates.deleted, [(Currency.eur, Currency.usd)]);
+    });
+
+    testWidgets('should_showDeleteErrorSnackbarAndKeepList_when_deleteFails', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        ratesState: listed,
+        deleteError: Exception('boom'),
+      );
+
+      await tester.tap(find.byTooltip('Supprimer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Supprimer'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(SnackBar),
+          matching: find.text('Erreur lors de la suppression'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('EUR → USD'), findsOneWidget);
+      expect(find.byTooltip('Modifier'), findsOneWidget);
     });
 
     testWidgets('should_notDelete_when_deletionCancelled', (tester) async {

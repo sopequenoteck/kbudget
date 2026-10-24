@@ -283,16 +283,17 @@ void main() {
       expect(state().mutatingIds, isEmpty);
     });
 
-    test('should_set_error_when_pay_fails', () async {
+    test('should_rethrow_without_setting_error_when_pay_fails', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
       await notifier().loadItems();
 
       when(mockRepo.pay(any)).thenThrow(Exception('Network error'));
 
-      expect(
-        () async => notifier().pay(sub1.id),
-        throwsException,
-      );
+      await expectLater(notifier().pay(sub1.id), throwsException);
+
+      // state.error est réservé aux erreurs de chargement (KKS-422)
+      expect(state().error, isNull);
+      expect(state().mutatingIds, isEmpty);
     });
   });
 

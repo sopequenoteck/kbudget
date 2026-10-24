@@ -518,7 +518,7 @@ entite, elle peut vivre des deux cotes.
 | Profil « Mon compte » (avatar, mot de passe, export, suppression) | **Suivi** | `/settings/account` | `/settings/profile` |
 | Reglages (theme, taille du texte, langue, fuseau, fonctionnalites, ordre de navigation) | **Suivi** | `/settings` | `/settings` |
 | Connexion | **Suivi** | `/auth` | `/login` |
-| Acceptation d'invitation | **Suivi** | `/auth/accept-invite/:token` | `/accept-invite/:token` |
+| Acceptation d'invitation | **Suivi** | `/auth/accept-invite/:token` | `/accept-invite/:token`, sans point d'entree : pas de lien profond Android (domaine d'instance inconnu a la compilation, KKS-519) ni iOS ; le lien d'invitation s'ouvre dans le navigateur |
 | Reinitialisation a la premiere connexion | **Suivi** | `/first-login-reset` | `/first-login-reset` |
 | Ecran d'incompatibilite de version | **Suivi** | `/incompatible` | `/incompatible` |
 | Administration (utilisateurs, invitations) | **Gele** | `/settings/users` | `/settings/users` |

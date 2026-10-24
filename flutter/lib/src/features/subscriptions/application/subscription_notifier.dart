@@ -186,7 +186,6 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState>
       }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
       rethrow;
     }

@@ -69,13 +69,13 @@ void main() {
       expect(container.read(invitationsNotifierProvider).items, hasLength(1));
     });
 
-    test('should_rethrowWithTranslatedError_when_createFails', () async {
+    test('should_rethrowWithoutStateError_when_createFails', () async {
       when(repo.createInvitation('a@b.c')).thenThrow(Exception('secret'));
 
       await expectLater(notifier().createInvitation('a@b.c'), throwsException);
 
       final state = container.read(invitationsNotifierProvider);
-      expect(state.error, l10n.usersFeedbackInviteCreateError);
+      expect(state.error, isNull);
       expect(state.isLoading, false);
     });
   });
@@ -92,15 +92,17 @@ void main() {
       expect(state.error, isNull);
     });
 
-    test('should_setTranslatedErrorWithoutDetail_when_revokeFails', () async {
-      when(repo.revokeInvitation(1)).thenThrow(Exception('secret detail'));
+    test('should_rethrowWithoutStateError_when_revokeFails', () async {
+      when(repo.listInvitations()).thenAnswer((_) async => [invitation()]);
+      await notifier().loadItems();
+      when(repo.revokeInvitation(1)).thenThrow(Exception('boom'));
 
-      await notifier().revoke(1);
+      await expectLater(notifier().revoke(1), throwsException);
 
       final state = container.read(invitationsNotifierProvider);
-      expect(state.error, l10n.usersFeedbackInviteRevokeError);
-      expect(state.error, isNot(contains('secret detail')));
+      expect(state.error, isNull);
       expect(state.mutatingIds, isEmpty);
+      expect(state.items, hasLength(1));
     });
   });
 

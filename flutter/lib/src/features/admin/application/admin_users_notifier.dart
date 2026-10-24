@@ -95,8 +95,8 @@ class AdminUsersNotifier extends Notifier<AdminUsersListState>
       }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: ref.read(appLocalizationsProvider).usersFeedbackUserEnableError,
       );
+      rethrow;
     }
   }
 }

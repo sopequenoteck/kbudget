@@ -23,13 +23,16 @@ Account accountIn(Currency currency, {bool actif = true}) =>
 /// Notifier de taux dont l'etat est fixe : aucun appel reseau.
 class FakeExchangeRateNotifier extends ExchangeRateNotifier {
   /// Cree un notifier qui demarre sur [initial].
-  FakeExchangeRateNotifier(this.initial, {this.upsertError});
+  FakeExchangeRateNotifier(this.initial, {this.upsertError, this.deleteError});
 
   /// Etat initial.
   final ListState<ExchangeRate> initial;
 
   /// Erreur levee par [upsert] si renseignee.
-  final Exception? upsertError;
+  Exception? upsertError;
+
+  /// Erreur levee par [delete] si renseignee.
+  final Exception? deleteError;
 
   /// Taux enregistres via [upsert].
   final upserted = <(Currency, Currency, double)>[];
@@ -55,6 +58,7 @@ class FakeExchangeRateNotifier extends ExchangeRateNotifier {
 
   @override
   Future<void> delete(Currency baseCurrency, Currency targetCurrency) async {
+    if (deleteError != null) throw deleteError!;
     deleted.add((baseCurrency, targetCurrency));
   }
 }

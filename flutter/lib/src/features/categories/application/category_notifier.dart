@@ -26,6 +26,19 @@ class CategoryNotifier extends CrudNotifier<Category> {
   void sortItems(List<Category> items) =>
       items.sort((a, b) => a.nom.compareTo(b.nom));
 
+  /// Indique si une categorie chargee porte deja ce nom.
+  ///
+  /// Compare le `nom` stocke (pas le nom affiche traduit) a `nom.trim()`,
+  /// sans tenir compte de la casse, comme l'API, sur toute la liste
+  /// (`allItems`, systeme comprises). [exceptId] exclut la categorie
+  /// modifiee : garder son propre nom n'est pas un doublon.
+  bool isNameTaken(String nom, {String? exceptId}) {
+    final wanted = nom.trim().toLowerCase();
+    return allItems.any(
+      (e) => e.id != exceptId && e.nom.toLowerCase() == wanted,
+    );
+  }
+
   @override
   String? validateUpdate(Category item) {
     final existing = allItems.where((e) => e.id == item.id).firstOrNull;
