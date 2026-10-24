@@ -7,6 +7,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.13.1] - 2026-10-24
+
 ### Fixed
 
 - **Mobile app: failed administration and exchange-rate actions now say so**
@@ -221,7 +223,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
