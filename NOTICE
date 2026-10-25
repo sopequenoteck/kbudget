@@ -77,9 +77,14 @@ soumission aux stores.
 2. Police Inter
 ---------------
 
-**Emplacement** : `flutter/assets/fonts/Inter/`
+**Emplacements** :
+
+    flutter/assets/fonts/Inter/      Inter statique, 4 graisses (Flutter)
+    app/src/styles/k/fonts/          Inter Variable, sous-ensemble latin (web),
+                                     recue de k-design par son scripts/sync.mjs
+
 **Licence** : SIL Open Font License 1.1
-**Texte** : `flutter/assets/fonts/Inter/OFL.txt`
+**Texte** : `OFL.txt`, dans chacun des deux repertoires
 **Copyright** : (c) 2016 The Inter Project Authors
 **Source** : https://github.com/rsms/inter
 
@@ -87,6 +92,7 @@ L'OFL autorise la redistribution a condition de joindre le texte de la licence.
 `OFL.txt` se trouve dans le repertoire de la police, lui-meme declare comme
 ressource dans `flutter/pubspec.yaml` : le texte est donc embarque dans
 l'application distribuee, et pas seulement present dans le depot.
+Cote web, `OFL.txt` accompagne le fichier woff2 dans `app/src/styles/k/fonts/`.
 
 
 3. Ce qui appartient au projet

@@ -1,0 +1,167 @@
+/* K Design v0.2.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer. */
+@font-face { font-family: 'Inter Variable'; src: url('./fonts/inter-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+:root, [data-theme="dark"] {
+  color-scheme: dark;
+  --k-gray-50: #fafafa;
+  --k-gray-100: #f5f5f5;
+  --k-gray-200: #e5e5e5;
+  --k-gray-300: #d4d4d4;
+  --k-gray-400: #a3a3a3;
+  --k-gray-500: #737373;
+  --k-gray-600: #525252;
+  --k-gray-700: #1e1e1e;
+  --k-gray-800: #141414;
+  --k-gray-900: #0a0a0a;
+  --k-amber-50: #fffbeb;
+  --k-amber-100: #fef3c7;
+  --k-amber-200: #fde68a;
+  --k-amber-300: #fcd34d;
+  --k-amber-400: #fbbf24;
+  --k-amber-500: #f59e0b;
+  --k-amber-600: #d97706;
+  --k-amber-700: #b45309;
+  --k-amber-800: #92400e;
+  --k-amber-900: #78350f;
+  --k-color-success-raw: #22c55e;
+  --k-color-warning-raw: #eab308;
+  --k-color-error-raw: #ef4444;
+  --k-color-info-raw: #3b82f6;
+  --k-bg-primary: var(--k-gray-900);
+  --k-bg-secondary: var(--k-gray-800);
+  --k-bg-tertiary: var(--k-gray-700);
+  --k-surface-default: var(--k-gray-800);
+  --k-surface-raised: var(--k-gray-700);
+  --k-surface-background: #00000000;
+  --k-surface-overlay: rgba(0, 0, 0, 0.6);
+  --k-text-primary: var(--k-gray-50);
+  --k-text-secondary: var(--k-gray-400);
+  --k-text-tertiary: #8a8a8a;
+  --k-text-inverse: var(--k-gray-900);
+  --k-border-default: var(--k-gray-700);
+  --k-border-strong: var(--k-gray-600);
+  --k-color-primary: #e0a820;
+  --k-color-primary-hover: #c9952a;
+  --k-color-primary-light: rgba(255, 255, 255, 0.08);
+  --k-color-primary-contrast: var(--k-gray-900);
+  --k-bg-success: rgba(34, 197, 94, 0.1);
+  --k-bg-error: rgba(239, 68, 68, 0.1);
+  --k-bg-warning: rgba(234, 179, 8, 0.1);
+  --k-bg-info: rgba(59, 130, 246, 0.1);
+  --k-text-success: #6dc990;
+  --k-text-error: #d97777;
+  --k-text-warning: #d4ad3c;
+  --k-text-info: #7aacdb;
+  --k-icon-circle-bg: rgba(255, 255, 255, 0.06);
+  --k-hover-bg: var(--k-gray-700);
+  --k-hover-subtle: rgba(255, 255, 255, 0.04);
+  --k-highlight-subtle: rgba(255, 255, 255, 0.1);
+  --k-overlay-light: rgba(255, 255, 255, 0.15);
+  --k-primary-subtle: rgba(224, 168, 32, 0.1);
+  --k-primary-muted: rgba(224, 168, 32, 0.15);
+  --k-primary-border: rgba(224, 168, 32, 0.25);
+  --k-focus-ring: rgba(251, 191, 36, 0.5);
+  --k-color-income: var(--k-text-success);
+  --k-color-expense: var(--k-text-error);
+  --k-color-debt-owe: var(--k-text-error);
+  --k-color-debt-owed: var(--k-text-success);
+  --k-color-subscription: #9580d9;
+  --k-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --k-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --k-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --k-shadow-colored-primary: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+}
+[data-theme="light"] {
+  color-scheme: light;
+  --k-bg-primary: #f0f0f0;
+  --k-bg-secondary: #ffffff;
+  --k-bg-tertiary: var(--k-gray-100);
+  --k-surface-default: #ffffff;
+  --k-surface-raised: var(--k-gray-100);
+  --k-surface-background: #00000000;
+  --k-surface-overlay: rgba(10, 10, 10, 0.5);
+  --k-text-primary: var(--k-gray-900);
+  --k-text-secondary: var(--k-gray-600);
+  --k-text-tertiary: #6b6b6b;
+  --k-text-inverse: #ffffff;
+  --k-border-default: var(--k-gray-200);
+  --k-border-strong: var(--k-gray-300);
+  --k-color-primary: #c66e05;
+  --k-color-primary-hover: var(--k-amber-700);
+  --k-color-primary-light: var(--k-amber-100);
+  --k-color-primary-contrast: #0a0a0a;
+  --k-bg-success: #dcfce7;
+  --k-bg-error: #fee2e2;
+  --k-bg-warning: #fef9c3;
+  --k-bg-info: #dbeafe;
+  --k-text-success: #166534;
+  --k-text-error: #b91c1c;
+  --k-text-warning: #854d0e;
+  --k-text-info: #1d4ed8;
+  --k-icon-circle-bg: rgba(0, 0, 0, 0.04);
+  --k-hover-bg: var(--k-gray-100);
+  --k-hover-subtle: rgba(0, 0, 0, 0.04);
+  --k-highlight-subtle: rgba(0, 0, 0, 0.06);
+  --k-overlay-light: rgba(0, 0, 0, 0.1);
+  --k-primary-subtle: rgba(198, 110, 5, 0.1);
+  --k-primary-muted: rgba(198, 110, 5, 0.15);
+  --k-primary-border: rgba(198, 110, 5, 0.25);
+  --k-focus-ring: rgba(245, 158, 11, 0.5);
+  --k-color-subscription: #8b5cf6;
+  --k-shadow-colored-primary: 0 8px 24px -4px rgba(245, 158, 11, 0.4);
+}
+:root {
+  --k-space-0: 0;
+  --k-space-1: 0.25rem;
+  --k-space-2: 0.5rem;
+  --k-space-3: 0.75rem;
+  --k-space-4: 1rem;
+  --k-space-5: 1.25rem;
+  --k-space-6: 1.5rem;
+  --k-space-7: 1.75rem;
+  --k-space-8: 2rem;
+  --k-space-9: 2.25rem;
+  --k-space-10: 2.5rem;
+  --k-space-11: 2.75rem;
+  --k-space-12: 3rem;
+  --k-radius-sm: 0.25rem;
+  --k-radius-md: 0.5rem;
+  --k-radius-lg: 0.75rem;
+  --k-radius-xl: 1rem;
+  --k-radius-round: 999px;
+  --k-font-size-2xs: 0.625rem;
+  --k-font-size-xs: 0.75rem;
+  --k-font-size-sm: 0.875rem;
+  --k-font-size-base: 1rem;
+  --k-font-size-lg: 1.125rem;
+  --k-font-size-xl: 1.25rem;
+  --k-font-size-2xl: 1.5rem;
+  --k-font-size-3xl: 1.875rem;
+  --k-font-weight-normal: 400;
+  --k-font-weight-medium: 500;
+  --k-font-weight-semibold: 600;
+  --k-font-weight-bold: 700;
+  --k-line-height-tight: 1.25;
+  --k-line-height-normal: 1.5;
+  --k-line-height-relaxed: 1.75;
+  --k-z-dropdown: 100;
+  --k-z-sticky: 200;
+  --k-z-fab: 250;
+  --k-z-overlay: 300;
+  --k-z-modal: 400;
+  --k-z-toast: 500;
+  --k-sidebar-width: 240px;
+  --k-font-family: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --k-font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+}
+.k-hero-amount { font-family: var(--k-font-family); font-size: 30px; line-height: 1.5; font-weight: 700; letter-spacing: -0.02em; }
+.k-page-title { font-family: var(--k-font-family); font-size: 18px; line-height: 1.5; font-weight: 700; }
+.k-section-title { font-family: var(--k-font-family); font-size: 16px; line-height: 1.5; font-weight: 600; }
+.k-row-title { font-family: var(--k-font-family); font-size: 14px; line-height: 1.5; font-weight: 500; }
+.k-row-amount { font-family: var(--k-font-family); font-size: 12px; line-height: 1.5; font-weight: 500; }
+.k-label-upper { font-family: var(--k-font-family); font-size: 12px; line-height: 1.5; font-weight: 500; letter-spacing: 0.05em; }
+.k-meta { font-family: var(--k-font-family); font-size: 12px; line-height: 1.5; font-weight: 400; }
+.k-h1 { font-family: var(--k-font-family); font-size: 30px; line-height: 1.25; font-weight: 600; }
+.k-h2 { font-family: var(--k-font-family); font-size: 24px; line-height: 1.25; font-weight: 600; }
+.k-h3 { font-family: var(--k-font-family); font-size: 20px; line-height: 1.25; font-weight: 600; }
+.k-h4 { font-family: var(--k-font-family); font-size: 18px; line-height: 1.25; font-weight: 600; }
+.k-body { font-family: var(--k-font-family); font-size: 16px; line-height: 1.5; font-weight: 400; }

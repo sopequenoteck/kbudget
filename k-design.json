@@ -1,0 +1,8 @@
+{
+  "app": "kbudget",
+  "version": "0.2.0",
+  "files": {
+    "css/kbudget/k-tokens.css": "app/src/styles/k/k-tokens.css",
+    "css/kbudget/fonts/": "app/src/styles/k/fonts/"
+  }
+}
