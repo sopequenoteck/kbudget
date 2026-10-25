@@ -22,6 +22,16 @@ public final class ImportTestFiles {
             2026-09-17,Subscription,-2.99
             """;
 
+    /** Same columns as {@link #OTHER_BANK_STATEMENT}, with a card payment prefix on the label. */
+    static final String OTHER_BANK_CARD_STATEMENT = """
+            Booked,Memo,Value
+            2026-09-16,CARTE X1234 14/09 BAKERY,-4.30
+            2026-09-17,CARTE X1234 15/09 GROCER,-12.00
+            """;
+
+    /** Card payment pattern suggested by the mapping screen. */
+    static final String CARD_PATTERN = "CARTE\\s+\\w+\\d{4}\\s+\\d{2}/\\d{2}\\s+";
+
     private static final String SG_COLUMN_HEADER =
             "Date de l'opération;Libellé;Détail de l'écriture;Montant de l'opération;Devise";
 
@@ -44,6 +54,10 @@ public final class ImportTestFiles {
 
     public static byte[] otherBankStatement() {
         return OTHER_BANK_STATEMENT.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static byte[] otherBankCardStatement() {
+        return OTHER_BANK_CARD_STATEMENT.getBytes(StandardCharsets.UTF_8);
     }
 
     public static byte[] bytes(String content, Charset charset) {

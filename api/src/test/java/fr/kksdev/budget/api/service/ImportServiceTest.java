@@ -211,7 +211,7 @@ class ImportServiceTest {
         var user = buildUser();
         var account = buildActiveAccount(user);
         var mapping = new CsvMappingRequest(";", "dd/MM/yyyy", "Date", "Montant", null, null,
-                "Libellé", "UTF-8", ",", 1, false, null);
+                "Libellé", "UTF-8", ",", 1, false, null, null);
 
         when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(account));
         when(importDraftRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, ImportDraftStatus.PENDING))
@@ -226,6 +226,65 @@ class ImportServiceTest {
         assertThatThrownBy(() -> importService.uploadWithMapping(file, accountId, mapping, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Unable to read the file (IOException)");
+    }
+
+    private ArgumentCaptor<ImportProfileRegistry.ImportProfileConfig> uploadWithMappingAndCaptureConfig(
+            CsvMappingRequest mapping) {
+        var account = buildActiveAccount(buildUser());
+        when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(account));
+        when(importDraftRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, ImportDraftStatus.PENDING))
+                .thenReturn(Optional.empty());
+        when(csvParsingService.parse(any(), any(), eq(userId))).thenReturn(List.of());
+        when(importDraftRepository.save(any(ImportDraft.class))).thenAnswer(invocation -> {
+            ImportDraft saved = invocation.getArgument(0);
+            saved.setStatus(ImportDraftStatus.PENDING);
+            return saved;
+        });
+        when(importBalanceService.draftBalances(any(), any(), eq(userId)))
+                .thenReturn(ImportBalanceService.DraftBalances.NONE);
+
+        importService.uploadWithMapping(validCsvFile(), accountId, mapping, userId);
+
+        ArgumentCaptor<ImportProfileRegistry.ImportProfileConfig> config =
+                ArgumentCaptor.forClass(ImportProfileRegistry.ImportProfileConfig.class);
+        verify(csvParsingService).parse(any(), config.capture(), eq(userId));
+        return config;
+    }
+
+    private CsvMappingRequest mappingWith(boolean saveAsProfile, List<String> cleanupPatterns) {
+        return new CsvMappingRequest(",", "yyyy-MM-dd", "Booked", "Value", null, null, "Memo", "UTF-8", ".", 0,
+                saveAsProfile, saveAsProfile ? "My bank" : null, cleanupPatterns);
+    }
+
+    @Test
+    void should_pass_cleanupPatterns_to_parsing_and_save_them_on_profile_when_saveAsProfile() {
+        var patterns = List.of("CARTE\\s+\\w+\\d{4}\\s+", "REF\\d+");
+        when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
+        when(importProfileRepository.save(any(ImportProfile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var config = uploadWithMappingAndCaptureConfig(mappingWith(true, patterns));
+
+        assertThat(config.getValue().cleanupPatterns()).containsExactlyElementsOf(patterns);
+        ArgumentCaptor<ImportProfile> saved = ArgumentCaptor.forClass(ImportProfile.class);
+        verify(importProfileRepository).save(saved.capture());
+        assertThat(saved.getValue().getCleanupPatterns()).containsExactlyElementsOf(patterns);
+    }
+
+    @Test
+    void should_pass_cleanupPatterns_to_parsing_without_saving_profile_when_not_saveAsProfile() {
+        var patterns = List.of("REF\\d+");
+
+        var config = uploadWithMappingAndCaptureConfig(mappingWith(false, patterns));
+
+        assertThat(config.getValue().cleanupPatterns()).containsExactlyElementsOf(patterns);
+        verify(importProfileRepository, never()).save(any());
+    }
+
+    @Test
+    void should_pass_empty_cleanupPatterns_to_parsing_when_mapping_has_none() {
+        var config = uploadWithMappingAndCaptureConfig(mappingWith(false, null));
+
+        assertThat(config.getValue().cleanupPatterns()).isEmpty();
     }
 
     @Test
