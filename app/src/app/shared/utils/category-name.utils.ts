@@ -11,7 +11,7 @@ import { systemCategoryNameKey } from '../../core/models/category.model';
  *
  * Partagee par le pipe `categoryName` (templates) et les `computed()` qui
  * traduisent en TypeScript — tri, recherche, libelle passe a un composant
- * sans pipe (exception documentee CLAUDE.md, KKS-380) — pour n'ecrire cette
+ * sans pipe (exception documentee app/CLAUDE.md, KKS-380) — pour n'ecrire cette
  * regle qu'une fois.
  */
 export function categoryDisplayName(

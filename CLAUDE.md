@@ -54,16 +54,7 @@ cd flutter && flutter analyze          # Analyse statique
 
 ## Constitution du projet
 
-Le fichier `.specify/memory/constitution.md` (v4.2.0) est le document de reference. 8 principes :
-
-1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Endpoints metier servis sous `/api/v1` (KKS-313) — une seule version servie a la fois, jamais deux en parallele. `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse — voir [`docs/api-compatibility.md`](docs/api-compatibility.md) pour les six regles et la procedure de rupture assumee.
-2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
-3. **Simplicite & YAGNI** : Controller → Service → Repository. Pas de CQRS/DDD/Event Sourcing.
-4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les ecrans de consultation (absent de la connexion et des parcours dedies a une tache : parametres, import de releve, v4.1.0). L'instance de l'utilisateur sera souvent injoignable : degrader proprement, le cache n'est jamais source de verite.
-5. **Testabilite** : tests d'integration sur endpoints, tests unitaires sur services. Nommage : `should_[resultat]_when_[condition]`. La suite doit tourner chez un contributeur externe.
-6. **Observabilite** : SLF4J/Logback uniquement. INFO pour actions, ERROR pour erreurs. Logs et messages techniques en anglais.
-7. **Self-Hosted & Distribution ouverte** : PostgreSQL seule dependance infra. AGPL-3.0 (`api/`, `app/`), MPL-2.0 (`flutter/`). Aucun bridage selon l'origine du build. Anglais par defaut, francais a parite.
-8. **Angular, client de reference** : toute feature nait cote Angular. Flutter n'a jamais d'obligation de parite — frontiere a 3 etats **Suivi / Gele / Jamais**. Verifier l'etat d'une surface avant tout portage.
+[`.specify/memory/constitution.md`](.specify/memory/constitution.md) fait autorite sur toute autre documentation : la lire avant toute proposition ou implementation. Interdit permanent : ne jamais retirer ni renommer un champ de reponse de l'API — six regles et procedure de rupture assumee dans [`docs/api-compatibility.md`](docs/api-compatibility.md).
 
 ## Frontiere Angular / Flutter
 
@@ -81,91 +72,13 @@ Classement complet, motifs et ecarts connus : [`docs/architecture.md`](docs/arch
 - Une fonction que Flutter aurait en avance se porte sur Angular, qui reste la surface fonctionnelle complete
 - Un bug sur une surface gelee se corrige : le gel porte sur les evolutions, pas sur le fonctionnement
 
-## Conventions backend
+## Conventions par module
 
-- DTOs separent TOUJOURS la couche API de la couche persistance
-- Enums pour les valeurs fixes du domaine (package `enums/`)
-- Lombok obligatoire (`@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
-- Chaque requete filtre par le user authentifie (isolation des donnees)
-- Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`)
-- Branches : `feature/<nom>`, `fix/<nom>`, `chore/<nom>`, `hotfix/<nom>`
+`api/CLAUDE.md` (backend), `app/CLAUDE.md` (Angular), `flutter/CLAUDE.md` (Flutter) : charges quand on travaille dans le dossier. Les lire avant de planifier un changement qui le touche.
 
-## Conventions Angular
+## Branches
 
-### Signals-First
-
-Approche **signals-first** obligatoire :
-
-| Besoin | Utiliser | Ne PAS utiliser |
-|--------|----------|-----------------|
-| State | `signal()` | Variables classiques |
-| Derived state | `computed()` | Getters manuels |
-| Side effects | `effect()` | `ngOnChanges` |
-| Inputs | `input()` / `input.required()` | `@Input()` |
-| Outputs | `output()` | `@Output()` + `EventEmitter` |
-| Queries | `viewChild()`, `contentChild()` | `@ViewChild()`, `@ContentChild()` |
-| Two-way binding | `model()` | `@Input()` + `@Output()` combo |
-
-### Regles
-
-- `inject()` uniquement (pas de constructor injection)
-- Standalone obligatoire, `ChangeDetectionStrategy.OnPush` sur tous les composants
-- Pas de `subscribe()` manuel — utiliser `toSignal()`, `firstValueFrom()` ou pipe `async`
-- RxJS limite aux flux HTTP et operateurs complexes
-- ESLint + Prettier configures (`ng lint`, `npm run format`). **Ne formater que les fichiers crees** : reformater un fichier existant en fait du nouveau code pour Sonar, et des blocs jumeaux entre composants deviennent de la duplication nouvelle (Quality Gate echoue, KKS-373). plus d'une centaine de fichiers ne passent deja pas Prettier et la CI ne le controle pas
-- Locale d'affichage : `LanguageService.displayLocale()` (`fr-FR`, `en-GB`), jamais une locale en dur dans `Intl`, `toLocaleString` ou `localeCompare`. Formatages partages dans `shared/utils/locale-format.utils.ts`. Cles et glossaire : [`docs/i18n.md`](docs/i18n.md)
-- Date metier seule (`AAAA-MM-JJ`) : `parseLocalDate` (`shared/utils/date.utils.ts`), jamais `new Date(x)` qui la lit a minuit UTC, soit la veille dans un fuseau en retard sur UTC. Date du jour a comparer : `toLocalIsoDate(new Date())`, jamais `toISOString()`. La suite vitest tourne par defaut en `America/Los_Angeles` (`vitest.config.ts`, surchargeable par `TZ=`) pour que la CI, en UTC, detecte ces decalages
-- Texte traduit : une structure calculee (`computed()`, defaut d'`input()`, constante) porte la **cle**, le template traduit avec le pipe `transloco`. `translate()` en TypeScript seulement au moment d'un evenement (toast, erreur posee dans un handler) : ailleurs il n'est evalue qu'une fois et garderait l'ancienne langue apres une bascule (KKS-374). Exception : un `computed()` qui doit traduire en TS (valeur passee a un composant sans pipe) lit d'abord `LanguageService.activeLanguage()`, la langue **appliquee** apres chargement du catalogue, jamais la preference brute (KKS-380)
-- Nom de categorie : toujours via le pipe `categoryName` (ou `categoryDisplayName` en TS), jamais `nom` brut ni le pipe `transloco` sur un nom saisi par l'utilisateur (KKS-395)
-- `[innerHTML]` uniquement pour une traduction qui porte du balisage (`<strong>`), et **toute donnee utilisateur interpolee passe par `escapeHtml`** (`shared/utils/html-escape.utils.ts`) : MessageFormat n'echappe pas ses parametres et le sanitizer d'Angular laisse passer `<a>`/`<img>` (KKS-376)
-
-### Design System
-
-Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux couleur : amber (action), vert (revenu), rouge (depense), gris (structure). Police : Inter.
-
-- `var(--token-name)` uniquement, jamais de hex/rgba hardcode dans les composants
-- Patterns partages dans `_list-patterns.scss` et `_bottom-sheet.scss` — les reutiliser, pas les reinventer
-- Avant modification frontend : lire `DESIGN.md` et verifier la conformite
-- Commande `/design-check` pour audit de coherence design
-
-## Conventions Flutter
-
-### Riverpod-First
-
-| Besoin | Utiliser | Ne PAS utiliser |
-|--------|----------|-----------------|
-| State management | `Notifier` + `NotifierProvider` | `ChangeNotifier`, `setState` |
-| Async data | `FutureProvider` / `StreamProvider` | `FutureBuilder`, `StreamBuilder` |
-| State immutable | `Freezed` (`@freezed`) | Classes mutables |
-| DI | `ref.watch()` / `ref.read()` | `Provider.of()`, `GetIt` |
-| Parameterized | `FutureProvider.family` | Provider avec constructeur |
-
-### Patterns obligatoires
-
-- **CRUD Notifier** : `Notifier<ListState<T>>` avec `loadItems()`, `create()`, `update()`, `delete()`, `loadMore()` — pagination client-side via `_refreshPage()`. `state.error` est reserve aux erreurs de chargement, qu'un ecran affiche a la place de la liste : une action en echec relance l'exception et l'ecran l'annonce (snackbar, ou message dans le formulaire si l'action part d'une modale, ou une snackbar passerait dessous) (KKS-422). Une action lancee depuis un tiroir (panneau de notifications) ferme le tiroir avant la snackbar : le `Scaffold` dessine ses tiroirs au-dessus des snackbars (KKS-415)
-- **ListState\<T\>** : Freezed model generique (`items`, `isLoading`, `error`, `currentPage`, `hasMore`, `mutatingIds`)
-- **Repository abstrait** : Interface dans `domain/repositories/`, implementation remote (Dio) dans `features/[feature]/data/`
-- **Repositories** : providers dans `data/repository_providers.dart`, implementation remote unique (Dio). Plus de mode autonome ni de Drift depuis KKS-335 ; aucun stockage local n'est une source de verite (cache de lecture : KKS-507)
-- **Client HTTP** : `apiClientProvider` est le client public, sans intercepteur (`/auth/*`, invitation) ; `authenticatedDioProvider` en derive une instance distincte. Un seul chemin vers `/auth/refresh` : `AuthRepository.refresh()`, a vol unique — le serveur revoque toutes les sessions si un jeton de rafraichissement est rejoue (KKS-532). `PreferenceRemoteDataSource.getPreferences()` est a vol unique aussi : les lecteurs simultanes de la connexion partagent la requete en cours, rien n'est mis en cache (KKS-539). La source s'invalide a chaque changement d'etat de session (`ref.listen` + `invalidateSelf`, pas `ref.watch`, qui la laisserait en chargement lue depuis un listener de connexion) : une lecture en vol n'est jamais partagee avec le compte suivant (KKS-562). Tout enregistrement de l'URL du serveur invalide `apiClientProvider` (onboarding, reglage « Serveur ») : les clients sont construits des le demarrage, avant que l'URL soit connue (KKS-537)
-- **Etat par compte** : tout provider dont l'etat depend du compte connecte (`Notifier` de liste, `AsyncNotifier`, `FutureProvider.family`, preference serveur, etat local de session) observe `authNotifierProvider` en tete de `build()` : il est reconstruit a chaque changement d'etat de session et repart vide, car les providers survivent a la deconnexion et l'autre compte heriterait des donnees du precedent. Un notifier qui garde un cache local (`allItems`, `_allItems`) le vide aussi dans `build()` : Riverpod reutilise l'instance. Une preference serveur se relit en plus a chaque passage vers `AuthAuthenticated` (`ref.listen`) et ne se lit au demarrage que si la session est ouverte (KKS-538, 542, 544, 546). Un widget qui lit un `AsyncNotifier` par compte ne lit la valeur que sur `AsyncData` (`whenOrNull(data: …)`), jamais `valueOrNull` : pendant le rechargement qui suit un changement de session, `valueOrNull` porte encore la valeur de l'ancien compte (KKS-559). Une requete encore en vol au changement de session reprend apres son `await` sur la meme instance : chaque notifier par compte porte le mixin `SessionGuard` (`watchSession(ref)` dans `build()`, `final token = session;` avant le premier `await`, `if (isStale(token)) { return; }` avant toute ecriture d'etat ou de cache apres un `await`, `catch` compris). Le jeton vient d'`AuthNotifier.sessionId`, avance des que l'etat change : Riverpod differe la reconstruction et fusionne deconnexion puis connexion en un seul `build()`, et refuse `ref` tant qu'elle n'a pas eu lieu (KKS-558). Les notifiers de preference serveur (langue, taille de texte, fonctionnalites) ne sont pas reconstruits, pour ne pas faire clignoter l'interface : ils appellent `bindSession(ref)` au lieu de `watchSession(ref)` et gardent de meme lectures et ecritures (KKS-562)
-- **Widgets** : `ConsumerWidget` (lecture state), `ConsumerStatefulWidget` (stateful + Riverpod), `StatelessWidget` (UI pure)
-- **Design tokens** : Constantes dans `flutter/lib/src/constants/` (AppColors, AppSpacing, AppTypography, AppRadius, AppShadows, AppDurations) — jamais de valeurs hardcodees
-- **Locale d'affichage** : `displayLocaleProvider` / `intlLocaleProvider` (`features/settings/application/display_locale_provider.dart`), jamais une locale en dur dans `NumberFormat` ou `DateFormat`. `displayLocaleProvider` derive de `languageNotifierProvider` (preference serveur, langue memorisee, langue du systeme, anglais par defaut) ; changer de langue passe par `LanguageNotifier.selectLanguage`. Cles ARB selon [`docs/i18n.md`](docs/i18n.md) (KKS-398, KKS-405)
-- **Nom de devise** : `currencyName(currency, l10n)` (`utils/currency_name.dart`) ; l'enum `Currency` ne porte aucun nom (KKS-401, KKS-423)
-- **Nom de catégorie** : `categoryDisplayName(nom, systemKey, l10n)` (`utils/category_name.dart`) sur tout site d'affichage, `categorySystemKey` pour les modèles de budget ; jamais `nom` brut, sauf dans l'écran de gestion des catégories, qui masque les catégories système. Tri inchangé sur `nom` (KKS-424). Doublon de nom : `CategoryNotifier.isNameTaken(nom, exceptId:)` compare le `nom` stocké de toutes les catégories chargées, casse ignorée comme l'API, avant tout appel ; l'API ne renvoie qu'un `400 BAD_REQUEST` générique, sans code a analyser (KKS-412)
-- **Libellé d'un enum** : fonction de traduction côté présentation (`_featureName`, `_textScaleName` dans `settings_hub_screen.dart`), jamais un getter en français dans `domain/enums` (KKS-403)
-- **Texte de notification** : `buildNotificationText(notification, l10n, intlLocale)` (`utils/notification_text.dart`) pour le panneau comme pour la notification système, jamais `title` / `message` bruts ; repli sur le texte stocké sans `params`, pour un type inconnu (`type` nullable, jamais de valeur `unknown` dans l'enum) ou un paramètre requis manquant. Un service sans `BuildContext` lit `appLocalizationsProvider` / `intlLocaleProvider` à l'appel, via son fournisseur (KKS-425)
-- **Navigation** : `context.push()` / `context.go()` via go_router
-- **Skeleton loading** : Package `shimmer` avec widgets `_XxxSkeleton` prives
-- **Code generation** : `build_runner` pour Freezed, json_serializable et les mocks Mockito — fichiers `.g.dart` et `.freezed.dart` gitignores (generes localement)
-
-### Tests Flutter
-
-- Nommage : `should_[resultat]_when_[condition]`
-- Structure : `ProviderContainer` avec `overrides` pour mocker les repositories
-- Pattern : `notifier()` / `state()` helpers dans chaque fichier test
-- Widget tests : `ProviderScope` + `MaterialApp.router` + `AppTheme.light`
-- Localisation : `pumpApp` fournit les delegues et la locale `fr` (parametre `locale`). Un `MaterialApp` de test construit a la main doit fixer `locale: const Locale('fr')`, et tout `ProviderContainer` / `ProviderScope` dont un notifier lit `appLocalizationsProvider` recoit `displayLocaleOverride()` (`test/helpers/display_locale.dart`) : le binding de test annonce `en_US` (KKS-398, KKS-405). Un test de largeur (debordement a 360 px) charge Inter par `loadAppFonts()` (`test/helpers/app_fonts.dart`)
+`feature/<nom>`, `fix/<nom>`, `chore/<nom>`, `hotfix/<nom>`. Un parcours Devflow nomme la sienne `<num>-kks-<id>-<slug>`.
 
 ## Documentation
 
@@ -179,6 +92,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/api-compatibility.md`](docs/api-compatibility.md) | **Politique de compatibilite d'API** (KKS-315) — les six regles d'ecriture et la procedure de rupture assumee. A consulter avant toute modification de DTO, de migration Flyway ou de parsing client |
 | [`docs/i18n.md`](docs/i18n.md) | **Convention i18n et glossaire EN/FR** (KKS-328) — structure des cles `domaine.contexte.element`, listes fermees des domaines et contextes, passage Transloco → ARB, ICU, glossaire. A consulter avant toute cle ou traduction |
 | [`docs/deployment.md`](docs/deployment.md) | Deploiement Docker/bare-metal |
+| [`docs/release.md`](docs/release.md) | Procedure de release : quatre fichiers de version, changelogs, branches, tag pose par la CI |
 | [`DESIGN.md`](DESIGN.md) | Reference design : principes, couleurs, patterns, tokens |
 | [`DESIGN-REFONTE.md`](DESIGN-REFONTE.md) | Changelog design : 20 sessions de decisions et justifications |
 | [`docs/direction.md`](docs/direction.md) | **Direction produit (2026-08-26)** : ouverture open source, positionnement, decisions et alternatives ecartees |
@@ -188,41 +102,9 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/manual-test-plan.md`](docs/manual-test-plan.md) | Plan de tests manuels (Angular + Flutter) |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` — profil `dev` uniquement. Desactivee par defaut ailleurs, reactivable via `SWAGGER_ENABLED=true` (KKS-311) |
 
-## Processus de release
+## Release
 
-La version vit dans **quatre** fichiers, tous a incrementer ensemble :
-
-| Fichier | Format |
-|---------|--------|
-| `VERSION` | `6.1.0` |
-| `api/pom.xml` | `<version>` du projet, pas celle du parent Spring Boot |
-| `app/package.json` | champ `version`. Le changer avec `npm version X.Y.Z --no-git-tag-version` depuis `app/` : la commande met aussi a jour les deux champs de version de `app/package-lock.json`, controles avec les autres |
-| `flutter/pubspec.yaml` | `6.1.0+2` — le `+N` suit le rythme des depots sur les stores, pas celui des releases |
-
-Le workflow `version-check` compare les quatre, plus le lock, sur toute PR vers
-`main` et nomme le fichier fautif. Avant KKS-314, `flutter/pubspec.yaml` etait fige a `1.0.0+1`
-et hors du controle : l'incoherence n'apparaissait qu'apres publication, dans le
-champ `serverVersion` de `/api/meta`.
-
-`docker-compose.yml` fixe aussi les deux tags d'image (`k-budget-api:X.Y.Z`,
-`k-budget-app:X.Y.Z`) : a incrementer dans le meme commit de release.
-`version-check` ne les controle pas.
-
-Le reste du processus :
-
-1. Mettre a jour **`CHANGELOG.md` (anglais) et `CHANGELOG.fr.md` (francais)**, a
-   parite — bloc `Unreleased` promu, liens de comparaison. `CHANGELOG.md` est
-   en anglais depuis la 6.10.0 ; `CHANGELOG.fr.md` garde tout l'historique
-   francais
-2. Commit sur `develop`, puis PR `develop` -> `main` (le push direct sur `main`
-   est bloque)
-3. **Ne jamais pousser le tag** : la CI le cree au merge, apres le gate de tests
-   et la publication des images. Un tag `vX.Y.Z` implique donc qu'une image
-   `:X.Y.Z` existe
-4. Apres le tag, la CI cree la GitHub Release `vX.Y.Z` (job `github-release`)
-   avec pour notes le bloc de la version du `CHANGELOG.md` anglais
-   (`.github/scripts/release-notes.sh`), sans fichier joint. `version-check`
-   refuse une PR vers `main` sans bloc de version dans les deux changelogs
+Procedure complete : [`docs/release.md`](docs/release.md), a suivre a chaque release. **Ne jamais pousser le tag** : la CI le cree au merge de la PR `develop` -> `main`.
 
 ## Zones sensibles (mode auto)
 
@@ -232,13 +114,3 @@ Regles lues par Claude et par le classifier du mode auto. Elles etaient auparava
 - **Fichiers proteges** : `deploy/Caddyfile` et `deploy/nginx.conf` (proxy d'entree, frontiere de confiance `TRUSTED_PROXIES` et rate limiting), `app/src/environments/environment.prod.ts`, `.env`. Ne pas les modifier sans demande explicite.
 - **Donnees utilisateurs** : donnees financieres personnelles, multi-utilisateurs. Ne jamais croiser les frontieres entre utilisateurs ni exposer les donnees d'un utilisateur a un autre.
 - **Secrets CI** : `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN` sont des noms de secrets GitHub. Ne jamais en ecrire ni en rechercher les valeurs.
-
-## Recent Changes
-
-> Historique complet : `git log --oneline`. Seules les 5 dernieres features sont listees ici.
-
-- **KKS-329 — Profils d'import en dehors de l'image** : lot 2/5 de P6. `ImportProfileRegistry` charge les profils embarques (`classpath*:import-profiles/*.yaml`) puis les `*.yaml` du repertoire `IMPORT_PROFILES_DIR` (`app.import-profiles.external-dir`, vide par defaut), tries par nom, lus avec `java.nio`. Doublon de `bankCode` : le premier charge gagne, un profil externe ne remplace jamais un embarque (WARN). Fichier invalide → WARN et ignore ; variable vide → rien de plus ; repertoire absent ou illisible → INFO ; jamais de blocage au demarrage, prise en compte au redemarrage seulement. Le constructeur Spring est `(String locationPattern, String externalDir)` avec `@Value`, car `(String)` est deja le constructeur de test par emplacement. Record `ImportProfileConfig` : `contributor` (100 caracteres au plus) et `validatedOn` (`LocalDate`, chaine ISO quotee) en fin de record, constructeur de compatibilite a 16 arguments (`ImportService` inchange) ; non exposes par l'API (CI de KKS-330). `formatVersion` reste 1. `docker-compose.yml` : `IMPORT_PROFILES_DIR: /app/import-profiles` et volume `./import-profiles` commente, en lecture seule et hors de `/app/data` (que l'entrypoint `chown` a chaque demarrage) ; un volume decommente demande `docker compose up -d api`, pas un `restart`.
-- **KKS-442 — Motifs de nettoyage des profils d'import personnalises** : lot 1/5 du jalon P6. Colonne `import_profiles.cleanup_patterns` `JSONB` nullable (migration V44, `NULL` lu comme liste vide), `ImportProfile.cleanupPatterns` en `@JdbcTypeCode(SqlTypes.JSON)` sur le modele de `Notification.params`. `CsvMappingRequest.cleanupPatterns` optionnel, valide dans le constructeur compact (Bean Validation ne passe pas : `ImportController` lit le JSON a la main et relance l'`IllegalArgumentException` trouvee dans la chaine de causes de Jackson) : au plus 20 motifs de 200 caracteres apres `trim`, compilables, message au rang (`cleanupPatterns[i] …`), jamais le contenu du motif. Les motifs servent au parsing du fichier courant, sont enregistres avec `saveAsProfile` et relus par `ImportProfileDetector.toConfig` au reimport ; exportes dans `UserExportResponse.ImportProfileDto` ; `ImportProfileResponse` inchange. Garde ReDoS : la phase 2 de `LabelCleaningService` lit le libelle par `DeadlineCharSequence`, budget 50 ms par motif et par libelle, motif ignore au depassement ; phases 1 et 3 (SG) inchangees. Angular : zone « Motifs de nettoyage du libelle » (un motif par ligne) et bouton d'ajout du motif carte dans `csv-mapping`, sans validation de regex cote client.
-- **KKS-247 — Verrouillage de l'application mobile** : exclusivite Flutter rendue reelle. `AppLockNotifier` (`features/auth/application/`) porte l'etat (inconnu / verrouille / deverrouille) ; `AppLockBarrier`, dans le `builder` de `MaterialApp.router` (`app.dart`), recouvre toute session authentifiee par `LockScreen` : pas de route `/lock`, donc aucun lien profond ne le contourne et l'ecran laisse est retrouve tel quel. PIN a 4 chiffres sur pave integre (`PinPad`, valide au 4e chiffre), biometrie en option derriere `BiometricAuthenticator` (`local_auth`), le PIN restant le recours. Verrou au lancement et apres 1 minute en arriere-plan (`paused`/`hidden`, pas `inactive`). 5 PIN faux d'affilee → `logout()` ; compteur persiste dans `AppConfig`, partage avec les reglages. **Le PIN n'est reinitialise que la ou les jetons sont effaces** (`AuthNotifier.logout()`, `DataSettingsNotifier.changeServerUrl()`), jamais dans `forceUnauthenticated()` : sinon une session invalidee hors ligne reprendrait sans PIN. PIN hache `sha256(sel + pin)` dans le stockage securise. Reglage `/settings/lock`, section « Cet appareil » du hub (avec Serveur). Natif : `NSFaceIDUsageDescription`, `USE_BIOMETRIC`, `FlutterFragmentActivity`.
-- **KKS-386 — Nouvelle revue d'import : les exceptions seules** : etape 5/6 de KKS-381. L'import part de l'ecran Transactions (icone d'en-tete → `/transactions/import`, code neuf dans `features/imports/` : `import-start`, `import-review` + `import-review.utils.ts`, `import-result`). Depart : `/imports/detect`, compte coche seulement si `suggestedAccountId` ou `?accountId=`, jamais le compte par defaut ; format inconnu → `csv-mapping` (reste sous Parametres). Revue : hero au solde bancaire, interrupteur « aligner le solde initial » au premier import, corps limite aux exceptions (a trancher, erreurs de lecture, sans categorie **regroupees par `merchantKey`** — un `PUT` sur une ligne du groupe, l'API propage), groupes replies corrigibles (rapprochees, categorisees, deja importees, ignorees). Les lignes sans categorie ne bloquent jamais. Resultat : `balanceCheck` et suspects. Confirmation par un bouton pleine largeur dans le flux ; le FAB est masque sur `/transactions/import*` comme sous `/settings` (`isTaskFlowRoute` du shell, constitution 4.1.0). API : `merchantKey` sur les lignes, `SKIPPED → READY` pour une ligne ignoree par l'utilisateur et lisible. Ancienne revue supprimee, ancienne route redirigee.
-- **KKS-387 — Rattrapage de l'historique** : etape 6/6 de KKS-381. Ecran `features/imports/history-cleanup/` sous `/settings/import/history-cleanup` (entree : Parametres → Import), styles partages avec la revue de KKS-386 dans `styles/_review-patterns.scss` ; « Recaler sur la banque » cree le contre-ajustement par `adjust-balance` (un ajustement compense par un ajustement oppose posterieur ou du meme jour n'est plus signale). `/history-cleanup` propose sans rien modifier : paires transaction importee ↔ saisie non importee selon les criteres de KKS-385 (`ImportMatchingService.inWindowOfImported`, fenetres partagees), paiements d'abonnement multiples sur une echeance (`SubscriptionPeriod`), transactions sans categorie regroupees par `MerchantKey` et sens avec suggestion (regle, historique au montant, historique du commercant), ajustements `probablyUnnecessary` au regard du dernier solde bancaire connu (KKS-384). Ecritures explicites : fusion (la saisie est conservee, recoit l'empreinte et, a defaut, le lien d'abonnement ; l'importee est supprimee ; refus si une dette serait perdue), fusion de paiements d'abonnement, categorisation d'un groupe + regle `AUTO`. Conflits `409 CLEANUP_PROPOSAL_STALE` / `CLEANUP_DEBT_LINK_MISSING`. Pas de suppression d'ajustement (l'API refuse deja de supprimer un `AJUSTEMENT`).

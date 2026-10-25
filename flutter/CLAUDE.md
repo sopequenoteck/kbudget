@@ -1,0 +1,39 @@
+# flutter/ — conventions Flutter
+
+## Riverpod-First
+
+| Besoin | Utiliser | Ne PAS utiliser |
+|--------|----------|-----------------|
+| State management | `Notifier` + `NotifierProvider` | `ChangeNotifier`, `setState` |
+| Async data | `FutureProvider` / `StreamProvider` | `FutureBuilder`, `StreamBuilder` |
+| State immutable | `Freezed` (`@freezed`) | Classes mutables |
+| DI | `ref.watch()` / `ref.read()` | `Provider.of()`, `GetIt` |
+| Parameterized | `FutureProvider.family` | Provider avec constructeur |
+
+## Patterns obligatoires
+
+- **CRUD Notifier** : `Notifier<ListState<T>>` avec `loadItems()`, `create()`, `update()`, `delete()`, `loadMore()` — pagination client-side via `_refreshPage()`. `state.error` est reserve aux erreurs de chargement, qu'un ecran affiche a la place de la liste : une action en echec relance l'exception et l'ecran l'annonce (snackbar, ou message dans le formulaire si l'action part d'une modale, ou une snackbar passerait dessous) (KKS-422). Une action lancee depuis un tiroir (panneau de notifications) ferme le tiroir avant la snackbar : le `Scaffold` dessine ses tiroirs au-dessus des snackbars (KKS-415)
+- **ListState\<T\>** : Freezed model generique (`items`, `isLoading`, `error`, `currentPage`, `hasMore`, `mutatingIds`)
+- **Repository abstrait** : Interface dans `domain/repositories/`, implementation remote (Dio) dans `features/[feature]/data/`
+- **Repositories** : providers dans `data/repository_providers.dart`, implementation remote unique (Dio). Plus de mode autonome ni de Drift depuis KKS-335 ; aucun stockage local n'est une source de verite (cache de lecture : KKS-507)
+- **Client HTTP** : `apiClientProvider` est le client public, sans intercepteur (`/auth/*`, invitation) ; `authenticatedDioProvider` en derive une instance distincte. Un seul chemin vers `/auth/refresh` : `AuthRepository.refresh()`, a vol unique — le serveur revoque toutes les sessions si un jeton de rafraichissement est rejoue (KKS-532). `PreferenceRemoteDataSource.getPreferences()` est a vol unique aussi : les lecteurs simultanes de la connexion partagent la requete en cours, rien n'est mis en cache (KKS-539). La source s'invalide a chaque changement d'etat de session (`ref.listen` + `invalidateSelf`, pas `ref.watch`, qui la laisserait en chargement lue depuis un listener de connexion) : une lecture en vol n'est jamais partagee avec le compte suivant (KKS-562). Tout enregistrement de l'URL du serveur invalide `apiClientProvider` (onboarding, reglage « Serveur ») : les clients sont construits des le demarrage, avant que l'URL soit connue (KKS-537)
+- **Etat par compte** : tout provider dont l'etat depend du compte connecte (`Notifier` de liste, `AsyncNotifier`, `FutureProvider.family`, preference serveur, etat local de session) observe `authNotifierProvider` en tete de `build()` : il est reconstruit a chaque changement d'etat de session et repart vide, car les providers survivent a la deconnexion et l'autre compte heriterait des donnees du precedent. Un notifier qui garde un cache local (`allItems`, `_allItems`) le vide aussi dans `build()` : Riverpod reutilise l'instance. Une preference serveur se relit en plus a chaque passage vers `AuthAuthenticated` (`ref.listen`) et ne se lit au demarrage que si la session est ouverte (KKS-538, 542, 544, 546). Un widget qui lit un `AsyncNotifier` par compte ne lit la valeur que sur `AsyncData` (`whenOrNull(data: …)`), jamais `valueOrNull` : pendant le rechargement qui suit un changement de session, `valueOrNull` porte encore la valeur de l'ancien compte (KKS-559). Une requete encore en vol au changement de session reprend apres son `await` sur la meme instance : chaque notifier par compte porte le mixin `SessionGuard` (`watchSession(ref)` dans `build()`, `final token = session;` avant le premier `await`, `if (isStale(token)) { return; }` avant toute ecriture d'etat ou de cache apres un `await`, `catch` compris). Le jeton vient d'`AuthNotifier.sessionId`, avance des que l'etat change : Riverpod differe la reconstruction et fusionne deconnexion puis connexion en un seul `build()`, et refuse `ref` tant qu'elle n'a pas eu lieu (KKS-558). Les notifiers de preference serveur (langue, taille de texte, fonctionnalites) ne sont pas reconstruits, pour ne pas faire clignoter l'interface : ils appellent `bindSession(ref)` au lieu de `watchSession(ref)` et gardent de meme lectures et ecritures (KKS-562)
+- **Widgets** : `ConsumerWidget` (lecture state), `ConsumerStatefulWidget` (stateful + Riverpod), `StatelessWidget` (UI pure)
+- **Design tokens** : Constantes dans `flutter/lib/src/constants/` (AppColors, AppSpacing, AppTypography, AppRadius, AppShadows, AppDurations) — jamais de valeurs hardcodees
+- **Locale d'affichage** : `displayLocaleProvider` / `intlLocaleProvider` (`features/settings/application/display_locale_provider.dart`), jamais une locale en dur dans `NumberFormat` ou `DateFormat`. `displayLocaleProvider` derive de `languageNotifierProvider` (preference serveur, langue memorisee, langue du systeme, anglais par defaut) ; changer de langue passe par `LanguageNotifier.selectLanguage`. Cles ARB selon [`docs/i18n.md`](../docs/i18n.md) (KKS-398, KKS-405)
+- **Nom de devise** : `currencyName(currency, l10n)` (`utils/currency_name.dart`) ; l'enum `Currency` ne porte aucun nom (KKS-401, KKS-423)
+- **Nom de catégorie** : `categoryDisplayName(nom, systemKey, l10n)` (`utils/category_name.dart`) sur tout site d'affichage, `categorySystemKey` pour les modèles de budget ; jamais `nom` brut, sauf dans l'écran de gestion des catégories, qui masque les catégories système. Tri inchangé sur `nom` (KKS-424). Doublon de nom : `CategoryNotifier.isNameTaken(nom, exceptId:)` compare le `nom` stocké de toutes les catégories chargées, casse ignorée comme l'API, avant tout appel ; l'API ne renvoie qu'un `400 BAD_REQUEST` générique, sans code a analyser (KKS-412)
+- **Libellé d'un enum** : fonction de traduction côté présentation (`_featureName`, `_textScaleName` dans `settings_hub_screen.dart`), jamais un getter en français dans `domain/enums` (KKS-403)
+- **Texte de notification** : `buildNotificationText(notification, l10n, intlLocale)` (`utils/notification_text.dart`) pour le panneau comme pour la notification système, jamais `title` / `message` bruts ; repli sur le texte stocké sans `params`, pour un type inconnu (`type` nullable, jamais de valeur `unknown` dans l'enum) ou un paramètre requis manquant. Un service sans `BuildContext` lit `appLocalizationsProvider` / `intlLocaleProvider` à l'appel, via son fournisseur (KKS-425)
+- **Verrouillage (KKS-247)** : le PIN n'est reinitialise que la ou les jetons sont effaces (`AuthNotifier.logout()`, `DataSettingsNotifier.changeServerUrl()`), jamais dans `forceUnauthenticated()` : sinon une session invalidee hors ligne reprendrait sans PIN
+- **Navigation** : `context.push()` / `context.go()` via go_router
+- **Skeleton loading** : Package `shimmer` avec widgets `_XxxSkeleton` prives
+- **Code generation** : `build_runner` pour Freezed, json_serializable et les mocks Mockito — fichiers `.g.dart` et `.freezed.dart` gitignores (generes localement)
+
+## Tests Flutter
+
+- Nommage : `should_[resultat]_when_[condition]`
+- Structure : `ProviderContainer` avec `overrides` pour mocker les repositories
+- Pattern : `notifier()` / `state()` helpers dans chaque fichier test
+- Widget tests : `ProviderScope` + `MaterialApp.router` + `AppTheme.light`
+- Localisation : `pumpApp` fournit les delegues et la locale `fr` (parametre `locale`). Un `MaterialApp` de test construit a la main doit fixer `locale: const Locale('fr')`, et tout `ProviderContainer` / `ProviderScope` dont un notifier lit `appLocalizationsProvider` recoit `displayLocaleOverride()` (`test/helpers/display_locale.dart`) : le binding de test annonce `en_US` (KKS-398, KKS-405). Un test de largeur (debordement a 360 px) charge Inter par `loadAppFonts()` (`test/helpers/app_fonts.dart`)
