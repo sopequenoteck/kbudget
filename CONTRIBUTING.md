@@ -129,7 +129,7 @@ principles frame what is accepted — notably strict per-user data isolation,
 simplicity (no CQRS, DDD or Event Sourcing), and the API as the single source
 of truth for every client.
 
-Code conventions and build commands are in [`CLAUDE.md`](CLAUDE.md).
+Build commands are in [`CLAUDE.md`](CLAUDE.md); code conventions per module are in [`api/CLAUDE.md`](api/CLAUDE.md), [`app/CLAUDE.md`](app/CLAUDE.md) and [`flutter/CLAUDE.md`](flutter/CLAUDE.md).
 
 ### API changes
 
