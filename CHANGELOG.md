@@ -17,6 +17,18 @@ This project follows [Semantic Versioning](https://semver.org/).
   logs. Profiles can also name their `contributor` and the date they were last
   checked on a real statement (`validatedOn`).
 
+### Fixed
+
+- **Manual CSV mapping: label clean-up patterns for custom import profiles**
+  (KKS-442): a statement imported through the manual mapping kept noise such as
+  "CARTE X1234 14/09" in its labels, and the automatic category rules learned
+  from them did not recognise the same merchant paid another way. The mapping
+  screen now takes clean-up patterns (regular expressions removed from the
+  label before categorisation, one per line, with a ready-made card payment
+  pattern). They apply to the imported file, are saved with the custom profile
+  and reused when a later file is recognised by it, and appear in the data
+  export. Each pattern gets a 50 ms budget per label, after which it is skipped.
+
 ## [6.13.1] - 2026-10-24
 
 ### Fixed

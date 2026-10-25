@@ -426,6 +426,7 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | encoding | String | Encodage du fichier |
 | decimalSeparator | String | Separateur decimal |
 | skipHeaderLines | Integer | Lignes d'en-tete a ignorer |
+| cleanupPatterns | List\<String\> (JSONB) | Motifs regex retires du libelle avant categorisation, saisis au mapping manuel (KKS-442). `NULL` lu comme liste vide. Chacun est applique avec un budget de 50 ms par libelle (`LabelCleaningService`, phase 2), au-dela il est ignore pour ce libelle |
 | createdAt | LocalDateTime | Date de creation |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |

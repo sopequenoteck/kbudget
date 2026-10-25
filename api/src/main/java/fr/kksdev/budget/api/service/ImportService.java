@@ -367,7 +367,7 @@ public class ImportService {
                 mapping.encoding(),
                 mapping.decimalSeparator(),
                 mapping.skipHeaderLines(),
-                List.of(),
+                mapping.cleanupPatterns(),
                 List.of(),
                 null,
                 null
@@ -398,6 +398,7 @@ public class ImportService {
                     .encoding(mapping.encoding())
                     .decimalSeparator(mapping.decimalSeparator())
                     .skipHeaderLines(mapping.skipHeaderLines())
+                    .cleanupPatterns(mapping.cleanupPatterns())
                     .build();
             customProfile = importProfileRepository.save(customProfile);
             savedProfileId = customProfile.getId();

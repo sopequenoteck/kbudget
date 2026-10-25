@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.service;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,9 @@ public class LabelCleaningService {
             "\\s+(PAYS-BAS|IRLANDE|ETATS-UNIS D'AME\\w*|LUXEMBOURG|ROYAUME-UNI|ALLEMAGNE)");
     private static final Pattern IOPD_PATTERN = Pattern.compile("\\d+IOPD");
 
+    // Time budget per profile pattern and per label (phase 2); a pattern over budget is skipped
+    static final long PATTERN_BUDGET_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
+
     public String clean(String rawLabel, List<String> cleanupPatterns) {
         if (rawLabel == null) {
             return "";
@@ -41,9 +45,12 @@ public class LabelCleaningService {
         // Phase 2: Apply profile-specific regex removal patterns
         for (String pattern : cleanupPatterns) {
             try {
-                result = result.replaceAll(pattern, " ");
+                long deadline = System.nanoTime() + PATTERN_BUDGET_NANOS;
+                result = Pattern.compile(pattern)
+                        .matcher(new DeadlineCharSequence(result, deadline))
+                        .replaceAll(" ");
             } catch (Exception e) {
-                // Skip invalid patterns
+                // Skip invalid patterns and patterns over the time budget
             }
         }
 

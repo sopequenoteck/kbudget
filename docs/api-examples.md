@@ -2147,6 +2147,41 @@ Response `200` :
 
 Request (multipart/form-data) : `file`, `accountId`, `mapping` (JSON string)
 
+Exemple de `mapping` :
+
+```json
+{
+  "separator": ";",
+  "dateFormat": "dd/MM/yyyy",
+  "dateColumn": "Date",
+  "amountColumn": "Montant",
+  "labelColumn": "Libelle",
+  "encoding": "UTF-8",
+  "decimalSeparator": ",",
+  "skipHeaderLines": 0,
+  "saveAsProfile": true,
+  "profileName": "Ma banque",
+  "cleanupPatterns": ["CARTE\\s+\\w+\\d{4}\\s+\\d{2}/\\d{2}\\s+"]
+}
+```
+
+`cleanupPatterns` (KKS-442, optionnel, `[]` si absent ou `null`) : expressions
+regulieres retirees du libelle avant categorisation, appliquees au fichier
+courant et enregistrees sur le profil si `saveAsProfile` vaut `true` ; un
+reimport reconnu par ce profil nettoie de meme. Au plus 20 motifs de 200
+caracteres apres `trim`, chacun compilable. Un motif qui depasse 50 ms sur un
+libelle est ignore pour ce libelle. Refus en `400`, le motif fautif designe par
+son rang, jamais par son contenu :
+
+```json
+{ "error": "BAD_REQUEST", "message": "cleanupPatterns[1] is not a valid regular expression" }
+```
+
+Autres messages : `cleanupPatterns must contain at most 20 patterns`,
+`cleanupPatterns[i] must not be blank`, `cleanupPatterns[i] must be at most 200 characters`.
+Les motifs sont exportes dans `importProfiles[].cleanupPatterns` de
+`GET /api/v1/users/me/export`.
+
 ### Consulter un brouillon `GET /api/v1/imports/drafts/{draftId}`
 
 Response `200` : meme format que la reponse de l'upload (avec toutes les lignes).

@@ -560,6 +560,7 @@ RESPONSE GET /v1/users/me/export 200 importHistory[].id: string
 RESPONSE GET /v1/users/me/export 200 importHistory[].importedAt: string
 RESPONSE GET /v1/users/me/export 200 importHistory[].transactionCount: integer
 RESPONSE GET /v1/users/me/export 200 importProfiles[].amountColumn: string
+RESPONSE GET /v1/users/me/export 200 importProfiles[].cleanupPatterns[]: string
 RESPONSE GET /v1/users/me/export 200 importProfiles[].createdAt: string
 RESPONSE GET /v1/users/me/export 200 importProfiles[].creditColumn: string
 RESPONSE GET /v1/users/me/export 200 importProfiles[].dateColumn: string

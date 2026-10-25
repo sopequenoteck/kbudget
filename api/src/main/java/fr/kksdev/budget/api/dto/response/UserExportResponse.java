@@ -164,7 +164,8 @@ public record UserExportResponse(
             String decimalSeparator,
             int skipHeaderLines,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt
+            LocalDateTime updatedAt,
+            List<String> cleanupPatterns
     ) {}
 
     public record ImportHistoryDto(
