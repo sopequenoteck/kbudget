@@ -7,6 +7,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **Profils bancaires ajoutés sans reconstruire l'image** (KKS-329) : une
+  instance peut désormais charger des profils d'import de relevé
+  supplémentaires depuis le répertoire indiqué par `IMPORT_PROFILES_DIR` (un
+  volume à décommenter dans le `docker-compose.yml` fourni), lus au démarrage
+  après les profils embarqués. Un profil embarqué n'est jamais remplacé, et un
+  fichier invalide est ignoré et signalé dans les logs. Un profil peut aussi
+  nommer son contributeur (`contributor`) et la date de sa dernière
+  vérification sur un relevé réel (`validatedOn`).
+
 ## [6.13.1] - 2026-10-24
 
 ### Fixed

@@ -67,9 +67,21 @@ services:
       # Pour stocker les avatars ailleurs sur l'hote, changer la source du
       # volume ci-dessous, pas cette variable.
       AVATAR_STORAGE_PATH: /app/data/avatars
+      # Profils bancaires ajoutes par l'instance, lus apres les profils
+      # embarques (KKS-329). Chemin fixe dans le container, hors de /app/data
+      # dont l'entrypoint change le proprietaire a chaque demarrage ; tant que
+      # le volume ci-dessous reste commente, le repertoire est absent et seuls
+      # les profils embarques sont charges.
+      IMPORT_PROFILES_DIR: /app/import-profiles
     volumes:
       - api-logs:/app/logs
       - api-avatars:/app/data/avatars
+      # Pour ajouter un profil bancaire : decommenter la ligne suivante, deposer
+      # les fichiers .yaml dans ./import-profiles sur l'hote, puis recreer le
+      # container (`docker compose up -d api` : un `restart` ne monte pas un
+      # volume ajoute). Ensuite, `docker compose restart api` suffit pour lire
+      # un fichier ajoute ou modifie.
+      # - ./import-profiles:/app/import-profiles:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:8080/api/actuator/health || exit 1"]
       interval: 30s

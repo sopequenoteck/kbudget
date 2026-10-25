@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.service.ImportProfileRegistry.ImportProfileConfig;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,6 +11,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
@@ -23,6 +27,30 @@ class ImportProfileRegistryTest {
     private static final String MIXED = "classpath*:import-profiles-test/mixed/";
 
     private final ImportProfileRegistry registry = new ImportProfileRegistry();
+
+    @TempDir
+    Path externalDir;
+
+    private static String profile(String bankCode, String name) {
+        return """
+                formatVersion: 1
+                bankCode: "%s"
+                name: "%s"
+                separator: ";"
+                encoding: "UTF-8"
+                dateFormat: "dd/MM/yyyy"
+                dateColumn: "Date"
+                amountColumn: "Amount"
+                labelColumn: "Label"
+                decimalSeparator: ","
+                signature:
+                  headerColumns: ["Date", "Label", "Amount"]
+                """.formatted(bankCode, name);
+    }
+
+    private void writeExternal(String fileName, String content) throws IOException {
+        Files.writeString(externalDir.resolve(fileName), content, StandardCharsets.UTF_8);
+    }
 
     // -------------------------------------------------------------------------
     // Bundled profile
@@ -50,6 +78,8 @@ class ImportProfileRegistryTest {
                 "UEP\\*");
         assertThat(sg.signatureColumns()).containsExactlyInAnyOrder(
                 "Date de l'opération", "Détail de l'écriture", "Montant de l'opération", "Libellé");
+        assertThat(sg.contributor()).isEqualTo("sopequenoteck");
+        assertThat(sg.validatedOn()).isNull();
     }
 
     @Test
@@ -157,5 +187,90 @@ class ImportProfileRegistryTest {
         ImportProfileRegistry loaded = new ImportProfileRegistry(MIXED + "*.yaml", resolver);
 
         assertThat(loaded.getAll()).isEmpty();
+    }
+
+    // -------------------------------------------------------------------------
+    // External directory
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_load_external_profiles_after_the_bundled_ones_when_directory_is_set() throws IOException {
+        writeExternal("b-bank.yaml", profile("BBANK", "B Bank"));
+        writeExternal("a-bank.yaml", profile("ABANK", "A Bank"));
+        writeExternal("ignored.yml", profile("YML", "Not a yaml extension"));
+
+        ImportProfileRegistry loaded = new ImportProfileRegistry(ImportProfileRegistry.DEFAULT_LOCATION, externalDir.toString());
+
+        assertThat(loaded.getAll()).extracting(ImportProfileConfig::bankCode).containsExactly("SG", "ABANK", "BBANK");
+        assertThat(loaded.findByBankCode("abank")).map(ImportProfileConfig::name).contains("A Bank");
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "   "})
+    void should_load_only_the_bundled_profiles_when_external_directory_is_blank(String directory) {
+        ImportProfileRegistry loaded = new ImportProfileRegistry(ImportProfileRegistry.DEFAULT_LOCATION, directory);
+
+        assertThat(loaded.getAll()).extracting(ImportProfileConfig::bankCode).containsExactly("SG");
+    }
+
+    @Test
+    void should_start_when_external_directory_does_not_exist() {
+        ImportProfileRegistry loaded = new ImportProfileRegistry(ImportProfileRegistry.DEFAULT_LOCATION, externalDir.resolve("missing").toString());
+
+        assertThat(loaded.getAll()).extracting(ImportProfileConfig::bankCode).containsExactly("SG");
+    }
+
+    @Test
+    void should_start_when_external_directory_is_a_file() throws IOException {
+        writeExternal("not-a-directory.yaml", profile("FILEBANK", "File Bank"));
+
+        ImportProfileRegistry loaded = new ImportProfileRegistry(ImportProfileRegistry.DEFAULT_LOCATION, externalDir.resolve("not-a-directory.yaml").toString());
+
+        assertThat(loaded.getAll()).extracting(ImportProfileConfig::bankCode).containsExactly("SG");
+    }
+
+    @Test
+    void should_ignore_the_external_file_without_failing_when_it_is_invalid() throws IOException {
+        writeExternal("a-invalid.yaml", "formatVersion: 2\n");
+        writeExternal("b-syntax.yaml", "formatVersion: [1\n");
+        writeExternal("c-valid.yaml", profile("VALIDBANK", "Valid Bank"));
+
+        ImportProfileRegistry loaded = new ImportProfileRegistry(ImportProfileRegistry.DEFAULT_LOCATION, externalDir.toString());
+
+        assertThat(loaded.getAll()).extracting(ImportProfileConfig::bankCode).containsExactly("SG", "VALIDBANK");
+    }
+
+    @Test
+    void should_keep_the_bundled_profile_when_an_external_file_shares_its_bank_code() throws IOException {
+        writeExternal("sg.yaml", profile("sg", "External SG"));
+
+        ImportProfileRegistry loaded = new ImportProfileRegistry(ImportProfileRegistry.DEFAULT_LOCATION, externalDir.toString());
+
+        assertThat(loaded.getAll()).extracting(ImportProfileConfig::bankCode).containsExactly("SG");
+        ImportProfileConfig sg = loaded.findByBankCode("SG").orElseThrow();
+        assertThat(sg.name()).isEqualTo("Société Générale");
+        assertThat(sg.separator()).isEqualTo(";");
+        assertThat(sg.encoding()).isEqualTo("ISO-8859-1");
+        assertThat(sg.amountColumn()).isEqualTo("Montant de l'opération");
+    }
+
+    @Test
+    void should_keep_the_first_external_file_by_name_when_two_share_a_bank_code() throws IOException {
+        writeExternal("b-second.yaml", profile("TWIN", "Twin second"));
+        writeExternal("a-first.yaml", profile("TWIN", "Twin first"));
+
+        ImportProfileRegistry loaded = new ImportProfileRegistry(ImportProfileRegistry.DEFAULT_LOCATION, externalDir.toString());
+
+        assertThat(loaded.findByBankCode("TWIN")).map(ImportProfileConfig::name).contains("Twin first");
+    }
+
+    @Test
+    void should_load_the_external_directory_after_the_given_location() throws IOException {
+        writeExternal("external.yaml", profile("EXTBANK", "External Bank"));
+
+        ImportProfileRegistry loaded = new ImportProfileRegistry(MIXED + "*.yaml", externalDir.toString());
+
+        assertThat(loaded.getAll()).extracting(ImportProfileConfig::bankCode).containsExactly("TESTBANK", "EXTBANK");
     }
 }

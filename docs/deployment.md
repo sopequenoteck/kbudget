@@ -72,6 +72,26 @@ account to keep.
 from **Settings → Users**, and the invitee receives a link to set their own
 password. Each user's data is strictly isolated from the others'.
 
+### Adding a bank profile
+
+The statement import recognises the banks whose profile ships with the
+application. To add another bank without rebuilding the image:
+
+1. In `docker-compose.yml`, uncomment the volume line
+   `- ./import-profiles:/app/import-profiles:ro` of the `api` service.
+2. Put the profile files (`.yaml`) in `./import-profiles` on the host. Copy
+   [`api/src/main/resources/import-profiles/sg.yaml`](../api/src/main/resources/import-profiles/sg.yaml)
+   from the repository as a model: its header comment documents the format.
+3. Recreate the API container (`docker compose up -d api`): a plain `restart`
+   does not mount a newly added volume. Afterwards, `docker compose restart api`
+   is enough to pick up a file you add or change, as profiles are only read at
+   startup.
+
+A file that fails validation is ignored and reported as a warning in the API
+logs; it never prevents the API from starting. A profile whose `bankCode` is
+already shipped with the application does not replace it: the external file is
+ignored.
+
 ## HTTPS and reverse proxy
 
 The compose file serves plain HTTP on `APP_PORT`. On a local network or over a
@@ -318,3 +338,4 @@ The backup scripts work here too with `MODE=native`.
 | `RATE_LIMIT_WINDOW_SECONDS` | no | `60` | Length of that window |
 | `TRUSTED_PROXIES` | no | private ranges | IP prefixes whose `X-Forwarded-For` is trusted. Never set this to trust everything — the header is client-supplied, and trusting it unconditionally makes rate limiting bypassable |
 | `AVATAR_STORAGE_PATH` | no | `/app/data/avatars` | Fixed inside the container; the `api-avatars` volume mounts onto it |
+| `IMPORT_PROFILES_DIR` | no | `/app/import-profiles` with the supplied compose, empty otherwise | Directory of additional bank profiles, read after the bundled ones. Empty or missing directory: bundled profiles only. See [Adding a bank profile](#adding-a-bank-profile) |

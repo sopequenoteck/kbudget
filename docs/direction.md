@@ -216,8 +216,8 @@ l'import de relevés.
 
 État réel au 2026-08-26 : `ImportProfileRegistry` ne contient **qu'un seul profil** — Société Générale —
 codé en dur en Java. *Depuis KKS-440, ce profil est un fichier de données
-(`api/src/main/resources/import-profiles/sg.yaml`) ; le répertoire externe monté en volume
-reste à faire (KKS-329).* Les 28 autres banques ont un logo, pas de profil. Pour en ajouter une,
+(`api/src/main/resources/import-profiles/sg.yaml`) ; depuis KKS-329, un self-hoster dépose
+ses propres profils dans le répertoire `IMPORT_PROFILES_DIR` monté en volume.* Les 28 autres banques ont un logo, pas de profil. Pour en ajouter une,
 il faut aujourd'hui écrire du Java, compiler, publier une release. Seul le mainteneur peut
 le faire, et avec 28 banques, cela n'arrivera pas.
 
