@@ -7,6 +7,16 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Bank profiles added without rebuilding the image** (KKS-329): an instance
+  can now load extra statement import profiles from the directory set by
+  `IMPORT_PROFILES_DIR` (a volume to uncomment in the supplied
+  `docker-compose.yml`), read at startup after the bundled profiles. A bundled
+  profile is never replaced, and an invalid file is ignored and reported in the
+  logs. Profiles can also name their `contributor` and the date they were last
+  checked on a real statement (`validatedOn`).
+
 ### Fixed
 
 - **Manual CSV mapping: label clean-up patterns for custom import profiles**

@@ -105,6 +105,10 @@ Les entites JPA ne sont jamais retournees directement par les controllers. Des D
 
 L'architecture reste en couches simples : Controller → Service → Repository. Ces patterns complexes n'apportent aucune valeur a l'echelle actuelle du projet. Si un besoin le justifie, il devra etre documente dans le plan avant implementation.
 
+### Profils d'import en fichiers (KKS-440, KKS-329)
+
+`ImportProfileRegistry` charge au demarrage les profils bancaires de l'import de releve, decrits en YAML et lus par `ImportProfileFileParser`. Deux emplacements, dans cet ordre : les profils embarques (`classpath*:import-profiles/*.yaml`, tries par description de ressource), puis les fichiers `*.yaml` du repertoire externe `IMPORT_PROFILES_DIR` (propriete `app.import-profiles.external-dir`), tries par nom de fichier. En cas de doublon de `bankCode`, le premier profil charge gagne et l'autre fichier est journalise en WARN : un profil externe ne remplace jamais un profil embarque. Un fichier invalide ou illisible est journalise en WARN et ignore ; une variable vide ne charge rien de plus, un repertoire absent ou illisible est journalise en INFO. Rien de tout cela n'empeche le demarrage, et un profil depose n'est pris en compte qu'au redemarrage. Le format porte deux metadonnees optionnelles, `contributor` (nom ou pseudonyme, 100 caracteres au plus) et `validatedOn` (date ISO quotee du dernier releve reel verifie), non exposees par l'API. `formatVersion` reste 1 : l'ajout de cles optionnelles ne change le sens d'aucune cle existante (`docs/api-compatibility.md`).
+
 ## Modele de donnees
 
 ### User

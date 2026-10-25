@@ -147,6 +147,46 @@ class ImportProfileFileParserTest {
         assertThat(parse(VALID + "futureKey: \"whatever\"\n").bankCode()).isEqualTo("TB");
     }
 
+    @Test
+    void should_read_metadata_when_file_declares_them() {
+        ImportProfileConfig config = parse(VALID + "contributor: \"jane-doe\"\nvalidatedOn: \"2026-10-25\"\n");
+
+        assertThat(config.contributor()).isEqualTo("jane-doe");
+        assertThat(config.validatedOn()).isEqualTo(LocalDate.of(2026, Month.OCTOBER, 25));
+    }
+
+    @Test
+    void should_leave_metadata_null_when_file_omits_them() {
+        ImportProfileConfig config = parse(VALID);
+
+        assertThat(config.contributor()).isNull();
+        assertThat(config.validatedOn()).isNull();
+    }
+
+    @Test
+    void should_leave_metadata_null_when_values_are_blank() {
+        ImportProfileConfig config = parse(VALID + "contributor: \" \"\nvalidatedOn: \"\"\n");
+
+        assertThat(config.contributor()).isNull();
+        assertThat(config.validatedOn()).isNull();
+    }
+
+    @Test
+    void should_accept_contributor_when_it_has_the_maximum_length() {
+        String contributor = "a".repeat(100);
+
+        assertThat(parse(VALID + "contributor: \"" + contributor + "\"\n").contributor()).isEqualTo(contributor);
+    }
+
+    @Test
+    void should_reject_contributor_when_it_exceeds_the_maximum_length() {
+        String yaml = VALID + "contributor: \"" + "a".repeat(101) + "\"\n";
+
+        assertThatThrownBy(() -> parse(yaml))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("contributor must not exceed 100 characters");
+    }
+
     // -------------------------------------------------------------------------
     // Invalid files
     // -------------------------------------------------------------------------
@@ -193,6 +233,10 @@ class ImportProfileFileParserTest {
                 Arguments.of("purchaseDate not a mapping", VALID.substring(0, VALID.indexOf("purchaseDate:")) + "purchaseDate: 3\n", "purchaseDate must be a mapping"),
                 Arguments.of("purchaseDate without group", VALID.replace("'CARD (\\d{2}/\\d{2})'", "'CARD \\d{2}/\\d{2}'"), "capturing group"),
                 Arguments.of("purchaseDate without format", VALID.replace("  format: \"dd/MM\"\n", ""), "purchaseDate requires"),
+                Arguments.of("unquoted number as contributor", VALID + "contributor: 42\n", "contributor must be a quoted string"),
+                Arguments.of("validatedOn out of range", VALID + "validatedOn: \"2026-13-45\"\n", "validatedOn must be an ISO date (yyyy-MM-dd): 2026-13-45"),
+                Arguments.of("validatedOn not ISO", VALID + "validatedOn: \"25/10/2026\"\n", "validatedOn must be an ISO date (yyyy-MM-dd): 25/10/2026"),
+                Arguments.of("unquoted validatedOn", VALID + "validatedOn: 2026-10-25\n", "validatedOn must be a quoted string"),
                 Arguments.of("malformed yaml", "formatVersion: [1\n", "")
         );
     }

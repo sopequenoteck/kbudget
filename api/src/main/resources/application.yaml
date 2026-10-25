@@ -43,6 +43,10 @@ app:
   storage:
     avatars:
       path: ${AVATAR_STORAGE_PATH:./data/avatars}
+  import-profiles:
+    # Repertoire de profils d'import ajoutes par l'instance, lus apres les
+    # profils embarques (KKS-329). Vide : profils embarques seuls.
+    external-dir: ${IMPORT_PROFILES_DIR:}
 
 server:
   port: 8080

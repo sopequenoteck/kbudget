@@ -38,9 +38,14 @@
 #                      the booking date
 #     pattern            regex with one capturing group
 #     format             pattern of the captured group, day and month (e.g. dd/MM)
+#   contributor        who provided the profile: a name or nickname, never an
+#                      email address (100 characters at most)
+#   validatedOn        date of the last real statement the profile was checked
+#                      on, quoted ISO date (e.g. "2026-10-25")
 formatVersion: 1
 bankCode: "SG"
 name: "Société Générale"
+contributor: "sopequenoteck"
 separator: ";"
 encoding: "ISO-8859-1"
 dateFormat: "dd/MM/yyyy"
