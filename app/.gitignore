@@ -6,6 +6,10 @@
 /out-tsc
 /bazel-out
 
+# Captures visuelles (e2e/visual) : resultats d'execution, jamais les references
+/test-results
+/playwright-report
+
 # Node
 /node_modules
 npm-debug.log

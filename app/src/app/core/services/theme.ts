@@ -34,6 +34,8 @@ export class ThemeService {
       const effective = this.effectiveTheme();
       document.documentElement.classList.remove('theme-light', 'theme-dark');
       document.documentElement.classList.add(`theme-${effective}`);
+      // Contrat de k-design (D8) : ses tokens clairs ne s'appliquent que sous data-theme="light" (KKS-587).
+      document.documentElement.setAttribute('data-theme', effective);
       document.documentElement.style.colorScheme = effective;
       this.syncThemeColor();
     });
