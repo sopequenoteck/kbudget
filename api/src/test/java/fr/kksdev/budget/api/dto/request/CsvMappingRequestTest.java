@@ -93,7 +93,9 @@ class CsvMappingRequestTest {
 
     @Test
     void should_not_expose_pattern_content_when_pattern_is_not_a_valid_regex() {
-        assertThatThrownBy(() -> mappingWith(List.of("(SECRET")))
+        var patterns = List.of("(SECRET");
+
+        assertThatThrownBy(() -> mappingWith(patterns))
                 .isExactlyInstanceOf(IllegalArgumentException.class)
                 .hasNoCause()
                 .message().doesNotContain("SECRET");

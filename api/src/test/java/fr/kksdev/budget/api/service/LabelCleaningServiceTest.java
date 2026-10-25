@@ -84,8 +84,8 @@ class LabelCleaningServiceTest {
 
         assertThat(sequence.charAt(1)).isEqualTo('b');
         assertThat(sequence.length()).isEqualTo(3);
-        assertThat(sequence.toString()).isEqualTo("abc");
-        assertThat(sequence.subSequence(1, 3).toString()).isEqualTo("bc");
+        assertThat(sequence).hasToString("abc");
+        assertThat(sequence.subSequence(1, 3)).hasToString("bc");
     }
 
     @Test
