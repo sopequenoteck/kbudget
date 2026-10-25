@@ -275,7 +275,8 @@ public class UserExportService {
                 p.getDecimalSeparator(),
                 p.getSkipHeaderLines(),
                 p.getCreatedAt(),
-                p.getUpdatedAt()
+                p.getUpdatedAt(),
+                p.getCleanupPatterns() != null ? p.getCleanupPatterns() : List.of()
         );
     }
 

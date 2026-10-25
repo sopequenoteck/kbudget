@@ -64,12 +64,22 @@ export class CsvMapping implements OnInit {
   readonly saveAsProfile = signal(false);
   readonly profileName = signal('');
 
+  // Label clean-up patterns (one regular expression per line)
+  readonly cleanupPatternsText = signal('');
+  readonly cleanupPatterns = computed(() =>
+    this.cleanupPatternsText()
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0),
+  );
+
   // Submit state
   readonly importing = signal(false);
   readonly importError = signal<string | null>(null);
 
   readonly headers = computed(() => this.preview()?.headers ?? []);
 
+  readonly CARD_PATTERN = String.raw`CARTE\s+\w+\d{4}\s+\d{2}/\d{2}\s+`;
   readonly DATE_FORMATS = ['dd/MM/yyyy', 'yyyy-MM-dd', 'MM/dd/yyyy', 'dd-MM-yyyy', 'MM/yyyy'];
   readonly ENCODINGS = ['UTF-8', 'ISO-8859-1', 'windows-1252'];
   readonly SEPARATORS = [
@@ -162,6 +172,17 @@ export class CsvMapping implements OnInit {
     this.loadPreview();
   }
 
+  addCardPattern(): void {
+    const text = this.cleanupPatternsText();
+    if (text.length === 0) {
+      this.cleanupPatternsText.set(this.CARD_PATTERN);
+      return;
+    }
+    if (this.cleanupPatterns().includes(this.CARD_PATTERN)) return;
+    const separator = /\r?\n$/.test(text) ? '' : '\n';
+    this.cleanupPatternsText.set(text + separator + this.CARD_PATTERN);
+  }
+
   isValid(): boolean {
     if (!this.dateColumn() || !this.labelColumn()) return false;
     if (this.amountMode() === 'single' && !this.amountColumn()) return false;
@@ -190,6 +211,7 @@ export class CsvMapping implements OnInit {
       skipHeaderLines: this.skipHeaderLines(),
       saveAsProfile: this.saveAsProfile(),
       profileName: this.saveAsProfile() ? this.profileName().trim() : null,
+      cleanupPatterns: this.cleanupPatterns(),
     };
 
     try {

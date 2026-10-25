@@ -201,6 +201,7 @@ export interface CsvMapping {
   skipHeaderLines: number;
   saveAsProfile: boolean;
   profileName: string | null;
+  cleanupPatterns: string[];
 }
 
 export interface ImportProfile {

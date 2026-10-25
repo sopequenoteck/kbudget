@@ -7,6 +7,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mapping CSV manuel : motifs de nettoyage du libellé pour les profils
+  d'import personnalisés** (KKS-442) : un relevé importé par mapping manuel
+  gardait dans ses libellés un bruit comme « CARTE X1234 14/09 », et les règles
+  de catégorisation automatique apprises sur eux ne reconnaissaient pas le même
+  commerçant payé autrement. L'écran de mapping accepte désormais des motifs de
+  nettoyage (expressions régulières retirées du libellé avant catégorisation,
+  une par ligne, avec un motif prêt à l'emploi pour les paiements carte). Ils
+  s'appliquent au fichier importé, sont enregistrés avec le profil personnalisé
+  et réutilisés quand un fichier suivant est reconnu par ce profil, et figurent
+  dans l'export des données. Chaque motif dispose de 50 ms par libellé, au-delà
+  il est ignoré.
+
 ## [6.13.1] - 2026-10-24
 
 ### Fixed

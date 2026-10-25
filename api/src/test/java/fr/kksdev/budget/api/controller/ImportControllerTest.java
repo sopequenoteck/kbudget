@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -76,5 +77,49 @@ class ImportControllerTest {
                 .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value(
                         allOf(startsWith("Invalid JSON mapping ("), not(containsString("SENTINEL")))));
+    }
+
+    private static final String VALID_MAPPING = "{\"separator\":\",\",\"dateFormat\":\"yyyy-MM-dd\","
+            + "\"dateColumn\":\"Booked\",\"labelColumn\":\"Memo\",\"amountColumn\":\"Value\"";
+
+    private org.springframework.test.web.servlet.ResultActions uploadWithMapping(String mappingJson) throws Exception {
+        var file = new MockMultipartFile("file", "releve.csv", "text/csv",
+                "date;libelle;montant".getBytes(StandardCharsets.UTF_8));
+        return mockMvc.perform(multipart("/v1/imports/upload-with-mapping")
+                .file(file)
+                .param("accountId", UUID.randomUUID().toString())
+                .param("mapping", mappingJson)
+                .header("Authorization", BEARER_TOKEN));
+    }
+
+    @Test
+    void should_return400WithRank_when_cleanupPatternIsNotAValidRegex() throws Exception {
+        uploadWithMapping(VALID_MAPPING + ",\"cleanupPatterns\":[\"CARTE\",\"(SECRET\"]}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("cleanupPatterns[1] is not a valid regular expression"));
+
+        verifyNoInteractions(importService);
+    }
+
+    @Test
+    void should_return400WithRank_when_cleanupPatternIsBlank() throws Exception {
+        uploadWithMapping(VALID_MAPPING + ",\"cleanupPatterns\":[\" \"]}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("cleanupPatterns[0] must not be blank"));
+
+        verifyNoInteractions(importService);
+    }
+
+    @Test
+    void should_return201_when_mappingHasNoCleanupPatterns() throws Exception {
+        uploadWithMapping(VALID_MAPPING + "}").andExpect(status().isCreated());
+    }
+
+    @Test
+    void should_return201_when_cleanupPatternsAreValid() throws Exception {
+        uploadWithMapping(VALID_MAPPING + ",\"cleanupPatterns\":[\"CARTE\\\\s+\"]}")
+                .andExpect(status().isCreated());
     }
 }

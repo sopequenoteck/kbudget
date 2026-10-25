@@ -65,7 +65,7 @@ class ImportStatementBalanceIT {
     private static final String RENT = "21/09/2026;PRELEVEMENT EUROPE;PRELEVEMENT EUROPEEN 3333333333 DE: BAILLEUR TEST ID: FR00ZZZ000002 REF: ref-0202 ;-600,00;EUR";
 
     private static final CsvMappingRequest OTHER_BANK_MAPPING = new CsvMappingRequest(
-            ",", "yyyy-MM-dd", "Booked", "Value", null, null, "Memo", "UTF-8", ".", 0, true, "My bank");
+            ",", "yyyy-MM-dd", "Booked", "Value", null, null, "Memo", "UTF-8", ".", 0, true, "My bank", null);
 
     @Autowired ImportService importService;
     @Autowired AccountService accountService;

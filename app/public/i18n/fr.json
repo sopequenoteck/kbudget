@@ -494,6 +494,7 @@
   },
   "imports": {
     "action": {
+      "addCardPattern": "Ajouter le motif des paiements carte",
       "addRule": "Ajouter une règle",
       "analyse": "Analyser le relevé",
       "apply": "Appliquer",
@@ -576,6 +577,9 @@
       "category": "Catégorie",
       "categoryPlaceholder": "-- Sélectionner une catégorie --",
       "categoryRequired": "La catégorie est requise.",
+      "cleanupPatterns": "Motifs de nettoyage du libellé",
+      "cleanupPatternsHint": "Expressions régulières retirées du libellé avant catégorisation.",
+      "cleanupPatternsPlaceholder": "une expression par ligne",
       "creditColumn": "Colonne Crédit",
       "dateColumn": "Colonne Date",
       "dateFormat": "Format de date",

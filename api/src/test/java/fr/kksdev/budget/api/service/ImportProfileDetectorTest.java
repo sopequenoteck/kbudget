@@ -183,6 +183,29 @@ class ImportProfileDetectorTest {
     }
 
     @Test
+    void should_pass_the_cleanup_patterns_of_the_profile_when_a_custom_profile_is_recognized() {
+        ImportProfile mine = customProfile("My bank", "Booked", "Memo", "Value");
+        mine.setCleanupPatterns(List.of("CARTE\\s+\\w+\\d{4}\\s+", "REF\\d+"));
+        givenCustomProfiles(mine);
+
+        Optional<Detection> detection = detector.detect(ImportTestFiles.otherBankStatement(), userId);
+
+        assertThat(detection).hasValueSatisfying(found ->
+                assertThat(found.config().cleanupPatterns()).containsExactly("CARTE\\s+\\w+\\d{4}\\s+", "REF\\d+"));
+    }
+
+    @Test
+    void should_use_no_cleanup_pattern_when_a_custom_profile_has_none_in_database() {
+        ImportProfile mine = customProfile("My bank", "Booked", "Memo", "Value");
+        mine.setCleanupPatterns(null);
+        givenCustomProfiles(mine);
+
+        Optional<Detection> detection = detector.detect(ImportTestFiles.otherBankStatement(), userId);
+
+        assertThat(detection).hasValueSatisfying(found -> assertThat(found.config().cleanupPatterns()).isEmpty());
+    }
+
+    @Test
     void should_prefer_the_first_matching_custom_profile_when_several_match() {
         ImportProfile mostRecent = customProfile("Recent", "Booked", "Memo", "Value");
         ImportProfile older = customProfile("Older", "Booked", "Memo", "Value");

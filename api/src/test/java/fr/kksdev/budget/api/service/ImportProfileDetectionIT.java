@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.CsvMappingRequest;
 import fr.kksdev.budget.api.dto.response.ImportDetectionResponse;
+import fr.kksdev.budget.api.dto.response.ImportDraftLineResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
@@ -24,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +46,7 @@ class ImportProfileDetectionIT {
     private static final String CUSTOM_PROFILE_NAME = "My bank";
 
     private static final CsvMappingRequest OTHER_BANK_MAPPING = new CsvMappingRequest(
-            ",", "yyyy-MM-dd", "Booked", "Value", null, null, "Memo", "UTF-8", ".", 0, true, CUSTOM_PROFILE_NAME);
+            ",", "yyyy-MM-dd", "Booked", "Value", null, null, "Memo", "UTF-8", ".", 0, true, CUSTOM_PROFILE_NAME, null);
 
     @Autowired ImportService importService;
     @Autowired UserRepository userRepository;
@@ -140,6 +142,60 @@ class ImportProfileDetectionIT {
         setUpdatedAt(older, LocalDateTime.of(2026, Month.SEPTEMBER, 1, 10, 0));
 
         assertThat(importService.detect(otherBankFile(), user.getId()).profileName()).isEqualTo("Older");
+    }
+
+    // -------------------------------------------------------------------------
+    // Cleanup patterns of a custom profile (KKS-442)
+    // -------------------------------------------------------------------------
+
+    private static CsvMappingRequest cardMapping(boolean saveAsProfile) {
+        return new CsvMappingRequest(",", "yyyy-MM-dd", "Booked", "Value", null, null, "Memo", "UTF-8", ".", 0,
+                saveAsProfile, saveAsProfile ? CUSTOM_PROFILE_NAME : null, List.of(ImportTestFiles.CARD_PATTERN));
+    }
+
+    private static MockMultipartFile otherBankCardFile() {
+        return new MockMultipartFile("file", "export.csv", "text/csv", ImportTestFiles.otherBankCardStatement());
+    }
+
+    @Test
+    void should_clean_the_labels_with_the_mapping_patterns_when_importing_with_a_manual_mapping() {
+        ImportDraftResponse draft = importService.uploadWithMapping(
+                otherBankCardFile(), accountId, cardMapping(true), user.getId());
+
+        assertThat(draft.lines()).extracting(ImportDraftLineResponse::cleanLabel).containsExactly("BAKERY", "GROCER");
+        assertThat(draft.lines()).extracting(ImportDraftLineResponse::rawLabel)
+                .containsExactly("CARTE X1234 14/09 BAKERY", "CARTE X1234 15/09 GROCER");
+    }
+
+    @Test
+    void should_clean_the_labels_the_same_way_when_the_saved_profile_is_recognized_again() {
+        ImportDraftResponse first = importService.uploadWithMapping(
+                otherBankCardFile(), accountId, cardMapping(true), user.getId());
+        importService.deleteDraft(first.id(), user.getId());
+
+        ImportDraftResponse second = importService.upload(otherBankCardFile(), accountId, user.getId());
+
+        assertThat(second.profileSource()).isEqualTo("CUSTOM");
+        assertThat(second.lines()).extracting(ImportDraftLineResponse::cleanLabel).containsExactly("BAKERY", "GROCER");
+    }
+
+    @Test
+    void should_apply_the_patterns_without_creating_a_profile_when_saveAsProfile_is_false() {
+        long profiles = importProfileRepository.count();
+
+        ImportDraftResponse draft = importService.uploadWithMapping(
+                otherBankCardFile(), accountId, cardMapping(false), user.getId());
+
+        assertThat(draft.lines()).extracting(ImportDraftLineResponse::cleanLabel).containsExactly("BAKERY", "GROCER");
+        assertThat(importProfileRepository.count()).isEqualTo(profiles);
+    }
+
+    @Test
+    void should_keep_the_labels_uncleaned_when_the_mapping_has_no_pattern() {
+        ImportDraftResponse draft = importService.uploadWithMapping(
+                otherBankCardFile(), accountId, OTHER_BANK_MAPPING, user.getId());
+
+        assertThat(draft.lines().getFirst().cleanLabel()).isEqualTo("CARTE X1234 14/09 BAKERY");
     }
 
     // -------------------------------------------------------------------------

@@ -587,6 +587,8 @@
 | IM-6 | Compte de l'URL | Entrée par IM-2, relevé sans suggestion | Choisir le fichier | Le compte de l'URL est coché ; une suggestion de l'API prime sur lui | -- |
 | IM-7 | Format inconnu | Relevé d'une banque non reconnue | Choisir le fichier | Message « format non reconnu », choix du compte, « Configurer les colonnes » → mappage existant ; son lien retour revient à `/transactions/import` ; une fois importé, on arrive sur la nouvelle revue | -- |
 | IM-8 | Rechargement du mappage | Sur `/settings/import/mapping` | Recharger la page (F5) | Redirection vers `/transactions/import`, jamais un écran vide | -- |
+| IM-41 | Motifs de nettoyage | Sur le mappage, relevé synthétique dont les libellés commencent par « CARTE X1234 14/09 » | Cliquer « Ajouter le motif des paiements carte », importer | La zone reçoit le motif carte une seule fois (un second clic n'ajoute rien) ; dans la revue, les libellés n'ont plus le préfixe carte ni la date ; le libellé brut reste visible sur la ligne | -- |
+| IM-42 | Motif refusé | Même écran | Saisir `(` seul sur une ligne, importer | Message d'erreur de l'API, aucun brouillon ni profil créé ; le texte saisi reste dans la zone | -- |
 | IM-9 | Brouillon déjà ouvert | Un brouillon existe pour le compte | Analyser un second relevé sur ce compte | Message d'erreur et lien « Reprendre le brouillon en cours » vers sa revue | -- |
 | IM-10 | Fichier illisible | Fichier vide ou non CSV | Choisir le fichier | Message d'erreur, le fichier est oublié | -- |
 

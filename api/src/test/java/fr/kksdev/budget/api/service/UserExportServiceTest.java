@@ -112,6 +112,36 @@ class UserExportServiceTest {
         assertThat(response.invitations()).isNotNull().isEmpty();
     }
 
+    private ImportProfile exportedProfile(List<String> cleanupPatterns) {
+        return ImportProfile.builder()
+                .id(UUID.randomUUID()).user(user).name("My bank").separator(",").dateFormat("yyyy-MM-dd")
+                .dateColumn("Booked").labelColumn("Memo").amountColumn("Value").encoding("UTF-8")
+                .decimalSeparator(".").skipHeaderLines(0).cleanupPatterns(cleanupPatterns).build();
+    }
+
+    @Test
+    void should_export_cleanup_patterns_in_order_when_user_has_a_custom_profile() {
+        stubAllRepositoriesEmpty();
+        when(importProfileRepository.findByUserIdOrderByNameAsc(userId))
+                .thenReturn(List.of(exportedProfile(List.of("CARTE\\s+", "REF\\d+"))));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.importProfiles()).hasSize(1);
+        assertThat(response.importProfiles().get(0).cleanupPatterns()).containsExactly("CARTE\\s+", "REF\\d+");
+    }
+
+    @Test
+    void should_export_empty_cleanup_patterns_when_profile_has_none_in_database() {
+        stubAllRepositoriesEmpty();
+        when(importProfileRepository.findByUserIdOrderByNameAsc(userId))
+                .thenReturn(List.of(exportedProfile(null)));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.importProfiles().get(0).cleanupPatterns()).isNotNull().isEmpty();
+    }
+
     @Test
     void should_not_expose_password_hash_in_export() {
         stubAllRepositoriesEmpty();
