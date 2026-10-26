@@ -1,8 +1,9 @@
 {
   "app": "kbudget",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "files": {
     "css/kbudget/k-tokens.css": "app/src/styles/k/k-tokens.css",
-    "css/kbudget/fonts/": "app/src/styles/k/fonts/"
+    "css/kbudget/fonts/": "app/src/styles/k/fonts/",
+    "dart/k_tokens.dart": "flutter/lib/src/theme/k_tokens.dart"
   }
 }

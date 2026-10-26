@@ -20,6 +20,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- **Application mobile sur les couleurs communes K Design** (KKS-589) :
+  Flutter reçoit désormais ses couleurs de k-design, comme le client web. En
+  thème clair, les montants de revenu et de dépense, les dettes et les textes
+  d'avertissement et d'information prennent les teintes plus soutenues qui
+  passent le contraste WCAG AA (#166534, #b91c1c, #854d0e, #1d4ed8), et les
+  fonds ambrés atténués suivent l'ambre #c66e05. Thème sombre inchangé.
+
 - **Libellés lisibles sur les boutons rouges et ambre, focus standard sur les
   champs** (KKS-590) : en thème sombre, les boutons de suppression et le badge
   de notifications portent un libellé sombre sur le rouge (le blanc donnait

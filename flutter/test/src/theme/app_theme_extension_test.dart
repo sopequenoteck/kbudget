@@ -100,7 +100,7 @@ void main() {
       );
       expect(
         AppThemeExtension.light.incomeColor,
-        equals(const Color(0xFF16A34A)),
+        equals(const Color(0xFF166534)),
       );
       expect(
         AppThemeExtension.light.expenseColor,
@@ -119,7 +119,7 @@ void main() {
       );
       expect(
         AppThemeExtension.light.textWarning,
-        equals(const Color(0xFFCA8A04)),
+        equals(const Color(0xFF854D0E)),
       );
       expect(
         AppThemeExtension.light.textInfo,
@@ -127,7 +127,7 @@ void main() {
       );
       expect(
         AppThemeExtension.light.textInfo,
-        equals(const Color(0xFF2563EB)),
+        equals(const Color(0xFF1D4ED8)),
       );
     });
 
