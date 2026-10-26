@@ -100,8 +100,12 @@ jobs:
           apt-get update -qq && apt-get install -y -qq postgresql-client > /dev/null
           psql -q -h postgres -U budget_u -d budget_db -f app/e2e/visual/seed.sql
 
+      # Tout passe par 127.0.0.1 : dans le conteneur, « localhost » peut se résoudre en
+      # IPv6 d'un côté et en IPv4 de l'autre. L'API doit alors admettre cette origine
+      # (CORS), son défaut dev ne connaissant que http://localhost:4200.
       - name: API en profil dev
         run: |
+          APP_CORS_ALLOWEDORIGINS=http://localhost:4200,http://127.0.0.1:4200 \
           SPRING_PROFILES_ACTIVE=dev \
           SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/budget_db \
           SPRING_DATASOURCE_USERNAME=budget_u \
@@ -114,7 +118,7 @@ jobs:
         working-directory: app
         run: |
           npm ci
-          nohup npx ng serve --proxy-config proxy.conf.json --port 4200 > ../ng.log 2>&1 &
+          nohup npx ng serve --proxy-config proxy.conf.json --host 127.0.0.1 --port 4200 > ../ng.log 2>&1 &
 
       - name: Attente de l'API et du front
         run: |
@@ -126,15 +130,23 @@ jobs:
               }
               throw new Error('injoignable : ' + url);
             };
-            (async () => { await wait('http://localhost:8080/api/meta'); await wait('http://localhost:4200/'); })()
+            (async () => { await wait('http://127.0.0.1:8080/api/meta'); await wait('http://127.0.0.1:4200/'); })()
               .catch((e) => { console.error(e.message); process.exit(1); });
           "
 
       - name: Captures
         working-directory: app/e2e/visual
+        env:
+          KB_BASE_URL: http://127.0.0.1:4200
         run: |
           npm ci
           npx playwright test ${{ github.event_name == 'workflow_dispatch' && '--update-snapshots' || '' }}
+
+      - name: Journaux de l'API et du front
+        if: failure()
+        run: |
+          echo '--- api.log (fin) ---'; tail -n 60 api.log || true
+          echo '--- ng.log (fin) ---'; tail -n 60 ng.log || true
 
       - name: Captures obtenues et diffs
         if: failure()
