@@ -33,6 +33,7 @@
 .draft-list__icon { color: var(--k-color-primary); flex-shrink: 0; }
 .draft-list__actions { display: flex; align-items: center; gap: var(--k-space-2); flex-shrink: 0; }
 
+// Variante locale de .btn-outline (styles/_buttons.scss) : rayon lg, icone alignee, taille --sm en xs.
 .btn-outline { display: inline-flex; align-items: center; gap: var(--k-space-1); padding: var(--k-space-2) var(--k-space-3); border: 1px solid var(--k-border-default); border-radius: var(--k-radius-lg); background: transparent; color: var(--k-text-primary); font-size: var(--k-font-size-sm); cursor: pointer; white-space: nowrap; transition: background var(--duration-fast) var(--easing-default); }
 .btn-outline:hover { background: var(--k-hover-bg); }
 .btn-outline--sm { font-size: var(--k-font-size-xs); padding: var(--k-space-1) var(--k-space-2); }

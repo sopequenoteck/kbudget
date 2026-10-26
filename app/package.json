@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "ng lint",
-    "lint:styles": "stylelint \"src/**/*.{scss,ts}\" && node ../scripts/check-css-vars.mjs",
+    "lint:styles": "stylelint \"src/**/*.{scss,ts}\" && node ../scripts/check-css-vars.mjs && node ../scripts/check-global-duplicates.mjs",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss}\""
   },
@@ -55,6 +55,7 @@
     "postcss-angular": "^2.0.0",
     "postcss-scss": "^4.0.9",
     "prettier": "^3.8.1",
+    "sass": "1.97.1",
     "stylelint": "^17.16.0",
     "stylelint-declaration-strict-value": "^1.12.1",
     "stylelint-scss": "^7.4.0",

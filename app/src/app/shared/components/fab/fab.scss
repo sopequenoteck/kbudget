@@ -7,7 +7,8 @@
 
 .speed-dial-menu {
   position: fixed;
-  bottom: calc(var(--k-space-6) + 48px + var(--k-space-3));
+  // Mobile : au-dessus de la barre du bas (desktop : media query plus bas)
+  bottom: calc(var(--bottom-nav-height) + var(--k-space-4) + 48px + var(--k-space-3));
   right: calc(var(--k-space-6) + var(--safe-right));
   z-index: calc(var(--k-z-overlay) + 1);
   display: flex;
@@ -66,7 +67,8 @@
 
 .fab-button {
   position: fixed;
-  bottom: var(--k-space-6);
+  // Mobile : au-dessus de la barre du bas (desktop : media query plus bas)
+  bottom: calc(var(--bottom-nav-height) + var(--k-space-4));
   right: calc(var(--k-space-6) + var(--safe-right));
   z-index: calc(var(--k-z-overlay) + 2);
   display: flex;
@@ -104,15 +106,6 @@
   font-weight: var(--k-font-weight-bold);
   line-height: 1;
   transition: transform var(--duration-normal) var(--easing-default);
-}
-
-// -- Mobile: FAB above bottom nav --
-.fab-button {
-  bottom: calc(var(--bottom-nav-height) + var(--k-space-4));
-}
-
-.speed-dial-menu {
-  bottom: calc(var(--bottom-nav-height) + var(--k-space-4) + 48px + var(--k-space-3));
 }
 
 // -- Desktop: restore original positions --

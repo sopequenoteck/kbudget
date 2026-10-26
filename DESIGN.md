@@ -9,7 +9,7 @@ Pour l'historique des decisions : voir `DESIGN-REFONTE.md` (20 sessions).
 2. **Typographie + spacing** : la hierarchie vient des tailles, graisses et espacements — pas des bordures ni des ombres.
 3. **Dark-first** : le dark mode est l'experience primaire. Elevation par luminosite (fond sombre < surface < raised).
 4. **Un seul niveau de surface modale** : bottom sheet OU dialog centre. Jamais deux empiles.
-5. **Tokens uniquement** : `var(--k-*)` partout (k-design), `var(--x)` pour les seuls tokens locaux de `styles/_app-tokens.scss`. Jamais de hex/rgba hardcode dans les composants. Controle par `cd app && npm run lint:styles` (Stylelint + variables inconnues, job CI **Styles APP**, KKS-590) ; une exception se nomme sur sa ligne (`stylelint-disable-next-line … -- raison`).
+5. **Tokens uniquement** : `var(--k-*)` partout (k-design), `var(--x)` pour les seuls tokens locaux de `styles/_app-tokens.scss`. Jamais de hex/rgba hardcode dans les composants. Controle par `cd app && npm run lint:styles` (Stylelint, variables inconnues, selecteurs en double dans la feuille globale ; job CI **Styles APP**, KKS-590) ; une exception se nomme sur sa ligne (`stylelint-disable-next-line … -- raison`).
 
 ## Anti-patterns
 

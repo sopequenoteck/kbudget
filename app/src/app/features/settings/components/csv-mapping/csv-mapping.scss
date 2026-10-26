@@ -240,6 +240,7 @@
   border-top: 1px solid var(--k-border-default);
 }
 
+// Variante locale de .btn-outline (styles/_buttons.scss) : rayon lg, icone alignee (inline-flex + gap).
 .btn-outline {
   display: inline-flex;
   align-items: center;
