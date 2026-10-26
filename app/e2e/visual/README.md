@@ -8,6 +8,7 @@
 | `playwright.config.ts` | mobile 390 × 844, `fr-FR`, `Europe/Paris`, diff nul exigé (`maxDiffPixels: 0`, `threshold: 0`) |
 | `seed.sql` | base de dev au 25 octobre 2026 (`pg_dump` après les migrations et `db/dev/R__dev_seed.sql`, jetons de session exclus) |
 | `baseline/` | 12 captures de référence |
+| `package.json` | paquet séparé de `app/` avec `@playwright/test` : déclaré dans `app/package.json`, Playwright activerait chez Sonar une règle sur tous les tests unitaires |
 
 Les données de `R__dev_seed.sql` sont datées par rapport au jour de création de la base. `seed.sql` fige ce jour, et le test fige l'horloge du navigateur au même jour (`NOW` dans `screens.spec.ts`) : les captures restent comparables quel que soit le jour où on les rejoue.
 
@@ -32,8 +33,9 @@ java -jar target/api-*.jar
 cd app && npm ci && npm start
 
 # 4. Captures
-cd app && npm run test:visual                 # compare à baseline/
-cd app && npm run test:visual -- --update-snapshots   # remplace baseline/
+cd app/e2e/visual && npm ci
+npm test              # compare à baseline/
+npm run update        # remplace baseline/
 ```
 
 Compte : `dev@local.test` / `dev123` (jeu de données de dev). `KB_BASE_URL` change l'adresse du front (défaut `http://localhost:4200`).
