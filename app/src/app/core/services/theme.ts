@@ -4,7 +4,7 @@ import { DevLogger } from './dev-logger';
 export type Theme = 'light' | 'dark' | 'auto';
 
 const STORAGE_KEY = 'budget_theme';
-const THEME_COLOR_TOKEN = '--surface-raised';
+const THEME_COLOR_TOKEN = '--k-surface-raised';
 const VALID_THEMES: Theme[] = ['light', 'dark', 'auto'];
 
 @Injectable({
@@ -32,9 +32,7 @@ export class ThemeService {
 
     effect(() => {
       const effective = this.effectiveTheme();
-      document.documentElement.classList.remove('theme-light', 'theme-dark');
-      document.documentElement.classList.add(`theme-${effective}`);
-      // Contrat de k-design (D8) : ses tokens clairs ne s'appliquent que sous data-theme="light" (KKS-587).
+      // Contrat de k-design (D8) : `data-theme="dark|light"` sur <html>, sombre par defaut.
       document.documentElement.dataset['theme'] = effective;
       document.documentElement.style.colorScheme = effective;
       this.syncThemeColor();
@@ -52,7 +50,7 @@ export class ThemeService {
 
   /**
    * `<meta name="theme-color">` (barre systeme Android, Safari hors PWA) suit la couleur de
-   * l'en-tete : `--surface-raised` du theme applique, lu apres la pose de la classe de theme.
+   * l'en-tete : `--k-surface-raised` du theme applique, lu apres la pose de `data-theme`.
    */
   private syncThemeColor(): void {
     const color = getComputedStyle(document.documentElement).getPropertyValue(THEME_COLOR_TOKEN).trim();

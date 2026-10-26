@@ -1,12 +1,12 @@
 :host {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
+  padding: var(--k-space-4);
 }
 
 // Styles specifiques a cette page — le reste est dans _list-patterns.scss
 
 // Hero amount toujours expense sur cette page
 .hero__amount-value {
-  color: var(--color-expense);
+  color: var(--k-color-expense);
 }

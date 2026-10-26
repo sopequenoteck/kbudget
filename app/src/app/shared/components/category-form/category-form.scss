@@ -1,55 +1,55 @@
 .category-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--k-space-4);
 
   &__field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--k-space-1);
 
     label,
     .category-form__label {
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-      color: var(--text-primary);
+      font-size: var(--k-font-size-sm);
+      font-weight: var(--k-font-weight-medium);
+      color: var(--k-text-primary);
     }
 
     input {
-      padding: var(--space-3) var(--space-4);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-xl);
-      background: var(--surface-default);
-      color: var(--text-primary);
-      font-size: var(--font-size-sm);
+      padding: var(--k-space-3) var(--k-space-4);
+      border: 1px solid var(--k-border-default);
+      border-radius: var(--k-radius-xl);
+      background: var(--k-surface-default);
+      color: var(--k-text-primary);
+      font-size: var(--k-font-size-sm);
 
       &:focus {
         outline: none;
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 4px var(--color-primary-light);
+        border-color: var(--k-color-primary);
+        box-shadow: 0 0 0 4px var(--k-color-primary-light);
       }
     }
   }
 
   &__hint {
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary);
+    font-size: var(--k-font-size-xs);
+    color: var(--k-text-tertiary);
   }
 
   &__error {
-    font-size: var(--font-size-xs);
-    color: var(--text-error);
+    font-size: var(--k-font-size-xs);
+    color: var(--k-text-error);
   }
 
   &__colors {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    gap: var(--k-space-2);
   }
 
   &__color-swatch {
-    width: var(--space-7);
-    height: var(--space-7);
+    width: var(--k-space-7);
+    height: var(--k-space-7);
     padding: 0;
     border: 2px solid transparent;
     border-radius: 50%;
@@ -63,16 +63,16 @@
     }
 
     &.active {
-      border-color: var(--text-primary);
+      border-color: var(--k-text-primary);
       transform: scale(1.15);
     }
   }
 
   &__error-banner {
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-lg);
-    background: var(--bg-error);
-    color: var(--text-error);
-    font-size: var(--font-size-sm);
+    padding: var(--k-space-2) var(--k-space-3);
+    border-radius: var(--k-radius-lg);
+    background: var(--k-bg-error);
+    color: var(--k-text-error);
+    font-size: var(--k-font-size-sm);
   }
 }

@@ -189,44 +189,44 @@ const FIXED_PARITY_RATES: Record<string, number> = {
     `
       .settings-section__header {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 0 var(--space-4); margin-bottom: var(--space-2);
+        padding: 0 var(--k-space-4); margin-bottom: var(--k-space-2);
       }
 
       .settings-section__title {
-        font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold);
-        text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary);
+        font-size: var(--k-font-size-xs); font-weight: var(--k-font-weight-semibold);
+        text-transform: uppercase; letter-spacing: 0.5px; color: var(--k-text-tertiary);
       }
 
       .add-btn {
         display: flex; align-items: center; justify-content: center;
         width: 28px; height: 28px; padding: 0;
-        border: 1px solid var(--border-default); border-radius: var(--radius-round);
-        background: transparent; color: var(--text-tertiary); cursor: pointer;
-        &:active { color: var(--text-primary); background-color: var(--hover-bg); }
+        border: 1px solid var(--k-border-default); border-radius: var(--k-radius-round);
+        background: transparent; color: var(--k-text-tertiary); cursor: pointer;
+        &:active { color: var(--k-text-primary); background-color: var(--k-hover-bg); }
       }
 
       .section-content {
-        background: var(--surface-default); border-radius: var(--radius-xl); overflow: hidden;
-        &--padded { padding: var(--space-4); }
+        background: var(--k-surface-default); border-radius: var(--k-radius-xl); overflow: hidden;
+        &--padded { padding: var(--k-space-4); }
       }
 
       .rate-row {
-        display: flex; align-items: center; gap: var(--space-3);
-        padding: var(--space-3) var(--space-4);
-        border-bottom: 1px solid var(--border-default);
+        display: flex; align-items: center; gap: var(--k-space-3);
+        padding: var(--k-space-3) var(--k-space-4);
+        border-bottom: 1px solid var(--k-border-default);
         &:last-child { border-bottom: none; }
 
-        &--info { color: var(--text-tertiary); font-size: var(--font-size-xs); }
+        &--info { color: var(--k-text-tertiary); font-size: var(--k-font-size-xs); }
 
-        &__label { font-size: var(--font-size-sm); color: var(--text-tertiary); }
+        &__label { font-size: var(--k-font-size-sm); color: var(--k-text-tertiary); }
         &__pair {
-          display: flex; align-items: center; gap: var(--space-1);
-          font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
-          color: var(--text-secondary); flex: 1;
+          display: flex; align-items: center; gap: var(--k-space-1);
+          font-size: var(--k-font-size-sm); font-weight: var(--k-font-weight-medium);
+          color: var(--k-text-secondary); flex: 1;
         }
         &__value {
-          font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold);
-          color: var(--text-secondary); font-variant-numeric: tabular-nums; margin-left: auto;
+          font-size: var(--k-font-size-sm); font-weight: var(--k-font-weight-semibold);
+          color: var(--k-text-secondary); font-variant-numeric: tabular-nums; margin-left: auto;
         }
       }
 
@@ -237,23 +237,23 @@ const FIXED_PARITY_RATES: Record<string, number> = {
         width: 32px;
         height: 32px;
         border: none;
-        border-radius: var(--radius-round);
+        border-radius: var(--k-radius-round);
         background: transparent;
-        color: var(--text-tertiary);
+        color: var(--k-text-tertiary);
         cursor: pointer;
         transition: background-color var(--duration-fast) var(--easing-default),
           color var(--duration-fast) var(--easing-default);
 
         &:hover {
-          background-color: var(--hover-bg);
-          color: var(--text-primary);
+          background-color: var(--k-hover-bg);
+          color: var(--k-text-primary);
         }
 
         &--danger {
-          color: var(--color-expense);
+          color: var(--k-color-expense);
 
           &:hover {
-            background-color: var(--bg-error);
+            background-color: var(--k-bg-error);
           }
         }
       }
@@ -261,14 +261,14 @@ const FIXED_PARITY_RATES: Record<string, number> = {
       .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--space-3);
-        margin-bottom: var(--space-3);
+        gap: var(--k-space-3);
+        margin-bottom: var(--k-space-3);
       }
 
       .form-field {
         display: flex;
         flex-direction: column;
-        gap: var(--space-2);
+        gap: var(--k-space-2);
 
         &--full {
           grid-column: 1 / -1;
@@ -276,77 +276,77 @@ const FIXED_PARITY_RATES: Record<string, number> = {
       }
 
       .form-label {
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-medium);
-        color: var(--text-secondary);
+        font-size: var(--k-font-size-sm);
+        font-weight: var(--k-font-weight-medium);
+        color: var(--k-text-secondary);
       }
 
       .form-readonly {
-        padding: var(--space-2) var(--space-3);
+        padding: var(--k-space-2) var(--k-space-3);
         background: transparent;
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-md);
-        font-size: var(--font-size-sm);
-        color: var(--text-primary);
-        font-weight: var(--font-weight-semibold);
+        border: 1px solid var(--k-border-default);
+        border-radius: var(--k-radius-md);
+        font-size: var(--k-font-size-sm);
+        color: var(--k-text-primary);
+        font-weight: var(--k-font-weight-semibold);
       }
 
       .form-select {
-        padding: var(--space-2) var(--space-3);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-md);
-        background: var(--surface-default);
-        color: var(--text-primary);
-        font-size: var(--font-size-sm);
+        padding: var(--k-space-2) var(--k-space-3);
+        border: 1px solid var(--k-border-default);
+        border-radius: var(--k-radius-md);
+        background: var(--k-surface-default);
+        color: var(--k-text-primary);
+        font-size: var(--k-font-size-sm);
         cursor: pointer;
         appearance: auto;
 
         &:focus {
-          outline: 2px solid var(--color-primary);
+          outline: 2px solid var(--k-color-primary);
           outline-offset: 2px;
         }
       }
 
       .form-input {
-        padding: var(--space-2) var(--space-3);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-md);
-        background: var(--surface-default);
-        color: var(--text-primary);
-        font-size: var(--font-size-sm);
+        padding: var(--k-space-2) var(--k-space-3);
+        border: 1px solid var(--k-border-default);
+        border-radius: var(--k-radius-md);
+        background: var(--k-surface-default);
+        color: var(--k-text-primary);
+        font-size: var(--k-font-size-sm);
         width: 100%;
         box-sizing: border-box;
 
         &:focus {
-          outline: 2px solid var(--color-primary);
+          outline: 2px solid var(--k-color-primary);
           outline-offset: 2px;
         }
 
         &::placeholder {
-          color: var(--text-tertiary, var(--text-secondary));
+          color: var(--k-text-tertiary, var(--k-text-secondary));
         }
       }
 
       .form-error {
-        font-size: var(--font-size-sm);
-        color: var(--color-expense);
-        margin-bottom: var(--space-3);
+        font-size: var(--k-font-size-sm);
+        color: var(--k-color-expense);
+        margin-bottom: var(--k-space-3);
       }
 
       .form-actions {
         display: flex;
         justify-content: flex-end;
-        gap: var(--space-2);
+        gap: var(--k-space-2);
       }
 
       .btn {
         display: inline-flex;
         align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-1) var(--space-3);
-        border-radius: var(--radius-round);
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-medium);
+        gap: var(--k-space-2);
+        padding: var(--k-space-1) var(--k-space-3);
+        border-radius: var(--k-radius-round);
+        font-size: var(--k-font-size-sm);
+        font-weight: var(--k-font-weight-medium);
         cursor: pointer;
         transition: opacity var(--duration-fast) var(--easing-default),
           background-color var(--duration-fast) var(--easing-default);
@@ -358,8 +358,8 @@ const FIXED_PARITY_RATES: Record<string, number> = {
         }
 
         &--primary {
-          background-color: var(--color-primary);
-          color: var(--text-inverse);
+          background-color: var(--k-color-primary);
+          color: var(--k-text-inverse);
 
           &:hover:not(:disabled) {
             opacity: 0.85;
@@ -368,17 +368,17 @@ const FIXED_PARITY_RATES: Record<string, number> = {
 
         &--ghost {
           background: transparent;
-          border: 1px solid var(--border-default);
-          color: var(--text-secondary);
+          border: 1px solid var(--k-border-default);
+          color: var(--k-text-secondary);
 
           &:hover:not(:disabled) {
-            background-color: var(--hover-bg);
-            color: var(--text-primary);
+            background-color: var(--k-hover-bg);
+            color: var(--k-text-primary);
           }
         }
 
         &--danger {
-          background-color: var(--color-expense);
+          background-color: var(--k-color-expense);
           color: white;
 
           &:hover:not(:disabled) {
@@ -390,33 +390,33 @@ const FIXED_PARITY_RATES: Record<string, number> = {
       .dialog-overlay {
         position: fixed;
         inset: 0;
-        background: var(--surface-overlay);
+        background: var(--k-surface-overlay);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 1000;
-        padding: var(--space-4);
+        padding: var(--k-space-4);
       }
 
       .dialog {
-        background: var(--surface-default);
-        border-radius: var(--radius-xl);
-        padding: var(--space-6);
+        background: var(--k-surface-default);
+        border-radius: var(--k-radius-xl);
+        padding: var(--k-space-6);
         max-width: 400px;
         width: 100%;
         box-shadow: var(--shadow-xl);
 
         &__message {
-          font-size: var(--font-size-sm);
-          color: var(--text-primary);
-          margin-bottom: var(--space-5);
+          font-size: var(--k-font-size-sm);
+          color: var(--k-text-primary);
+          margin-bottom: var(--k-space-5);
           line-height: 1.5;
         }
 
         &__actions {
           display: flex;
           justify-content: flex-end;
-          gap: var(--space-2);
+          gap: var(--k-space-2);
         }
       }
     `,

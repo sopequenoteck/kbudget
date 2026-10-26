@@ -1,9 +1,9 @@
 :host {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
-  padding-bottom: var(--space-8);
-  gap: var(--space-5);
+  padding: var(--k-space-4);
+  padding-bottom: var(--k-space-8);
+  gap: var(--k-space-5);
 }
 
 // Réutilise les classes .settings-section, .settings-row de settings.scss
@@ -12,39 +12,39 @@
 .mon-compte {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--k-space-5);
 
   &__alert {
-    padding: var(--space-2) var(--space-3);
-    background-color: color-mix(in srgb, var(--color-expense) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-expense) 30%, transparent);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-xs);
-    color: var(--color-expense);
+    padding: var(--k-space-2) var(--k-space-3);
+    background-color: color-mix(in srgb, var(--k-color-expense) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--k-color-expense) 30%, transparent);
+    border-radius: var(--k-radius-md);
+    font-size: var(--k-font-size-xs);
+    color: var(--k-color-expense);
   }
 
   &__avatar-row {
     display: flex;
     justify-content: center;
-    padding: var(--space-4) var(--space-4) var(--space-3);
-    border-bottom: 1px solid var(--border-default);
+    padding: var(--k-space-4) var(--k-space-4) var(--k-space-3);
+    border-bottom: 1px solid var(--k-border-default);
   }
 
   &__name-edit {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
+    gap: var(--k-space-1);
     margin-top: 2px;
   }
 
   &__name-input {
     flex: 1;
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: var(--surface-background);
-    color: var(--text-primary);
-    font-size: var(--font-size-xs);
+    padding: var(--k-space-1) var(--k-space-2);
+    border: 1px solid var(--k-color-primary);
+    border-radius: var(--k-radius-md);
+    background: var(--k-surface-background);
+    color: var(--k-text-primary);
+    font-size: var(--k-font-size-xs);
     font-family: inherit;
     outline: none;
     min-width: 0;
@@ -54,7 +54,7 @@
     width: 24px;
     height: 24px;
     border: none;
-    border-radius: var(--radius-round);
+    border-radius: var(--k-radius-round);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -64,36 +64,36 @@
     transition: background-color var(--duration-fast);
 
     &--save {
-      background-color: color-mix(in srgb, var(--color-income) 15%, transparent);
-      color: var(--color-income);
-      &:active { background-color: color-mix(in srgb, var(--color-income) 25%, transparent); }
+      background-color: color-mix(in srgb, var(--k-color-income) 15%, transparent);
+      color: var(--k-color-income);
+      &:active { background-color: color-mix(in srgb, var(--k-color-income) 25%, transparent); }
     }
 
     &--cancel {
-      background-color: var(--icon-circle-bg);
-      color: var(--text-tertiary);
-      &:active { background-color: var(--hover-bg); }
+      background-color: var(--k-icon-circle-bg);
+      color: var(--k-text-tertiary);
+      &:active { background-color: var(--k-hover-bg); }
     }
   }
 
   &__edit-trigger {
     border: none;
     background: transparent;
-    color: var(--text-tertiary);
+    color: var(--k-text-tertiary);
     cursor: pointer;
-    padding: var(--space-1);
-    border-radius: var(--radius-round);
+    padding: var(--k-space-1);
+    border-radius: var(--k-radius-round);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color var(--duration-fast), background-color var(--duration-fast);
     flex-shrink: 0;
-    &:active { background-color: var(--hover-bg); color: var(--text-secondary); }
+    &:active { background-color: var(--k-hover-bg); color: var(--k-text-secondary); }
   }
 
   &__badge {
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary);
+    font-size: var(--k-font-size-xs);
+    color: var(--k-text-tertiary);
     flex-shrink: 0;
     white-space: nowrap;
   }
@@ -112,18 +112,18 @@
 // Reprise locale des classes settings.scss pour éviter la dépendance aux styles globaux du parent
 .settings-section {
   &__label {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
+    font-size: var(--k-font-size-xs);
+    font-weight: var(--k-font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--text-tertiary);
-    padding: 0 var(--space-4);
-    margin-bottom: var(--space-2);
+    color: var(--k-text-tertiary);
+    padding: 0 var(--k-space-4);
+    margin-bottom: var(--k-space-2);
   }
 
   &__container {
-    background-color: var(--surface-default);
-    border-radius: var(--radius-xl);
+    background-color: var(--k-surface-default);
+    border-radius: var(--k-radius-xl);
     overflow: hidden;
   }
 }
@@ -131,11 +131,11 @@
 .settings-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  gap: var(--k-space-3);
+  padding: var(--k-space-3) var(--k-space-4);
   text-decoration: none;
   color: inherit;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--k-border-default);
   width: 100%;
   background: transparent;
   font-family: inherit;
@@ -148,7 +148,7 @@
   &--link {
     cursor: pointer;
     transition: background-color var(--duration-fast);
-    &:active { background-color: var(--hover-bg); }
+    &:active { background-color: var(--k-hover-bg); }
   }
 
   &--disabled {
@@ -158,7 +158,7 @@
 
   &--danger {
     .settings-row__title {
-      color: var(--color-expense);
+      color: var(--k-color-expense);
     }
   }
 
@@ -168,7 +168,7 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    border-radius: var(--radius-round);
+    border-radius: var(--k-radius-round);
     flex-shrink: 0;
   }
 
@@ -181,19 +181,19 @@
   }
 
   &__title {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
+    font-size: var(--k-font-size-sm);
+    font-weight: var(--k-font-weight-medium);
+    color: var(--k-text-secondary);
   }
 
   &__description {
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary);
+    font-size: var(--k-font-size-xs);
+    color: var(--k-text-tertiary);
   }
 
   &__chevron {
-    font-size: var(--font-size-lg);
-    color: var(--text-tertiary);
+    font-size: var(--k-font-size-lg);
+    color: var(--k-text-tertiary);
     flex-shrink: 0;
     line-height: 1;
   }
@@ -202,8 +202,8 @@
 .page-header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: 0 0 var(--space-2);
+  gap: var(--k-space-3);
+  padding: 0 0 var(--k-space-2);
 
   &__back {
     display: flex;
@@ -211,20 +211,20 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    border-radius: var(--radius-round);
-    background-color: var(--surface-raised);
-    color: var(--text-secondary);
+    border-radius: var(--k-radius-round);
+    background-color: var(--k-surface-raised);
+    color: var(--k-text-secondary);
     text-decoration: none;
     flex-shrink: 0;
     transition: background-color var(--duration-fast);
-    &:active { background-color: var(--hover-bg); }
+    &:active { background-color: var(--k-hover-bg); }
   }
 
   &__title {
     flex: 1;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+    font-size: var(--k-font-size-lg);
+    font-weight: var(--k-font-weight-bold);
+    color: var(--k-text-primary);
     margin: 0;
   }
 }

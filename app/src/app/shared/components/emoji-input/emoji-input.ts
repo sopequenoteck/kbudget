@@ -95,7 +95,7 @@ export class EmojiInput implements AfterViewChecked {
 
     if (!this.isOpen()) return;
 
-    const theme = document.documentElement.classList.contains('theme-dark') ? 'dark' : 'light';
+    const theme = document.documentElement.dataset['theme'] === 'light' ? 'light' : 'dark';
 
     // Position the popover in fixed coordinates relative to the trigger
     const trigger: HTMLElement | null = this.el.nativeElement.querySelector('.emoji-trigger');

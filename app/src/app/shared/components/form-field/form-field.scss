@@ -1,13 +1,13 @@
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--k-space-1);
 }
 
 label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-text-secondary);
 }
 
 .form-field__input-wrapper {
@@ -18,14 +18,14 @@ label {
 
 .form-field__prefix-icon {
   position: absolute;
-  left: var(--space-3);
-  color: var(--text-tertiary);
+  left: var(--k-space-3);
+  color: var(--k-text-tertiary);
   pointer-events: none;
   flex-shrink: 0;
   z-index: 1;
 }
 
 .form-error {
-  font-size: var(--font-size-xs);
-  color: var(--text-error);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-error);
 }

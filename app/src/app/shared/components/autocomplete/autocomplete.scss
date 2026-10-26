@@ -31,19 +31,19 @@
 
   &__list {
     list-style: none;
-    margin: var(--space-1) 0 0 0;
-    padding: var(--space-1) 0;
-    background: var(--surface-raised);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    margin: var(--k-space-1) 0 0 0;
+    padding: var(--k-space-1) 0;
+    background: var(--k-surface-raised);
+    border-radius: var(--k-radius-md);
+    box-shadow: var(--k-shadow-lg);
     overflow-y: auto;
     max-height: 14rem;
   }
 
   &__item {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
+    padding: var(--k-space-2) var(--k-space-3);
+    font-size: var(--k-font-size-sm);
+    color: var(--k-text-primary);
     cursor: pointer;
     transition: background-color var(--duration-fast) var(--easing-default);
     white-space: nowrap;
@@ -52,7 +52,7 @@
 
     &:hover,
     &--active {
-      background: var(--hover-bg);
+      background: var(--k-hover-bg);
     }
   }
 }
