@@ -5,7 +5,10 @@ name: CI - APP (Angular)
 # Gate qualité : Quality Gate "Clean as You Code" (new code only) côté Sonar.
 #   - pull_request → BLOQUANT dans le run (sonar.qualitygate.wait=true) : le check
 #                    apparaît ROUGE sur la PR si le new code régresse.
-#                    Barrière HUMAINE au merge (pas de required check strict).
+#                    Barrière HUMAINE au merge : l'analyse n'est pas un check
+#                    obligatoire, le runner self-hosted ne tournant pas pour une
+#                    PR de fork non approuvée. Les jobs « runner GitHub » le sont
+#                    (règles de develop et main, CONTRIBUTING.md).
 #   - push (merge) → scan de référence non bloquant, alimente le dashboard Sonar.
 #
 # PRÉREQUIS INFRA (hors repo) :
@@ -20,9 +23,6 @@ name: CI - APP (Angular)
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'app/**'
-      - '.github/workflows/ci-app.yml'
   push:
     branches: [main, develop]
     paths:
@@ -39,6 +39,23 @@ permissions:
   contents: read
 
 jobs:
+  # Fichiers de la PR : les jobs suivants sont sautés si elle ne touche pas le
+  # motif (.github/actions/changed). Un job sauté satisfait un check obligatoire.
+  changes:
+    name: Fichiers concernés (APP)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.changed.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: changed
+        uses: ./.github/actions/changed
+        with:
+          pattern: '^(app/|\.github/workflows/ci-app\.yml$|\.github/actions/changed/)'
+
   # Tests sur runner GitHub : c'est le seul job de ce workflow qu'une PR de fork
   # peut executer, le self-hosted ayant le socket Docker (cf. PREREQUIS INFRA
   # ci-dessus). Il ne depend d'aucune infra maison, donc un contributeur externe
@@ -47,6 +64,8 @@ jobs:
   # ci-api.yml et ci-flutter.yml ont chacun leur equivalent depuis KKS-358.
   app-tests:
     name: Tests APP (runner GitHub)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
@@ -62,6 +81,8 @@ jobs:
 
   app-analysis:
     name: Analyse APP (Angular)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: [self-hosted, kbudget-ci]
     timeout-minutes: 15
     container:

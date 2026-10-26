@@ -27,10 +27,6 @@ name: Captures - écrans de référence (Angular)
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'app/**'
-      - 'api/src/main/**'
-      - '.github/workflows/visual.yml'
   workflow_dispatch:
 
 concurrency:
@@ -41,8 +37,27 @@ permissions:
   contents: read
 
 jobs:
+  # Fichiers de la PR : les jobs suivants sont sautés si elle ne touche pas le
+  # motif (.github/actions/changed). Un job sauté satisfait un check obligatoire.
+  changes:
+    name: Fichiers concernés (captures)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.changed.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: changed
+        uses: ./.github/actions/changed
+        with:
+          pattern: '^(app/|api/src/main/|\.github/workflows/visual\.yml$|\.github/actions/changed/)'
+
   api-jar:
     name: Jar de l'API
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -66,7 +81,10 @@ jobs:
 
   screens:
     name: Captures APP (écrans de référence)
-    needs: api-jar
+    # changes en plus d'api-jar : si le jar échoue, ce job tourne quand même et
+    # échoue, au lieu d'être sauté et de compter comme satisfait.
+    needs: [changes, api-jar]
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # Version de l'image = version de @playwright/test dans app/e2e/visual/package.json.
