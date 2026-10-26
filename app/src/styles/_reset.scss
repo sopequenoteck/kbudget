@@ -57,10 +57,10 @@ ol {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-tertiary);
+  background: var(--k-bg-tertiary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-round);
+  background: var(--k-border-strong);
+  border-radius: var(--k-radius-round);
 }

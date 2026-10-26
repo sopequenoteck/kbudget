@@ -1,17 +1,17 @@
 .flr-notice {
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--primary-subtle);
-  border-left: 2px solid var(--color-primary);
-  border-radius: var(--radius-md);
+  padding: var(--k-space-3) var(--k-space-4);
+  background-color: var(--k-primary-subtle);
+  border-left: 2px solid var(--k-color-primary);
+  border-radius: var(--k-radius-md);
 
   p {
     margin: 0;
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    font-size: var(--k-font-size-sm);
+    color: var(--k-text-secondary);
     line-height: 1.5;
   }
 }
 
 .input-error {
-  border-color: var(--text-error);
+  border-color: var(--k-text-error);
 }

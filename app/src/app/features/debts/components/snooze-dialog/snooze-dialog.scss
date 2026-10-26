@@ -10,43 +10,43 @@
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background-color: var(--surface-overlay);
+  background-color: var(--k-surface-overlay);
   animation: fade-in var(--duration-fast) var(--easing-default);
 }
 
 .dialog-panel {
   position: relative;
-  background: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-6);
+  background: var(--k-surface-default);
+  border-radius: var(--k-radius-xl);
+  box-shadow: var(--k-shadow-lg);
+  padding: var(--k-space-6);
   width: min(90vw, 400px);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--k-space-4);
   animation: scale-in var(--duration-fast) var(--easing-default);
 
   h3 {
     margin: 0;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
+    font-size: var(--k-font-size-lg);
+    font-weight: var(--k-font-weight-semibold);
+    color: var(--k-text-primary);
   }
 }
 
 .form-error-banner {
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--bg-error);
-  color: var(--text-error);
-  font-size: var(--font-size-sm);
+  padding: var(--k-space-3);
+  border-radius: var(--k-radius-md);
+  background: var(--k-bg-error);
+  color: var(--k-text-error);
+  font-size: var(--k-font-size-sm);
 }
 
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
+  gap: var(--k-space-3);
+  padding-top: var(--k-space-3);
 }
 
 @keyframes fade-in {

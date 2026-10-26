@@ -1,11 +1,11 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: var(--z-modal);
+  z-index: var(--k-z-modal);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: var(--surface-overlay);
+  background: var(--k-surface-overlay);
   animation: modal-fade-in var(--duration-normal) var(--easing-out);
 
   &.is-closing {
@@ -23,9 +23,9 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  background: var(--surface-default);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  box-shadow: var(--shadow-lg);
+  background: var(--k-surface-default);
+  border-radius: var(--k-radius-xl) var(--k-radius-xl) 0 0;
+  box-shadow: var(--k-shadow-lg);
   animation: modal-slide-up var(--duration-normal) var(--easing-out);
 
   &.is-closing {
@@ -33,7 +33,7 @@
   }
 
   @media (min-width: 768px) {
-    border-radius: var(--radius-xl);
+    border-radius: var(--k-radius-xl);
     animation: modal-scale-in var(--duration-normal) var(--easing-out);
 
     &.is-closing {
@@ -45,15 +45,15 @@
 .modal-header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-5) var(--space-5) var(--space-3);
+  gap: var(--k-space-3);
+  padding: var(--k-space-5) var(--k-space-5) var(--k-space-3);
 }
 
 .modal-title {
   margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  font-size: var(--k-font-size-lg);
+  font-weight: var(--k-font-weight-bold);
+  color: var(--k-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -69,32 +69,32 @@
   height: 32px;
   padding: 0;
   border: none;
-  border-radius: var(--radius-round);
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-  font-size: var(--font-size-xl);
+  border-radius: var(--k-radius-round);
+  background: var(--k-bg-tertiary);
+  color: var(--k-text-secondary);
+  font-size: var(--k-font-size-xl);
   cursor: pointer;
   transition: background var(--duration-normal) var(--easing-default);
 
   &:hover {
-    background: var(--border-default);
+    background: var(--k-border-default);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--k-color-primary);
     outline-offset: 2px;
   }
 }
 
 .modal-body {
   // Bas de feuille au-dessus de la barre de gestes (les formulaires `.bsheet` y vivent).
-  padding: var(--space-3) var(--space-5) calc(var(--space-5) + var(--safe-bottom));
+  padding: var(--k-space-3) var(--k-space-5) calc(var(--k-space-5) + var(--safe-bottom));
   overflow-y: auto;
   flex: 1;
 
   &:first-child {
     // When header is hidden, body is the first child — add top padding
-    padding-top: var(--space-3);
+    padding-top: var(--k-space-3);
   }
 }
 

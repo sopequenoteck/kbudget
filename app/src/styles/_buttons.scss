@@ -3,13 +3,13 @@
 // =============================================================================
 
 %btn-base {
-  padding: var(--space-3) var(--space-5);
+  padding: var(--k-space-3) var(--k-space-5);
   border: 1px solid transparent;
-  border-radius: var(--radius-xl);
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-normal);
+  border-radius: var(--k-radius-xl);
+  font-family: var(--k-font-family);
+  font-size: var(--k-font-size-base);
+  font-weight: var(--k-font-weight-semibold);
+  line-height: var(--k-line-height-normal);
   cursor: pointer;
   transition:
     background-color var(--duration-normal) var(--easing-default),
@@ -26,30 +26,30 @@
 
 .btn-primary {
   @extend %btn-base;
-  background-color: var(--color-primary);
-  color: var(--color-primary-contrast);
+  background-color: var(--k-color-primary);
+  color: var(--k-color-primary-contrast);
 
   &:hover:not(:disabled) {
-    background-color: var(--color-primary-hover);
-    box-shadow: var(--shadow-sm);
+    background-color: var(--k-color-primary-hover);
+    box-shadow: var(--k-shadow-sm);
   }
 }
 
 .btn-outline {
   @extend %btn-base;
   background-color: transparent;
-  border-color: var(--border-default);
-  color: var(--text-primary);
+  border-color: var(--k-border-default);
+  color: var(--k-text-primary);
 
   &:hover:not(:disabled) {
-    background-color: var(--hover-bg);
+    background-color: var(--k-hover-bg);
   }
 }
 
 .btn-danger {
   @extend %btn-base;
-  background-color: var(--text-error);
-  color: var(--text-inverse);
+  background-color: var(--k-text-error);
+  color: var(--k-text-inverse);
 
   &:hover:not(:disabled) {
     opacity: 0.9;

@@ -17,30 +17,30 @@ import { ThemeService } from '../../core/services/theme';
   styles: `
     :host {
       display: block;
-      background: var(--bg-primary, #0a0a0a);
+      background: var(--k-bg-primary, #0a0a0a);
     }
 
     .lab {
-      padding: var(--space-5);
+      padding: var(--k-space-5);
       padding-bottom: 80px;
       max-width: 480px;
       margin: 0 auto;
     }
 
     .lab__header {
-      margin-bottom: var(--space-8);
+      margin-bottom: var(--k-space-8);
     }
 
     .lab__title {
-      font-size: var(--font-size-xl);
-      font-weight: var(--font-weight-bold);
-      color: var(--text-primary);
+      font-size: var(--k-font-size-xl);
+      font-weight: var(--k-font-weight-bold);
+      color: var(--k-text-primary);
     }
 
     .lab__subtitle {
-      font-size: var(--font-size-xs);
-      color: var(--text-tertiary);
-      margin-top: var(--space-1);
+      font-size: var(--k-font-size-xs);
+      color: var(--k-text-tertiary);
+      margin-top: var(--k-space-1);
     }
   `,
 })

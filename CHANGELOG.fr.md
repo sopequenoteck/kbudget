@@ -18,7 +18,25 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   nommer son contributeur (`contributor`) et la date de sa dernière
   vérification sur un relevé réel (`validatedOn`).
 
+### Changed
+
+- **Application web sur les tokens communs K Design** (KKS-588) : le client
+  web prend désormais ses couleurs, espacements, rayons, ombres et sa
+  typographie dans k-design, le socle visuel commun des applications K.
+  Changements visibles : la police Inter Variable embarquée (l'application web
+  n'en chargeait aucune et retombait sur celle installée sur l'appareil), un
+  texte tertiaire plus lisible (dates, aides, conversions, champs vides), et en
+  thème clair un ambre plus soutenu (#c66e05) avec des libellés sombres sur les
+  boutons pleins, et des couleurs de revenu, dépense, avertissement et
+  information plus soutenues qui passent le contraste WCAG AA. Le thème est
+  posé par `data-theme` sur la page, sombre par défaut.
+
 ### Fixed
+
+- **Fond des fenêtres en thème clair** (KKS-588) : sa couleur était écrite
+  sous une forme invalide, ignorée par les navigateurs ; le thème clair
+  n'assombrissait pas la page derrière les fenêtres et les feuilles du bas.
+  C'est désormais le cas.
 
 - **Mapping CSV manuel : motifs de nettoyage du libellé pour les profils
   d'import personnalisés** (KKS-442) : un relevé importé par mapping manuel

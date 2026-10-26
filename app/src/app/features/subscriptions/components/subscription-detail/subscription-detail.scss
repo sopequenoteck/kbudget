@@ -1,8 +1,8 @@
 :host {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
-  gap: var(--space-5);
+  padding: var(--k-space-4);
+  gap: var(--k-space-5);
 }
 
 // =============================================================================
@@ -10,19 +10,19 @@
 // =============================================================================
 
 .badge-status {
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  border-radius: var(--radius-round);
+  padding: var(--k-space-1) var(--k-space-3);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-semibold);
+  border-radius: var(--k-radius-round);
 
   &--actif {
-    background-color: var(--bg-success);
-    color: var(--text-success);
+    background-color: var(--k-bg-success);
+    color: var(--k-text-success);
   }
 
   &--inactif {
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
+    background-color: var(--k-bg-secondary);
+    color: var(--k-text-secondary);
   }
 }
 
@@ -40,68 +40,68 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: var(--space-1);
+  gap: var(--k-space-2);
+  margin-bottom: var(--k-space-1);
 }
 
 .hero__tags {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--k-space-2);
   flex-wrap: wrap;
 }
 
 .hero__label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .hero__category {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
 }
 
 .hero__date {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
   flex-shrink: 0;
 }
 
 .hero__amount {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-expense);
+  font-size: var(--k-font-size-3xl);
+  font-weight: var(--k-font-weight-bold);
+  color: var(--k-color-expense);
   letter-spacing: -0.02em;
 }
 
 .hero__converted {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
 }
 
 .hero__secondary {
-  font-size: var(--font-size-xs);
-  color: var(--color-expense);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-color-expense);
   opacity: 0.7;
 }
 
 .hero__total {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-semibold);
-  margin-top: var(--space-2);
+  font-size: var(--k-font-size-sm);
+  color: var(--k-text-secondary);
+  font-weight: var(--k-font-weight-semibold);
+  margin-top: var(--k-space-2);
 }
 
 .hero__account {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  gap: var(--k-space-2);
+  margin-top: var(--k-space-1);
+  font-size: var(--k-font-size-sm);
+  color: var(--k-text-secondary);
 }
 
 // =============================================================================
@@ -111,22 +111,22 @@
 .bank-logo {
   width: 20px;
   height: 20px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--k-radius-sm);
   object-fit: contain;
 
   &--sm {
     width: 24px;
     height: 24px;
-    border-radius: var(--radius-md);
+    border-radius: var(--k-radius-md);
     flex-shrink: 0;
   }
 }
 
 .bank-emoji {
-  font-size: var(--font-size-sm);
+  font-size: var(--k-font-size-sm);
 
   &--sm {
-    font-size: var(--font-size-base);
+    font-size: var(--k-font-size-base);
     flex-shrink: 0;
   }
 }
@@ -138,7 +138,7 @@
 .detail-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--k-space-2);
 
   &__spacer {
     flex: 1;
@@ -148,14 +148,14 @@
 .action-btn {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-round);
+  gap: var(--k-space-1);
+  padding: var(--k-space-2) var(--k-space-3);
+  border: 1px solid var(--k-border-default);
+  border-radius: var(--k-radius-round);
   background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  color: var(--k-text-secondary);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-medium);
   cursor: pointer;
   transition: all var(--duration-fast);
   white-space: nowrap;
@@ -165,32 +165,32 @@
   }
 
   &:hover {
-    background: var(--hover-bg);
-    color: var(--text-primary);
+    background: var(--k-hover-bg);
+    color: var(--k-text-primary);
   }
 
   &--primary {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--color-primary-contrast);
+    background-color: var(--k-color-primary);
+    border-color: var(--k-color-primary);
+    color: var(--k-color-primary-contrast);
 
     &:hover {
       opacity: 0.9;
-      color: var(--color-primary-contrast);
+      color: var(--k-color-primary-contrast);
     }
   }
 
   &--danger {
-    color: var(--text-error);
+    color: var(--k-text-error);
     border-color: transparent;
 
     &:hover {
-      background: var(--bg-error);
+      background: var(--k-bg-error);
     }
   }
 
   &--icon-only {
-    padding: var(--space-2);
+    padding: var(--k-space-2);
   }
 
   &:disabled {
@@ -206,7 +206,7 @@
 .detail-payments {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--k-space-3);
 }
 
 .payments-header {
@@ -215,79 +215,79 @@
   justify-content: space-between;
 
   h2 {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-secondary);
+    font-size: var(--k-font-size-base);
+    font-weight: var(--k-font-weight-semibold);
+    color: var(--k-text-secondary);
     margin: 0;
   }
 }
 
 .payments-count {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-text-tertiary);
 }
 
 .payments-empty {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  color: var(--k-text-secondary);
   text-align: center;
-  padding: var(--space-5) var(--space-4);
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  padding: var(--k-space-5) var(--k-space-4);
+  background-color: var(--k-surface-default);
+  border-radius: var(--k-radius-xl);
+  box-shadow: var(--k-shadow-sm);
   margin: 0;
 }
 
 .payments-loading {
   display: flex;
   justify-content: center;
-  padding: var(--space-5) var(--space-4);
+  padding: var(--k-space-5) var(--k-space-4);
 }
 
 .payments-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--k-surface-default);
+  border-radius: var(--k-radius-xl);
+  box-shadow: var(--k-shadow-sm);
   overflow: hidden;
 }
 
 .payment-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  gap: var(--k-space-3);
+  padding: var(--k-space-3) var(--k-space-4);
 
   &:not(:last-child) {
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--k-border-default);
   }
 }
 
 .payment-info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--k-space-1);
   flex: 1;
 }
 
 .payment-account {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-text-secondary);
 }
 
 .payment-date {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
 }
 
 .payment-amount {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-text-secondary);
 }
 
 // =============================================================================
@@ -300,22 +300,22 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-10) var(--space-4);
-  gap: var(--space-4);
-  color: var(--text-secondary);
+  padding: var(--k-space-10) var(--k-space-4);
+  gap: var(--k-space-4);
+  color: var(--k-text-secondary);
 }
 
 .btn-outline {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  padding: var(--k-space-2) var(--k-space-4);
+  border: 1px solid var(--k-border-default);
+  border-radius: var(--k-radius-md);
   background: none;
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
+  color: var(--k-text-primary);
+  font-size: var(--k-font-size-sm);
   cursor: pointer;
 
   &:hover {
-    background: var(--hover-bg);
+    background: var(--k-hover-bg);
   }
 }
 

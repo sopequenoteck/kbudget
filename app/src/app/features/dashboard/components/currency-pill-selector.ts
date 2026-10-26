@@ -24,26 +24,26 @@ import { CurrencyService } from '../../../core/services/currency';
     `
       .pill-container {
         display: flex;
-        gap: var(--space-1);
+        gap: var(--k-space-1);
         overflow-x: auto;
       }
       .pill {
-        padding: var(--space-1) var(--space-3);
-        border-radius: var(--radius-round);
-        border: 1px solid var(--border-default);
+        padding: var(--k-space-1) var(--k-space-3);
+        border-radius: var(--k-radius-round);
+        border: 1px solid var(--k-border-default);
         cursor: pointer;
-        font-size: var(--font-size-xs);
-        font-weight: var(--font-weight-medium);
+        font-size: var(--k-font-size-xs);
+        font-weight: var(--k-font-weight-medium);
         background: none;
-        color: var(--text-secondary);
+        color: var(--k-text-secondary);
         white-space: nowrap;
         transition: all var(--duration-fast);
       }
       .pill.active {
-        background-color: var(--color-primary);
-        border-color: var(--color-primary);
-        color: var(--color-primary-contrast);
-        font-weight: var(--font-weight-semibold);
+        background-color: var(--k-color-primary);
+        border-color: var(--k-color-primary);
+        color: var(--k-color-primary-contrast);
+        font-weight: var(--k-font-weight-semibold);
       }
     `,
   ],

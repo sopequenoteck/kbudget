@@ -108,16 +108,16 @@ import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 var(--space-4);
-      margin-bottom: var(--space-2);
+      padding: 0 var(--k-space-4);
+      margin-bottom: var(--k-space-2);
     }
 
     .settings-section__title {
-      font-size: var(--font-size-xs);
-      font-weight: var(--font-weight-semibold);
+      font-size: var(--k-font-size-xs);
+      font-weight: var(--k-font-weight-semibold);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--text-tertiary);
+      color: var(--k-text-tertiary);
     }
 
     .add-btn {
@@ -127,17 +127,17 @@ import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
       width: 28px;
       height: 28px;
       padding: 0;
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-round);
+      border: 1px solid var(--k-border-default);
+      border-radius: var(--k-radius-round);
       background: transparent;
-      color: var(--text-tertiary);
+      color: var(--k-text-tertiary);
       cursor: pointer;
-      &:active { color: var(--text-primary); background-color: var(--hover-bg); }
+      &:active { color: var(--k-text-primary); background-color: var(--k-hover-bg); }
     }
 
     .section-content {
-      background: var(--surface-default);
-      border-radius: var(--radius-xl);
+      background: var(--k-surface-default);
+      border-radius: var(--k-radius-xl);
       overflow: hidden;
     }
 
@@ -146,70 +146,70 @@ import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
     .currency-item {
       display: flex;
       align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-3) var(--space-4);
-      border-bottom: 1px solid var(--border-default);
+      gap: var(--k-space-3);
+      padding: var(--k-space-3) var(--k-space-4);
+      border-bottom: 1px solid var(--k-border-default);
 
-      &__handle { color: var(--text-tertiary); cursor: grab; display: flex; align-items: center; }
-      &__symbol { font-weight: var(--font-weight-semibold); min-width: 40px; color: var(--text-secondary); font-size: var(--font-size-sm); }
-      &__name { flex: 1; font-size: var(--font-size-sm); color: var(--text-tertiary); }
+      &__handle { color: var(--k-text-tertiary); cursor: grab; display: flex; align-items: center; }
+      &__symbol { font-weight: var(--k-font-weight-semibold); min-width: 40px; color: var(--k-text-secondary); font-size: var(--k-font-size-sm); }
+      &__name { flex: 1; font-size: var(--k-font-size-sm); color: var(--k-text-tertiary); }
       &__badge {
-        font-size: var(--font-size-2xs); color: var(--text-tertiary); background: transparent;
-        border: 1px solid var(--border-default); padding: var(--space-1) var(--space-2);
-        border-radius: var(--radius-round); font-weight: var(--font-weight-medium);
+        font-size: var(--k-font-size-2xs); color: var(--k-text-tertiary); background: transparent;
+        border: 1px solid var(--k-border-default); padding: var(--k-space-1) var(--k-space-2);
+        border-radius: var(--k-radius-round); font-weight: var(--k-font-weight-medium);
       }
     }
 
     .btn-action {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border: none; border-radius: var(--radius-round);
-      background: transparent; color: var(--text-tertiary); cursor: pointer;
+      width: 32px; height: 32px; border: none; border-radius: var(--k-radius-round);
+      background: transparent; color: var(--k-text-tertiary); cursor: pointer;
 
-      &--danger { color: var(--color-expense); }
-      &:active { background-color: var(--hover-bg); }
+      &--danger { color: var(--k-color-expense); }
+      &:active { background-color: var(--k-hover-bg); }
     }
 
     .btn {
       display: inline-flex; align-items: center; gap: var(--space-1-5);
-      padding: var(--space-1) var(--space-3); border-radius: var(--radius-round);
-      font-size: var(--font-size-xs); font-weight: var(--font-weight-medium);
+      padding: var(--k-space-1) var(--k-space-3); border-radius: var(--k-radius-round);
+      font-size: var(--k-font-size-xs); font-weight: var(--k-font-weight-medium);
       font-family: inherit; cursor: pointer; border: none;
 
-      &--ghost { background: transparent; border: 1px solid var(--border-default); color: var(--text-secondary); }
-      &--danger { background-color: var(--color-expense); color: white; }
+      &--ghost { background: transparent; border: 1px solid var(--k-border-default); color: var(--k-text-secondary); }
+      &--danger { background-color: var(--k-color-expense); color: white; }
     }
 
     .dialog-overlay {
-      position: fixed; inset: 0; background: var(--surface-overlay);
-      display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4);
+      position: fixed; inset: 0; background: var(--k-surface-overlay);
+      display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--k-space-4);
     }
     .dialog {
-      background: var(--surface-default); border-radius: var(--radius-xl);
-      padding: var(--space-5); max-width: 400px; width: 100%;
+      background: var(--k-surface-default); border-radius: var(--k-radius-xl);
+      padding: var(--k-space-5); max-width: 400px; width: 100%;
 
       &__title {
-        font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold);
-        color: var(--text-primary); margin-bottom: var(--space-3);
+        font-size: var(--k-font-size-sm); font-weight: var(--k-font-weight-semibold);
+        color: var(--k-text-primary); margin-bottom: var(--k-space-3);
       }
-      &__message { font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--space-4); line-height: 1.5; }
-      &__actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
+      &__message { font-size: var(--k-font-size-sm); color: var(--k-text-secondary); margin-bottom: var(--k-space-4); line-height: 1.5; }
+      &__actions { display: flex; justify-content: flex-end; gap: var(--k-space-2); }
       &__option {
-        display: flex; align-items: center; gap: var(--space-3);
-        width: 100%; padding: var(--space-3) 0; border: none; border-bottom: 1px solid var(--border-default);
-        background: transparent; color: var(--text-secondary); font-size: var(--font-size-sm);
+        display: flex; align-items: center; gap: var(--k-space-3);
+        width: 100%; padding: var(--k-space-3) 0; border: none; border-bottom: 1px solid var(--k-border-default);
+        background: transparent; color: var(--k-text-secondary); font-size: var(--k-font-size-sm);
         font-family: inherit; cursor: pointer; text-align: left;
         &:last-child { border-bottom: none; }
-        &:active { color: var(--text-primary); }
+        &:active { color: var(--k-text-primary); }
       }
       &__option-symbol {
-        font-weight: var(--font-weight-semibold); min-width: 40px; color: var(--text-tertiary);
+        font-weight: var(--k-font-weight-semibold); min-width: 40px; color: var(--k-text-tertiary);
       }
     }
 
     .cdk-drag-preview {
-      display: flex; align-items: center; gap: var(--space-3);
-      padding: var(--space-3) var(--space-4); background-color: var(--surface-raised);
-      border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); font-size: var(--font-size-sm);
+      display: flex; align-items: center; gap: var(--k-space-3);
+      padding: var(--k-space-3) var(--k-space-4); background-color: var(--k-surface-raised);
+      border-radius: var(--k-radius-lg); box-shadow: var(--k-shadow-lg); font-size: var(--k-font-size-sm);
     }
     .cdk-drag-placeholder { opacity: 0.3; }
   `],

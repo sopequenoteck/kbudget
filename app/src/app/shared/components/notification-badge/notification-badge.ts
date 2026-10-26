@@ -27,12 +27,12 @@ import { NotificationService } from '../../../core/services/notification';
       border: none;
       cursor: pointer;
       padding: 6px;
-      border-radius: var(--radius-md, 8px);
-      color: var(--text-primary);
+      border-radius: var(--k-radius-md, 8px);
+      color: var(--k-text-primary);
       transition: background-color 0.15s;
     }
     .notification-badge:hover {
-      background-color: var(--hover-bg);
+      background-color: var(--k-hover-bg);
     }
     .badge {
       position: absolute;
@@ -42,9 +42,9 @@ import { NotificationService } from '../../../core/services/notification';
       height: 18px;
       padding: 0 5px;
       border-radius: 9px;
-      background-color: var(--text-error);
+      background-color: var(--k-text-error);
       color: white;
-      font-size: var(--font-size-2xs);
+      font-size: var(--k-font-size-2xs);
       font-weight: 600;
       display: flex;
       align-items: center;

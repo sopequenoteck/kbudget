@@ -17,7 +17,7 @@ import { LanguageService } from '../../../core/services/language';
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: var(--space-4);
+      gap: var(--k-space-4);
 
       &__btn {
         display: flex;
@@ -28,26 +28,26 @@ import { LanguageService } from '../../../core/services/language';
         min-width: 44px;
         padding: 0;
         border: none;
-        border-radius: var(--radius-round);
-        background-color: var(--surface-default);
-        color: var(--text-primary);
-        font-size: var(--font-size-base);
-        box-shadow: var(--shadow-sm);
+        border-radius: var(--k-radius-round);
+        background-color: var(--k-surface-default);
+        color: var(--k-text-primary);
+        font-size: var(--k-font-size-base);
+        box-shadow: var(--k-shadow-sm);
         cursor: pointer;
         transition:
           background-color var(--duration-normal) var(--easing-default),
           box-shadow var(--duration-normal) var(--easing-default);
 
         &:hover {
-          background-color: var(--hover-bg);
-          box-shadow: var(--shadow-md);
+          background-color: var(--k-hover-bg);
+          box-shadow: var(--k-shadow-md);
         }
       }
 
       &__label {
-        font-size: var(--font-size-lg);
-        font-weight: var(--font-weight-semibold);
-        color: var(--text-primary);
+        font-size: var(--k-font-size-lg);
+        font-weight: var(--k-font-weight-semibold);
+        color: var(--k-text-primary);
         text-transform: capitalize;
         min-width: 160px;
         text-align: center;

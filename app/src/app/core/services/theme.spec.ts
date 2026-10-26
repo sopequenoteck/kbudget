@@ -9,8 +9,8 @@ const LIGHT_SURFACE = '#f5f5f5';
 function installThemeTokens(): HTMLStyleElement {
   const style = document.createElement('style');
   style.textContent = `
-    :root, .theme-light { --surface-raised: ${LIGHT_SURFACE}; }
-    .theme-dark { --surface-raised: ${DARK_SURFACE}; }
+    :root, [data-theme='light'] { --k-surface-raised: ${LIGHT_SURFACE}; }
+    [data-theme='dark'] { --k-surface-raised: ${DARK_SURFACE}; }
   `;
   document.head.appendChild(style);
   return style;
@@ -59,7 +59,6 @@ describe('ThemeService — theme-color', () => {
   afterEach(() => {
     tokens.remove();
     meta.remove();
-    document.documentElement.classList.remove('theme-light', 'theme-dark');
     document.documentElement.removeAttribute('data-theme');
     vi.unstubAllGlobals();
   });

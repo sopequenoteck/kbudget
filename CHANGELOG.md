@@ -17,7 +17,23 @@ This project follows [Semantic Versioning](https://semver.org/).
   logs. Profiles can also name their `contributor` and the date they were last
   checked on a real statement (`validatedOn`).
 
+### Changed
+
+- **Web app on the shared K Design tokens** (KKS-588): the web client now takes
+  its colours, spacing, radii, shadows and type from k-design, the visual base
+  shared by the K apps. Visible changes: the embedded Inter Variable typeface
+  (the web app loaded none before and fell back to whatever was installed),
+  more readable tertiary text (dates, hints, conversions, placeholders), and in
+  the light theme a deeper amber (#c66e05) with dark labels on solid buttons
+  and stronger income, expense, warning and info colours that now pass WCAG AA
+  contrast. The theme is set by `data-theme` on the page and is dark by
+  default.
+
 ### Fixed
+
+- **Light-theme modal backdrop** (KKS-588): the backdrop colour was written in
+  an invalid form and ignored by browsers, so the light theme did not dim the
+  page behind dialogs and bottom sheets. It now does.
 
 - **Manual CSV mapping: label clean-up patterns for custom import profiles**
   (KKS-442): a statement imported through the manual mapping kept noise such as

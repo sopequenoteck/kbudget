@@ -3,19 +3,19 @@
 }
 
 .result__balance {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--k-space-4);
 }
 
 .result__verdict {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  column-gap: var(--space-2);
+  column-gap: var(--k-space-2);
   margin: 0;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--k-font-size-base);
+  font-weight: var(--k-font-weight-semibold);
   // Verdict en texte neutre : l'icone seule distingue l'etat ; seul le montant de l'ecart garde la couleur de son signe.
-  color: var(--text-primary);
+  color: var(--k-text-primary);
 
   ng-icon {
     flex-shrink: 0;
@@ -25,22 +25,22 @@
 // Valeur de l'ecart sous le libelle, alignee sur lui (motif libelle + valeur du hero).
 .result__gap-amount {
   grid-column: 2;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--k-font-size-lg);
+  font-weight: var(--k-font-weight-bold);
 }
 
 .result__gap-amount--income {
-  color: var(--color-income);
+  color: var(--k-color-income);
 }
 
 .result__gap-amount--expense {
-  color: var(--color-expense);
+  color: var(--k-color-expense);
 }
 
 .result__hint {
-  margin: var(--space-1) 0 var(--space-2);
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  margin: var(--k-space-1) 0 var(--k-space-2);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
 }
 
 .result__row {
@@ -52,15 +52,15 @@
 }
 
 .result__amount--income {
-  color: var(--color-income);
+  color: var(--k-color-income);
 }
 
 .result__amount--expense {
-  color: var(--color-expense);
+  color: var(--k-color-expense);
 }
 
 .result__actions {
-  margin-top: var(--space-6);
+  margin-top: var(--k-space-6);
 }
 
 .result__done {

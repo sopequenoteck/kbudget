@@ -6,26 +6,26 @@ input:not([type='checkbox']):not([type='radio']):not(.input-naked),
 textarea,
 select {
   width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
+  padding: var(--k-space-3) var(--k-space-4);
+  border: 1px solid var(--k-border-default);
+  border-radius: var(--k-radius-xl);
+  background-color: var(--k-bg-secondary);
+  color: var(--k-text-primary);
+  font-family: var(--k-font-family);
+  font-size: var(--k-font-size-base);
+  line-height: var(--k-line-height-normal);
   transition:
     border-color var(--duration-normal) var(--easing-default),
     box-shadow var(--duration-normal) var(--easing-default);
 
   &::placeholder {
-    color: var(--text-tertiary);
+    color: var(--k-text-tertiary);
   }
 
   &:focus {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 4px var(--color-primary-light);
+    border-color: var(--k-color-primary);
+    box-shadow: 0 0 0 4px var(--k-color-primary-light);
   }
 
   &:disabled {
@@ -34,11 +34,11 @@ select {
   }
 
   &.input-error {
-    border-color: var(--text-error);
+    border-color: var(--k-text-error);
   }
 
   &.input-error:focus {
-    box-shadow: 0 0 0 4px var(--bg-error);
+    box-shadow: 0 0 0 4px var(--k-bg-error);
   }
 }
 
@@ -50,7 +50,7 @@ textarea {
 
 input[type='color'] {
   height: 44px;
-  padding: var(--space-1);
+  padding: var(--k-space-1);
   cursor: pointer;
 
   &::-webkit-color-swatch-wrapper {
@@ -59,12 +59,12 @@ input[type='color'] {
 
   &::-webkit-color-swatch {
     border: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--k-radius-lg);
   }
 
   &::-moz-color-swatch {
     border: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--k-radius-lg);
   }
 }
 
@@ -85,7 +85,7 @@ textarea {
 input[type='checkbox'],
 input[type='radio'] {
   width: auto;
-  accent-color: var(--color-primary);
+  accent-color: var(--k-color-primary);
   cursor: pointer;
 }
 
@@ -96,7 +96,7 @@ input[type='radio'] {
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: var(--space-5);
+  margin-top: var(--k-space-5);
 }
 
 // =============================================================================
@@ -107,5 +107,5 @@ input[type='radio'] {
 .form-field__input-wrapper--icon
   input:not([type='checkbox']):not([type='radio']):not(.input-naked),
 .form-field__input-wrapper--icon select {
-  padding-left: var(--space-9);
+  padding-left: var(--k-space-9);
 }

@@ -7,39 +7,39 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-10) var(--space-4);
-  gap: var(--space-2);
+  padding: var(--k-space-10) var(--k-space-4);
+  gap: var(--k-space-2);
 }
 
 .empty-state__icon {
-  color: var(--text-tertiary);
+  color: var(--k-text-tertiary);
   opacity: 0.5;
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--k-space-1);
 }
 
 .empty-state__message {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  color: var(--k-text-secondary);
   text-align: center;
   margin: 0;
 }
 
 .empty-state__hint {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
   text-align: center;
   margin: 0;
 }
 
 .empty-state__cta {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-color-primary);
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-top: var(--space-1);
+  margin-top: var(--k-space-1);
 
   &:hover {
     text-decoration: underline;
