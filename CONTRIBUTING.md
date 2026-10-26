@@ -49,13 +49,14 @@ the build fails early with instructions instead.
 | Stack | Command |
 |-------|---------|
 | API | `cd api && mvn verify` |
-| Angular | `cd app && npm test && npx ng lint` |
+| Angular | `cd app && npm test && npx ng lint && npm run lint:styles` |
 | Flutter | `cd flutter && flutter analyze && flutter test` |
 
 CI replays all three. Three jobs — **Tests API**, **Tests APP** and **Tests
 Flutter**, each suffixed *(runner GitHub)* — run on GitHub's own infrastructure,
 so a pull request opened from a fork gets a real result without waiting for
-anyone. A fourth, **En-tetes de licence MPL**, runs there too.
+anyone. A fourth, **En-tetes de licence MPL**, runs there too, and so does **Styles APP
+(tokens uniquement)**, which replays `npm run lint:styles`.
 
 The Sonar analysis jobs are the exception: the SonarQube server sits on a
 private network, so they run on a self-hosted runner that never executes

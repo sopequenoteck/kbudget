@@ -89,7 +89,7 @@
   min-width: 24px;
   max-width: 100%;
   text-align: left;
-  font-size: 30px;
+  font-size: var(--k-font-size-3xl);
   font-weight: var(--k-font-weight-bold);
   letter-spacing: -0.5px;
   color: var(--k-text-primary);
@@ -109,8 +109,10 @@
     caret-color: var(--k-color-expense);
   }
 
-  // Tailles
+  // Tailles : le montant rétrécit quand il s'allonge (30 → 26 → 22 px), ajustement de saisie hors échelle typographique
+  /* stylelint-disable-next-line scale-unlimited/declaration-strict-value -- ajustement de saisie hors échelle */
   &--md { font-size: 26px; }
+  /* stylelint-disable-next-line scale-unlimited/declaration-strict-value -- ajustement de saisie hors échelle */
   &--sm { font-size: 22px; }
 
   // Alignement
@@ -127,7 +129,7 @@
 }
 
 .bsheet__currency {
-  font-size: 18px;
+  font-size: var(--k-font-size-lg);
   font-weight: var(--k-font-weight-medium);
   color: var(--k-text-tertiary);
   opacity: 0.4;
@@ -135,7 +137,7 @@
 
   &--expense { color: var(--k-color-expense); opacity: 0.5; }
   &--income { color: var(--k-color-income); opacity: 0.5; }
-  &--sm { font-size: 14px; }
+  &--sm { font-size: var(--k-font-size-sm); }
 }
 
 // Applique les dimensions au container — fonctionne aussi bien sur un <input>
@@ -240,13 +242,13 @@ input.bsheet__libelle.ng-invalid.ng-touched,
   border: 1px solid var(--k-border-default);
   border-radius: var(--k-radius-round);
   color: var(--k-text-tertiary);
-  font-size: 10px;
+  font-size: var(--k-font-size-2xs);
   font-weight: var(--k-font-weight-medium);
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--duration-fast) var(--easing-default);
 
-  ::ng-deep ng-icon { min-width: 14px; font-size: 14px; }
+  ::ng-deep ng-icon { min-width: 14px; font-size: var(--k-font-size-sm); }
   &:active { transform: scale(0.96); }
   &.active { color: var(--k-color-primary); border-color: var(--k-color-primary); }
 

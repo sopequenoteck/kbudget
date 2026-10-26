@@ -11,6 +11,9 @@
 /e2e/visual/test-results
 /e2e/visual/playwright-report
 
+# Journaux de postcss-angular (syntaxe Stylelint des styles inline .ts)
+/.postcss-angular
+
 # Node
 /node_modules
 npm-debug.log

@@ -69,7 +69,7 @@
 .form-input:focus { outline: none; border-color: var(--k-color-primary); }
 .form-input::placeholder { color: var(--k-text-tertiary, var(--k-text-secondary)); }
 
-.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: var(--k-space-2); padding: var(--k-space-3) var(--k-space-5); border: none; border-radius: var(--k-radius-xl); background: var(--k-color-primary); color: var(--k-text-inverse); font-size: var(--k-font-size-base); font-weight: var(--k-font-weight-semibold); }
+.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: var(--k-space-2); padding: var(--k-space-3) var(--k-space-5); border: none; border-radius: var(--k-radius-xl); background: var(--k-color-primary); color: var(--k-color-primary-contrast); font-size: var(--k-font-size-base); font-weight: var(--k-font-weight-semibold); }
 .btn-primary:hover:not(:disabled) { opacity: .9; }
 .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
 .btn-primary--sm { padding: var(--k-space-2) var(--k-space-4); font-size: var(--k-font-size-sm); border-radius: var(--k-radius-lg); }

@@ -5,6 +5,7 @@
   .emoji-trigger {
     width: var(--k-space-12);
     height: var(--k-space-12);
+    /* stylelint-disable-next-line scale-unlimited/declaration-strict-value -- taille de glyphe d'emoji, hors échelle typographique */
     font-size: 2rem;
     display: flex;
     align-items: center;
@@ -20,9 +21,9 @@
       box-shadow var(--duration-fast) var(--easing-default);
 
     &:focus-visible {
-      outline: none;
+      outline: 2px solid var(--k-color-primary);
+      outline-offset: 2px;
       border-color: var(--k-color-primary);
-      box-shadow: 0 0 0 4px var(--k-color-primary-light);
     }
 
     &:hover {

@@ -217,7 +217,7 @@
 
   &--danger {
     background-color: var(--k-color-expense);
-    color: #fff;
+    color: var(--k-text-inverse);
 
     &:active:not(:disabled) {
       opacity: 0.9;

@@ -23,9 +23,9 @@ select {
   }
 
   &:focus {
-    outline: none;
+    outline: 2px solid var(--k-color-primary);
+    outline-offset: 2px;
     border-color: var(--k-color-primary);
-    box-shadow: 0 0 0 4px var(--k-color-primary-light);
   }
 
   &:disabled {
@@ -38,7 +38,7 @@ select {
   }
 
   &.input-error:focus {
-    box-shadow: 0 0 0 4px var(--k-bg-error);
+    outline-color: var(--k-text-error);
   }
 }
 

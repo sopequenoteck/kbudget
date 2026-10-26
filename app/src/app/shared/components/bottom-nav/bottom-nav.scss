@@ -38,6 +38,7 @@
 }
 
 .bottom-nav-icon {
+  /* stylelint-disable-next-line scale-unlimited/declaration-strict-value -- taille de glyphe d'icône, hors échelle typographique */
   font-size: 1.625rem;
   line-height: 1;
   position: relative;
@@ -56,5 +57,5 @@
 
 // Police réduite pour 6+ items
 :host([data-item-count="6"]) .bottom-nav-label {
-  font-size: 0.625rem;
+  font-size: var(--k-font-size-2xs);
 }

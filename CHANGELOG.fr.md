@@ -20,6 +20,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- **Libellés lisibles sur les boutons rouges et ambre, focus standard sur les
+  champs** (KKS-590) : en thème sombre, les boutons de suppression et le badge
+  de notifications portent un libellé sombre sur le rouge (le blanc donnait
+  3,1:1, sous le seuil WCAG AA) ; en thème clair, le jour sélectionné du
+  calendrier, le toast d'information et quelques boutons primaires prennent le
+  libellé sombre déjà employé sur les boutons ambre pleins (le blanc donnait
+  3,7:1). Un champ qui a le focus affiche le contour ambre de 2px employé
+  partout ailleurs, au lieu d'un halo à peine visible.
+
 - **Application web sur les tokens communs K Design** (KKS-588) : le client
   web prend désormais ses couleurs, espacements, rayons, ombres et sa
   typographie dans k-design, le socle visuel commun des applications K.

@@ -19,6 +19,14 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Readable labels on red and amber buttons, standard focus ring on fields**
+  (KKS-590): in the dark theme, delete buttons and the notification badge now
+  use a dark label on the red background (white gave 3.1:1, below WCAG AA);
+  in the light theme, the selected day of the date picker, the info toast and
+  a few primary buttons get the dark label already used on solid amber
+  buttons (white gave 3.7:1). Focused form fields show the 2px amber outline
+  used everywhere else instead of a faint halo.
+
 - **Web app on the shared K Design tokens** (KKS-588): the web client now takes
   its colours, spacing, radii, shadows and type from k-design, the visual base
   shared by the K apps. Visible changes: the embedded Inter Variable typeface

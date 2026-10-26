@@ -17,7 +17,7 @@ import { ThemeService } from '../../core/services/theme';
   styles: `
     :host {
       display: block;
-      background: var(--k-bg-primary, #0a0a0a);
+      background: var(--k-bg-primary);
     }
 
     .lab {

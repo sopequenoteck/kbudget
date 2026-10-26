@@ -125,13 +125,13 @@
   // Selected day (new selection)
   &--selected {
     background: var(--k-color-primary);
-    color: var(--k-text-inverse);
+    color: var(--k-color-primary-contrast);
     font-weight: var(--k-font-weight-semibold);
     border: none;
 
     &:hover {
       background: var(--k-color-primary-hover);
-      color: var(--k-text-inverse);
+      color: var(--k-color-primary-contrast);
     }
   }
 
