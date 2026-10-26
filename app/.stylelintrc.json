@@ -1,0 +1,67 @@
+{
+  "customSyntax": "postcss-scss",
+  "plugins": [
+    "stylelint-scss",
+    "stylelint-declaration-strict-value"
+  ],
+  "ignoreFiles": [
+    "src/styles/k/**",
+    "**/*.spec.ts"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts"
+      ],
+      "customSyntax": "postcss-angular"
+    }
+  ],
+  "rules": {
+    "color-no-hex": true,
+    "color-named": "never",
+    "function-disallowed-list": [
+      "rgb",
+      "rgba",
+      "hsl",
+      "hsla"
+    ],
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "color",
+        "background-color",
+        "border-color",
+        "fill",
+        "stroke",
+        "border-radius",
+        "box-shadow",
+        "font-size",
+        "font-weight"
+      ],
+      {
+        "ignoreValues": {
+          "": [
+            "transparent",
+            "inherit",
+            "currentColor",
+            "currentcolor",
+            "none",
+            "0",
+            "initial",
+            "unset"
+          ],
+          "border-radius": [
+            "transparent",
+            "inherit",
+            "currentColor",
+            "currentcolor",
+            "none",
+            "0",
+            "initial",
+            "unset",
+            "50%"
+          ]
+        }
+      }
+    ]
+  }
+}

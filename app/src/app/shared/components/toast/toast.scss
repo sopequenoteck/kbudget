@@ -17,8 +17,8 @@
   padding: var(--k-space-3, 12px) var(--k-space-4, 16px);
   border-radius: var(--k-radius-md, 8px);
   box-shadow: var(--k-shadow-md);
-  font-size: var(--font-sm, 14px);
-  font-weight: 500;
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
   pointer-events: auto;
   animation: toast-slide-in 0.25s ease-out;
 
@@ -34,14 +34,14 @@
 
   &--info {
     background-color: var(--k-color-primary);
-    color: var(--k-text-inverse);
+    color: var(--k-color-primary-contrast);
   }
 }
 
 .toast-icon {
   flex-shrink: 0;
-  font-size: var(--font-base, 16px);
-  font-weight: 700;
+  font-size: var(--k-font-size-base);
+  font-weight: var(--k-font-weight-bold);
   line-height: 1;
 }
 
@@ -60,7 +60,7 @@
   opacity: 0.8;
   padding: 0;
   line-height: 1;
-  font-size: var(--font-sm, 14px);
+  font-size: var(--k-font-size-sm);
   transition: opacity 0.15s;
 
   &:hover {

@@ -17,7 +17,7 @@
 }
 
 .account-form__preview-emoji {
-  font-size: 1.5rem;
+  font-size: var(--k-font-size-2xl);
   line-height: 1;
 }
 
@@ -101,7 +101,7 @@
   }
 
   &__emoji {
-    font-size: 1.25rem;
+    font-size: var(--k-font-size-xl);
     line-height: 1;
   }
 

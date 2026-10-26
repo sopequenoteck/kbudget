@@ -1,4 +1,4 @@
-/* K Design v0.2.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer. */
+/* K Design v0.3.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer. */
 @font-face { font-family: 'Inter Variable'; src: url('./fonts/inter-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
 :root, [data-theme="dark"] {
   color-scheme: dark;
@@ -33,6 +33,7 @@
   --k-surface-raised: var(--k-gray-700);
   --k-surface-background: #00000000;
   --k-surface-overlay: rgba(0, 0, 0, 0.6);
+  --k-switch-thumb: #ffffff;
   --k-text-primary: var(--k-gray-50);
   --k-text-secondary: var(--k-gray-400);
   --k-text-tertiary: #8a8a8a;

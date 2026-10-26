@@ -359,7 +359,7 @@ const FIXED_PARITY_RATES: Record<string, number> = {
 
         &--primary {
           background-color: var(--k-color-primary);
-          color: var(--k-text-inverse);
+          color: var(--k-color-primary-contrast);
 
           &:hover:not(:disabled) {
             opacity: 0.85;
@@ -379,7 +379,7 @@ const FIXED_PARITY_RATES: Record<string, number> = {
 
         &--danger {
           background-color: var(--k-color-expense);
-          color: white;
+          color: var(--k-text-inverse);
 
           &:hover:not(:disabled) {
             opacity: 0.85;
@@ -404,7 +404,6 @@ const FIXED_PARITY_RATES: Record<string, number> = {
         padding: var(--k-space-6);
         max-width: 400px;
         width: 100%;
-        box-shadow: var(--shadow-xl);
 
         &__message {
           font-size: var(--k-font-size-sm);

@@ -170,13 +170,13 @@ import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
     }
 
     .btn {
-      display: inline-flex; align-items: center; gap: var(--space-1-5);
+      display: inline-flex; align-items: center; gap: var(--k-space-0);
       padding: var(--k-space-1) var(--k-space-3); border-radius: var(--k-radius-round);
       font-size: var(--k-font-size-xs); font-weight: var(--k-font-weight-medium);
       font-family: inherit; cursor: pointer; border: none;
 
       &--ghost { background: transparent; border: 1px solid var(--k-border-default); color: var(--k-text-secondary); }
-      &--danger { background-color: var(--k-color-expense); color: white; }
+      &--danger { background-color: var(--k-color-expense); color: var(--k-text-inverse); }
     }
 
     .dialog-overlay {
