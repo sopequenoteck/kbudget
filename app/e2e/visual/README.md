@@ -44,7 +44,13 @@ Compte : `dev@local.test` / `dev123` (jeu de données de dev). `KB_BASE_URL` cha
 
 Le workflow `.github/workflows/visual.yml` rejoue les captures à chaque PR qui touche `app/` ou `api/src/main/`, avec la même pile (PostgreSQL restauré depuis `seed.sql`, API en profil dev, `ng serve`), dans l'image officielle `mcr.microsoft.com/playwright:v1.63.0-noble`. En cas d'écart, le job *Captures APP* échoue et l'artefact `captures-ecart` contient les captures obtenues et les diffs.
 
-**Les références sont produites dans cette image, par la CI**, pour un rendu identique d'une exécution à l'autre (même Chromium, mêmes polices, y compris les emoji des catégories). Pour les régénérer après un changement visuel validé : onglet Actions, workflow *Captures - écrans de référence*, « Run workflow » sur la branche de la PR. Le workflow commite les nouvelles références sur cette branche (commit dédié de `github-actions[bot]`), ce qui relance toute la CI de la PR.
+**Les références sont produites dans cette image, par la CI**, pour un rendu identique d'une exécution à l'autre (même Chromium, mêmes polices, y compris les emoji des catégories). Pour les régénérer après un changement visuel validé, lancer le workflow sur la branche de la PR :
+
+```bash
+gh workflow run visual.yml --ref <branche-de-la-pr>
+```
+
+Le bouton « Run workflow » de l'onglet Actions fait de même, mais GitHub ne l'affiche que pour un workflow présent sur la branche par défaut (`main`) ; la commande, qui passe par l'API, marche dans tous les cas. Le workflow commite les nouvelles références sur cette branche (commit dédié de `github-actions[bot]`), ce qui relance toute la CI de la PR.
 
 Prérequis : le secret de dépôt `VISUAL_PUSH_TOKEN`, un jeton GitHub à grain fin limité au dépôt, permission *Contents : read and write*. Un commit poussé avec le jeton par défaut ne relancerait aucun workflow.
 

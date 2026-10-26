@@ -9,10 +9,12 @@ name: Captures - écrans de référence (Angular)
 #
 #   - pull_request      : compare ; en cas d'écart, le job échoue et joint les
 #                         captures obtenues et les diffs en artefact.
-#   - workflow_dispatch : à lancer sur une branche (« Run workflow ») ; régénère
+#   - workflow_dispatch : à lancer sur une branche
+#                         (gh workflow run visual.yml --ref <branche>) ; régénère
 #                         les références et les commite sur cette branche, en
 #                         commit dédié de github-actions[bot]. Le job qui commite
-#                         n'exécute aucun code du projet.
+#                         n'exécute aucun code du projet. Le bouton « Run workflow »
+#                         n'apparaît que si ce fichier est sur la branche par défaut.
 #
 # Le push des références passe par le secret VISUAL_PUSH_TOKEN (jeton à grain fin,
 # dépôt kbudget seul, Contents: read and write) : poussé avec GITHUB_TOKEN, le
