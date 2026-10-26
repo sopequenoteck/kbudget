@@ -35,7 +35,9 @@ describe('CompatibilityService', () => {
     const promise = service.check();
     // Le prefixe de version est precisement ce que le client vient decouvrir :
     // demander /api/v1/meta supposerait connu ce qu'on cherche a savoir.
-    httpMock.expectOne(META_URL).flush(validMeta);
+    const metaCalls = httpMock.match(META_URL);
+    expect(metaCalls).toHaveLength(1);
+    metaCalls[0].flush(validMeta);
     await promise;
   });
 
