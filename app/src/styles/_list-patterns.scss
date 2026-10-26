@@ -556,21 +556,6 @@
   color: var(--k-text-secondary);
 }
 
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--k-border-default);
-  border-top-color: var(--k-color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 // --- Skeleton loading ---
 .skeleton-item {
   display: flex;
@@ -637,18 +622,4 @@
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
-}
-
-.btn-outline {
-  padding: var(--k-space-2) var(--k-space-4);
-  border: 1px solid var(--k-border-default);
-  border-radius: var(--k-radius-md);
-  background: none;
-  color: var(--k-text-primary);
-  font-size: var(--k-font-size-sm);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--k-hover-bg);
-  }
 }

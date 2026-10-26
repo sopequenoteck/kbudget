@@ -350,18 +350,3 @@
   gap: var(--k-space-4);
   color: var(--k-text-secondary);
 }
-
-.btn-outline {
-  padding: var(--k-space-2) var(--k-space-4);
-  border: 1px solid var(--k-border-default);
-  border-radius: var(--k-radius-md);
-  background: none;
-  color: var(--k-text-primary);
-  font-size: var(--k-font-size-sm);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--k-hover-bg);
-  }
-}
-

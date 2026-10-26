@@ -9,6 +9,8 @@ name: Qualité - styles (Angular)
 #     avec sa raison).
 #   - scripts/check-css-vars.mjs : aucune variable CSS inconnue (absente de
 #     k-tokens.css ou des déclarations locales), aucun --k-* redéclaré.
+#   - Sélecteurs en double : no-duplicate-selectors par fichier (Stylelint) et,
+#     sur la feuille globale compilée, scripts/check-global-duplicates.mjs.
 #
 # Runner GitHub, sans infra maison : une PR de fork l'exécute aussi, et un
 # contributeur reproduit l'échec en local avec `cd app && npm run lint:styles`.
@@ -19,12 +21,14 @@ on:
     paths:
       - 'app/**'
       - 'scripts/check-css-vars.mjs'
+      - 'scripts/check-global-duplicates.mjs'
       - '.github/workflows/quality.yml'
   push:
     branches: [main, develop]
     paths:
       - 'app/**'
       - 'scripts/check-css-vars.mjs'
+      - 'scripts/check-global-duplicates.mjs'
       - '.github/workflows/quality.yml'
 
 concurrency:

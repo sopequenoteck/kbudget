@@ -35,13 +35,18 @@
   }
 }
 
+// Definition unique (KKS-590) : reprend celle de _list-patterns.scss, qui s'appliquait
+// par-dessus. Plus compact que les boutons pleins : padding 2/4, rayon md, taille sm.
 .btn-outline {
   @extend %btn-base;
-  background-color: transparent;
+  padding: var(--k-space-2) var(--k-space-4);
   border-color: var(--k-border-default);
+  border-radius: var(--k-radius-md);
+  background-color: transparent;
   color: var(--k-text-primary);
+  font-size: var(--k-font-size-sm);
 
-  &:hover:not(:disabled) {
+  &:hover {
     background-color: var(--k-hover-bg);
   }
 }

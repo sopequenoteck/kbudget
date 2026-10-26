@@ -110,9 +110,9 @@
   }
 
   // Tailles : le montant rétrécit quand il s'allonge (30 → 26 → 22 px), ajustement de saisie hors échelle typographique
-  /* stylelint-disable-next-line scale-unlimited/declaration-strict-value -- ajustement de saisie hors échelle */
+  // stylelint-disable-next-line scale-unlimited/declaration-strict-value -- ajustement de saisie hors échelle
   &--md { font-size: 26px; }
-  /* stylelint-disable-next-line scale-unlimited/declaration-strict-value -- ajustement de saisie hors échelle */
+  // stylelint-disable-next-line scale-unlimited/declaration-strict-value -- ajustement de saisie hors échelle
   &--sm { font-size: 22px; }
 
   // Alignement
