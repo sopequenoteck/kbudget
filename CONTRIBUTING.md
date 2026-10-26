@@ -60,6 +60,11 @@ anyone. A fourth, **En-tetes de licence MPL**, runs there too, and so does **Sty
 référence)** compares the key screens pixel by pixel with the committed
 references (`app/e2e/visual/README.md`).
 
+These six checks, plus **Verifier la signature du CLA**, are required: a pull
+request into `develop` or `main` cannot be merged until they pass, and the rule
+binds maintainers too. Each runs only when the pull request touches its part of
+the repository; otherwise it is skipped, which counts as passing.
+
 The Sonar analysis jobs are the exception: the SonarQube server sits on a
 private network, so they run on a self-hosted runner that never executes
 unapproved code from a fork. **A fork's pull request therefore gets no Quality

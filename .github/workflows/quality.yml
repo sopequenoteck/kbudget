@@ -18,11 +18,6 @@ name: Qualité - styles (Angular)
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'app/**'
-      - 'scripts/check-css-vars.mjs'
-      - 'scripts/check-global-duplicates.mjs'
-      - '.github/workflows/quality.yml'
   push:
     branches: [main, develop]
     paths:
@@ -39,8 +34,27 @@ permissions:
   contents: read
 
 jobs:
+  # Fichiers de la PR : les jobs suivants sont sautés si elle ne touche pas le
+  # motif (.github/actions/changed). Un job sauté satisfait un check obligatoire.
+  changes:
+    name: Fichiers concernés (styles)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.changed.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: changed
+        uses: ./.github/actions/changed
+        with:
+          pattern: '^(app/|scripts/check-css-vars\.mjs$|scripts/check-global-duplicates\.mjs$|\.github/workflows/quality\.yml$|\.github/actions/changed/)'
+
   styles:
     name: Styles APP (tokens uniquement)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     container:

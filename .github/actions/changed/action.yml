@@ -1,0 +1,48 @@
+name: Fichiers concernés
+description: >
+  Indique si la pull request touche un chemin du motif. Hors pull_request
+  (push, workflow_dispatch), répond toujours oui.
+
+# Remplace le filtre `paths` des déclencheurs pull_request : un check obligatoire
+# dont le workflow ne se déclenche pas reste « Expected » et bloque la PR, alors
+# qu'un job sauté par `if:` compte comme satisfait.
+#
+# Le job appelant fait un checkout avec fetch-depth: 2 : sur pull_request, HEAD est
+# le commit de merge de la PR et HEAD^1 la pointe de la branche cible, donc
+# `git diff HEAD^1 HEAD` liste exactement les fichiers de la PR, sans le plafond de
+# 3000 fichiers de l'API.
+#
+# Échec de la détection (historique absent, git en erreur) : réponse oui. Un job
+# sauté à tort passerait pour vert.
+
+inputs:
+  pattern:
+    description: Expression régulière étendue (grep -E) sur les chemins depuis la racine du dépôt
+    required: true
+
+outputs:
+  run:
+    description: "'true' si la PR touche le motif, ou hors pull_request ; sinon 'false'"
+    value: ${{ steps.diff.outputs.run }}
+
+runs:
+  using: composite
+  steps:
+    - id: diff
+      shell: bash
+      env:
+        PATTERN: ${{ inputs.pattern }}
+        EVENT: ${{ github.event_name }}
+      run: |
+        if [ "$EVENT" != pull_request ]; then
+          run=true
+        elif ! files=$(git diff --name-only HEAD^1 HEAD); then
+          echo "::warning::Détection des fichiers impossible : jobs lancés par défaut."
+          run=true
+        elif grep -qE "$PATTERN" <<< "$files"; then
+          run=true
+        else
+          run=false
+        fi
+        echo "Motif ${PATTERN} : ${run}"
+        echo "run=${run}" >> "$GITHUB_OUTPUT"
