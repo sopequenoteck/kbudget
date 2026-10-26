@@ -1,0 +1,195 @@
+name: Captures - écrans de référence (Angular)
+
+# Captures des écrans clés (app/e2e/visual, KKS-587) rejouées à chaque PR et
+# comparées pixel à pixel aux références (KKS-590).
+#
+# Rendu reproductible : les captures tournent dans l'image officielle Playwright
+# (même Chromium, mêmes polices d'une exécution à l'autre). Les références sont
+# donc produites dans cette image, par ce workflow, jamais sur un poste.
+#
+#   - pull_request      : compare ; en cas d'écart, le job échoue et joint les
+#                         captures obtenues et les diffs en artefact.
+#   - workflow_dispatch : à lancer sur une branche (« Run workflow ») ; régénère
+#                         les références et les commite sur cette branche, en
+#                         commit dédié de github-actions[bot]. Le job qui commite
+#                         n'exécute aucun code du projet.
+#
+# Le push des références passe par le secret VISUAL_PUSH_TOKEN (jeton à grain fin,
+# dépôt kbudget seul, Contents: read and write) : poussé avec GITHUB_TOKEN, le
+# commit ne déclencherait aucun workflow et la PR resterait sans checks.
+#
+# Pile complète, comme en local (app/e2e/visual/README.md) : PostgreSQL restauré
+# depuis seed.sql, API en profil dev, front servi par ng serve. Runner GitHub,
+# sans secret ni infra maison.
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'app/**'
+      - 'api/src/main/**'
+      - '.github/workflows/visual.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  api-jar:
+    name: Jar de l'API
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Package (sans tests)
+        working-directory: api
+        run: mvn -B -q -DskipTests package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: api-jar
+          path: api/target/api-*.jar
+          retention-days: 1
+
+  screens:
+    name: Captures APP (écrans de référence)
+    needs: api-jar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Version de l'image = version de @playwright/test dans app/e2e/visual/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: budget_db
+          POSTGRES_USER: budget_u
+          POSTGRES_PASSWORD: visual-ci
+        options: >-
+          --health-cmd "pg_isready -U budget_u -d budget_db"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: visual-ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: api-jar
+          path: api-jar
+
+      - name: Base restaurée depuis seed.sql
+        run: |
+          apt-get update -qq && apt-get install -y -qq postgresql-client > /dev/null
+          psql -q -h postgres -U budget_u -d budget_db -f app/e2e/visual/seed.sql
+
+      - name: API en profil dev
+        run: |
+          SPRING_PROFILES_ACTIVE=dev \
+          SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/budget_db \
+          SPRING_DATASOURCE_USERNAME=budget_u \
+          SPRING_DATASOURCE_PASSWORD=visual-ci \
+          APP_JWT_SECRET="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64'))")" \
+          SPRING_FLYWAY_LOCATIONS=classpath:db/migration,classpath:db/dev \
+          nohup java -jar api-jar/api-*.jar > api.log 2>&1 &
+
+      - name: Front
+        working-directory: app
+        run: |
+          npm ci
+          nohup npx ng serve --proxy-config proxy.conf.json --port 4200 > ../ng.log 2>&1 &
+
+      - name: Attente de l'API et du front
+        run: |
+          node -e "
+            const wait = async (url) => {
+              for (let i = 0; i < 90; i++) {
+                try { if ((await fetch(url)).ok) return; } catch {}
+                await new Promise((r) => setTimeout(r, 2000));
+              }
+              throw new Error('injoignable : ' + url);
+            };
+            (async () => { await wait('http://localhost:8080/api/meta'); await wait('http://localhost:4200/'); })()
+              .catch((e) => { console.error(e.message); process.exit(1); });
+          "
+
+      - name: Captures
+        working-directory: app/e2e/visual
+        run: |
+          npm ci
+          npx playwright test ${{ github.event_name == 'workflow_dispatch' && '--update-snapshots' || '' }}
+
+      - name: Captures obtenues et diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: captures-ecart
+          path: |
+            app/e2e/visual/test-results
+            api.log
+            ng.log
+          retention-days: 7
+
+      - name: Nouvelles références
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: references
+          path: app/e2e/visual/baseline
+          retention-days: 1
+
+  commit-references:
+    name: Commit des références
+    if: github.event_name == 'workflow_dispatch'
+    needs: screens
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Secret VISUAL_PUSH_TOKEN présent
+        env:
+          VISUAL_PUSH_TOKEN: ${{ secrets.VISUAL_PUSH_TOKEN }}
+        run: |
+          if [ -z "$VISUAL_PUSH_TOKEN" ]; then
+            echo "::error::Secret VISUAL_PUSH_TOKEN absent : voir l'en-tête de .github/workflows/visual.yml"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.VISUAL_PUSH_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: references
+          path: app/e2e/visual/baseline
+
+      - name: Commit dédié si les références changent
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/e2e/visual/baseline
+          if git diff --cached --quiet; then
+            echo 'Références inchangées.'
+            exit 0
+          fi
+          git commit -m "chore: références des captures régénérées en CI (${GITHUB_REF_NAME})"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
