@@ -60,6 +60,7 @@ describe('ThemeService — theme-color', () => {
     tokens.remove();
     meta.remove();
     document.documentElement.classList.remove('theme-light', 'theme-dark');
+    document.documentElement.removeAttribute('data-theme');
     vi.unstubAllGlobals();
   });
 
@@ -79,6 +80,18 @@ describe('ThemeService — theme-color', () => {
     TestBed.tick();
 
     expect(themeColor(meta)).toBe(LIGHT_SURFACE);
+  });
+
+  it('should_set_data_theme_to_the_effective_theme_when_theme_changes', () => {
+    const service = createService();
+
+    service.setTheme('light');
+    TestBed.tick();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+
+    service.setTheme('dark');
+    TestBed.tick();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
   it('should_follow_the_system_theme_when_theme_is_auto', () => {

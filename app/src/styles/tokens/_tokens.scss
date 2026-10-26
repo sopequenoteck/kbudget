@@ -8,28 +8,28 @@
 
 :root {
   // -- Palette: Gray --
-  --gray-50: #{p.$gray-50};
-  --gray-100: #{p.$gray-100};
-  --gray-200: #{p.$gray-200};
-  --gray-300: #{p.$gray-300};
-  --gray-400: #{p.$gray-400};
-  --gray-500: #{p.$gray-500};
-  --gray-600: #{p.$gray-600};
-  --gray-700: #{p.$gray-700};
-  --gray-800: #{p.$gray-800};
-  --gray-900: #{p.$gray-900};
+  --gray-50: var(--k-gray-50);
+  --gray-100: var(--k-gray-100);
+  --gray-200: var(--k-gray-200);
+  --gray-300: var(--k-gray-300);
+  --gray-400: var(--k-gray-400);
+  --gray-500: var(--k-gray-500);
+  --gray-600: var(--k-gray-600);
+  --gray-700: var(--k-gray-700);
+  --gray-800: var(--k-gray-800);
+  --gray-900: var(--k-gray-900);
 
   // -- Palette: Amber --
-  --amber-50: #{p.$amber-50};
-  --amber-100: #{p.$amber-100};
-  --amber-200: #{p.$amber-200};
-  --amber-300: #{p.$amber-300};
-  --amber-400: #{p.$amber-400};
-  --amber-500: #{p.$amber-500};
-  --amber-600: #{p.$amber-600};
-  --amber-700: #{p.$amber-700};
-  --amber-800: #{p.$amber-800};
-  --amber-900: #{p.$amber-900};
+  --amber-50: var(--k-amber-50);
+  --amber-100: var(--k-amber-100);
+  --amber-200: var(--k-amber-200);
+  --amber-300: var(--k-amber-300);
+  --amber-400: var(--k-amber-400);
+  --amber-500: var(--k-amber-500);
+  --amber-600: var(--k-amber-600);
+  --amber-700: var(--k-amber-700);
+  --amber-800: var(--k-amber-800);
+  --amber-900: var(--k-amber-900);
 
   // -- Palette: RGB (for opacity) --
   --amber-500-rgb: #{p.$amber-500-rgb};
@@ -38,26 +38,26 @@
   --gray-50-rgb: #{p.$gray-50-rgb};
 
   // -- Feedback --
-  --color-success-raw: #{p.$success};
-  --color-warning-raw: #{p.$warning};
-  --color-error-raw: #{p.$error};
-  --color-info-raw: #{p.$info};
+  --color-success-raw: var(--k-color-success-raw);
+  --color-warning-raw: var(--k-color-warning-raw);
+  --color-error-raw: var(--k-color-error-raw);
+  --color-info-raw: var(--k-color-info-raw);
   --color-subscription-raw: #{p.$subscription};
 
   // -- Spacing --
-  --space-0: #{p.$space-0};
-  --space-1: #{p.$space-1};
-  --space-2: #{p.$space-2};
-  --space-3: #{p.$space-3};
-  --space-4: #{p.$space-4};
-  --space-5: #{p.$space-5};
-  --space-6: #{p.$space-6};
-  --space-7: #{p.$space-7};
-  --space-8: #{p.$space-8};
-  --space-9: #{p.$space-9};
-  --space-10: #{p.$space-10};
-  --space-11: #{p.$space-11};
-  --space-12: #{p.$space-12};
+  --space-0: var(--k-space-0);
+  --space-1: var(--k-space-1);
+  --space-2: var(--k-space-2);
+  --space-3: var(--k-space-3);
+  --space-4: var(--k-space-4);
+  --space-5: var(--k-space-5);
+  --space-6: var(--k-space-6);
+  --space-7: var(--k-space-7);
+  --space-8: var(--k-space-8);
+  --space-9: var(--k-space-9);
+  --space-10: var(--k-space-10);
+  --space-11: var(--k-space-11);
+  --space-12: var(--k-space-12);
 
   // -- Safe areas (PWA installee, `viewport-fit=cover`, KKS-447) --
   // 0 hors encoche / barre de gestes : sans effet sur desktop et navigateur classique.
@@ -70,31 +70,31 @@
   // Hauteurs TOTALES, zone sure comprise : les `top: var(--header-height)` des sticky et
   // `calc(100dvh - var(--header-height))` restent justes sans rien changer. Les composants
   // posent le padding de zone sure a l'interieur de cette hauteur (`box-sizing: border-box`).
-  --sidebar-width: #{p.$sidebar-width};
+  --sidebar-width: var(--k-sidebar-width);
   --header-height: calc(#{p.$header-height} + var(--safe-top));
   --bottom-nav-height: calc(72px + var(--safe-bottom));
 
   // -- Border radius --
-  --radius-sm: #{p.$radius-sm};
-  --radius-md: #{p.$radius-md};
-  --radius-lg: #{p.$radius-lg};
-  --radius-xl: #{p.$radius-xl};
+  --radius-sm: var(--k-radius-sm);
+  --radius-md: var(--k-radius-md);
+  --radius-lg: var(--k-radius-lg);
+  --radius-xl: var(--k-radius-xl);
   --radius-xxl: #{p.$radius-xxl};
-  --radius-round: #{p.$radius-round};
+  --radius-round: var(--k-radius-round);
 
   // -- Shadows --
-  --shadow-sm: #{p.$shadow-sm};
-  --shadow-md: #{p.$shadow-md};
-  --shadow-lg: #{p.$shadow-lg};
+  --shadow-sm: var(--k-shadow-sm);
+  --shadow-md: var(--k-shadow-md);
+  --shadow-lg: var(--k-shadow-lg);
   --shadow-colored-primary: #{p.$shadow-colored-primary};
 
   // -- Z-index --
-  --z-dropdown: #{p.$z-dropdown};
-  --z-sticky: #{p.$z-sticky};
-  --z-fab: #{p.$z-fab};
-  --z-overlay: #{p.$z-overlay};
-  --z-modal: #{p.$z-modal};
-  --z-toast: #{p.$z-toast};
+  --z-dropdown: var(--k-z-dropdown);
+  --z-sticky: var(--k-z-sticky);
+  --z-fab: var(--k-z-fab);
+  --z-overlay: var(--k-z-overlay);
+  --z-modal: var(--k-z-modal);
+  --z-toast: var(--k-z-toast);
 
   // -- Animations --
   --duration-fast: #{p.$duration-fast};
@@ -106,25 +106,25 @@
 
   // -- Typography --
   --font-family: #{p.$font-family};
-  --font-mono: #{p.$font-mono};
+  --font-mono: var(--k-font-mono);
 
-  --font-size-2xs: #{p.$font-size-2xs};
-  --font-size-xs: #{p.$font-size-xs};
-  --font-size-sm: #{p.$font-size-sm};
-  --font-size-base: #{p.$font-size-base};
-  --font-size-lg: #{p.$font-size-lg};
-  --font-size-xl: #{p.$font-size-xl};
-  --font-size-2xl: #{p.$font-size-2xl};
-  --font-size-3xl: #{p.$font-size-3xl};
+  --font-size-2xs: var(--k-font-size-2xs);
+  --font-size-xs: var(--k-font-size-xs);
+  --font-size-sm: var(--k-font-size-sm);
+  --font-size-base: var(--k-font-size-base);
+  --font-size-lg: var(--k-font-size-lg);
+  --font-size-xl: var(--k-font-size-xl);
+  --font-size-2xl: var(--k-font-size-2xl);
+  --font-size-3xl: var(--k-font-size-3xl);
 
-  --font-weight-normal: #{p.$font-weight-normal};
-  --font-weight-medium: #{p.$font-weight-medium};
-  --font-weight-semibold: #{p.$font-weight-semibold};
-  --font-weight-bold: #{p.$font-weight-bold};
+  --font-weight-normal: var(--k-font-weight-normal);
+  --font-weight-medium: var(--k-font-weight-medium);
+  --font-weight-semibold: var(--k-font-weight-semibold);
+  --font-weight-bold: var(--k-font-weight-bold);
 
-  --line-height-tight: #{p.$line-height-tight};
-  --line-height-normal: #{p.$line-height-normal};
-  --line-height-relaxed: #{p.$line-height-relaxed};
+  --line-height-tight: var(--k-line-height-tight);
+  --line-height-normal: var(--k-line-height-normal);
+  --line-height-relaxed: var(--k-line-height-relaxed);
 }
 
 // -- Reduced motion --

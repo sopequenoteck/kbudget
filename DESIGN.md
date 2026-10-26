@@ -197,10 +197,11 @@ Classes : `.skeleton-item`, `.skeleton-circle`, `.skeleton-line`, `.skeleton-her
 
 | Fichier | Contenu |
 |---------|---------|
+| `styles/k/k-tokens.css` | Tokens k-design (`--k-*`), copie generee, ne pas editer (k-design D14). Charge avant `styles.scss` par `angular.json` |
 | `styles/tokens/_primitives.scss` | Variables SCSS (palettes, spacing, typo) |
-| `styles/tokens/_tokens.scss` | CSS custom properties sur :root |
-| `styles/themes/_dark.scss` | Tokens semantiques dark |
-| `styles/themes/_light.scss` | Tokens semantiques light |
+| `styles/tokens/_tokens.scss` | CSS custom properties sur :root, en alias `var(--k-*)` quand la valeur est identique (KKS-587) |
+| `styles/themes/_dark.scss` | Tokens semantiques dark, idem |
+| `styles/themes/_light.scss` | Tokens semantiques light, idem ; les `--k-*` clairs exigent `data-theme="light"`, pose par `ThemeService` |
 | `styles/_list-patterns.scss` | Hero, section-header, list-group, list-row, skeleton |
 | `styles/_bottom-sheet.scss` | Bottom sheet 4 rows, pills, expand, actions |
 | `styles/_forms.scss` | Inputs, selects, textareas, utilities |

@@ -5,37 +5,37 @@
 :root,
 .theme-light {
   // -- Backgrounds --
-  --bg-primary: #f0f0f0;
-  --bg-secondary: #fff;
-  --bg-tertiary: var(--gray-100);
+  --bg-primary: var(--k-bg-primary);
+  --bg-secondary: var(--k-bg-secondary);
+  --bg-tertiary: var(--k-bg-tertiary);
 
   // -- Text --
-  --text-primary: var(--gray-900);
-  --text-secondary: var(--gray-600);
+  --text-primary: var(--k-text-primary);
+  --text-secondary: var(--k-text-secondary);
   --text-tertiary: var(--gray-400);
-  --text-inverse: #fff;
+  --text-inverse: var(--k-text-inverse);
 
   // -- Borders --
-  --border-default: var(--gray-200);
-  --border-strong: var(--gray-300);
+  --border-default: var(--k-border-default);
+  --border-strong: var(--k-border-strong);
 
   // -- Primary (amber-600/700 for contrast on white — amber-500 fails WCAG) --
   --color-primary: var(--amber-600);
-  --color-primary-hover: var(--amber-700);
-  --color-primary-light: var(--amber-100);
+  --color-primary-hover: var(--k-color-primary-hover);
+  --color-primary-light: var(--k-color-primary-light);
   --color-primary-contrast: #fff;
 
   // -- Surfaces --
-  --surface-default: #fff;
-  --surface-raised: var(--gray-100);
-  --surface-background: transparent;
+  --surface-default: var(--k-surface-default);
+  --surface-raised: var(--k-surface-raised);
+  --surface-background: var(--k-surface-background);
   --surface-overlay: rgb(var(--gray-900-rgb) / 0.5);
 
   // -- Feedback backgrounds --
-  --bg-success: #dcfce7;
-  --bg-error: #fee2e2;
-  --bg-warning: #fef9c3;
-  --bg-info: #dbeafe;
+  --bg-success: var(--k-bg-success);
+  --bg-error: var(--k-bg-error);
+  --bg-warning: var(--k-bg-warning);
+  --bg-info: var(--k-bg-info);
 
   // -- Feedback text --
   --text-success: #16a34a;
@@ -44,13 +44,13 @@
   --text-info: #2563eb;
 
   // -- Misc --
-  --icon-circle-bg: rgba(0, 0, 0, 0.04);
+  --icon-circle-bg: var(--k-icon-circle-bg);
 
   // -- Interactive --
-  --hover-bg: var(--gray-100);
-  --hover-subtle: rgba(0, 0, 0, 0.04);
-  --highlight-subtle: rgba(0, 0, 0, 0.06);
-  --overlay-light: rgba(0, 0, 0, 0.1);
+  --hover-bg: var(--k-hover-bg);
+  --hover-subtle: var(--k-hover-subtle);
+  --highlight-subtle: var(--k-highlight-subtle);
+  --overlay-light: var(--k-overlay-light);
   --primary-subtle: rgba(217, 119, 6, 0.1);
   --primary-muted: rgba(217, 119, 6, 0.15);
   --primary-border: rgba(217, 119, 6, 0.25);
@@ -61,7 +61,7 @@
   --color-expense: #dc2626;
   --color-debt-owe: #dc2626;
   --color-debt-owed: #16a34a;
-  --color-subscription: #8b5cf6;
+  --color-subscription: var(--k-color-subscription);
 
   // -- Dashboard (quiet utility — aligned with dark, no gradients) --
   --hero-gradient: none;
