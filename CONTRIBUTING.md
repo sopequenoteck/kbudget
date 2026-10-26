@@ -56,7 +56,9 @@ CI replays all three. Three jobs — **Tests API**, **Tests APP** and **Tests
 Flutter**, each suffixed *(runner GitHub)* — run on GitHub's own infrastructure,
 so a pull request opened from a fork gets a real result without waiting for
 anyone. A fourth, **En-tetes de licence MPL**, runs there too, and so does **Styles APP
-(tokens uniquement)**, which replays `npm run lint:styles`.
+(tokens uniquement)**, which replays `npm run lint:styles`. **Captures APP (écrans de
+référence)** compares the key screens pixel by pixel with the committed
+references (`app/e2e/visual/README.md`).
 
 The Sonar analysis jobs are the exception: the SonarQube server sits on a
 private network, so they run on a self-hosted runner that never executes
