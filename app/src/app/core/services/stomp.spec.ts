@@ -71,9 +71,10 @@ describe('StompService', () => {
     // Act
     service.connect();
 
-    // Assert — client est créé (non null après connect)
-    // On vérifie indirectement via disconnect qui ne throw pas
-    service.disconnect();
+    // Assert — un client est cree et active
+    const client = (service as { client: { activate: ReturnType<typeof vi.fn> } | null })['client'];
+    expect(client).not.toBeNull();
+    expect(client?.activate).toHaveBeenCalledTimes(1);
   });
 
   it('should_not_create_new_client_when_already_active', () => {
@@ -86,8 +87,10 @@ describe('StompService', () => {
     // Act — deuxième connect ne doit pas recréer
     service.connect();
 
-    // Assert — pas d'erreur, un seul client
-    service.disconnect();
+    // Assert — meme instance, activee une seule fois
+    const client = (service as { client: { activate: ReturnType<typeof vi.fn> } | null })['client'];
+    expect(client).toBe(clientField);
+    expect(client?.activate).toHaveBeenCalledTimes(1);
   });
 
   it('should_set_client_null_after_disconnect', () => {
