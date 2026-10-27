@@ -41,7 +41,7 @@ import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
-import 'package:k_budget/src/theme/app_theme.dart';
+import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
 
 import '../helpers/app_fonts.dart';
@@ -210,8 +210,8 @@ void _golden(
   Future<void> Function(WidgetTester tester)? act,
 }) {
   for (final (themeName, theme) in [
-    ('dark', AppTheme.dark),
-    ('light', AppTheme.light),
+    ('dark', app_theme.AppTheme.dark),
+    ('light', app_theme.AppTheme.light),
   ]) {
     testWidgets('should_match_reference_when_rendering_${themeName}_$name',
         (tester) async {
