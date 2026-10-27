@@ -12,6 +12,7 @@ library;
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -43,6 +44,7 @@ import 'package:k_budget/src/features/transactions/presentation/widgets/transact
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/app_fonts.dart';
 import '../helpers/display_locale.dart';
@@ -246,9 +248,20 @@ void main() {
   setUpAll(() async {
     await initializeDateFormatting('fr_FR');
     await loadAppFonts();
+    // Version affichée par les réglages : figée.
+    PackageInfo.setMockInitialValues(
+      appName: 'k-budget',
+      packageName: 'fr.kksdev.budget',
+      version: '1.0.0',
+      buildNumber: '1',
+      buildSignature: '',
+    );
   });
 
   setUp(() {
+    // Stockage sécurisé vide : configuration, thème et taille de texte par
+    // défaut, sans plugin natif.
+    FlutterSecureStorage.setMockInitialValues({});
     authRepo = MockAuthRepository();
     transactionRepo = MockTransactionRepository();
     categoryRepo = MockCategoryRepository();
