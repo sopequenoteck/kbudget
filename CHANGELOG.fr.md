@@ -20,6 +20,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- **Thèmes de l'application mobile alignés sur le web** (KKS-600) : dans
+  l'application Flutter, les textes secondaires (dates, indications, libellés)
+  prennent le gris secondaire au lieu de la couleur du texte principal, comme
+  sur le web. En thème clair, l'ambre des boutons, du bouton flottant et de
+  l'onglet actif devient le #c66e05, plus soutenu, avec un libellé sombre ; le
+  fond de page passe à #f0f0f0, l'en-tête et la barre du bas à #f5f5f5 ; le
+  texte d'erreur à #b91c1c. En thème sombre, l'en-tête et la barre du bas
+  passent à #1e1e1e, les erreurs à #d97777 avec un libellé sombre sur les
+  boutons rouges, et les bordures des champs au #1e1e1e discret. Les avatars
+  prennent l'ambre avec un libellé sombre, comme sur le web.
+
 - **Application mobile sur les couleurs communes K Design** (KKS-589) :
   Flutter reçoit désormais ses couleurs de k-design, comme le client web. En
   thème clair, les montants de revenu et de dépense, les dettes et les textes

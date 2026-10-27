@@ -33,6 +33,81 @@ void main() {
       'error': (AppColors.error, KTokens.colorErrorRawDark),
       'warning': (AppColors.warning, KTokens.colorWarningRawDark),
       'info': (AppColors.info, KTokens.colorInfoRawDark),
+      'bgPrimaryLight': (AppColors.bgPrimaryLight, KTokens.bgPrimaryLight),
+      'surfaceDefaultLight': (
+        AppColors.surfaceDefaultLight,
+        KTokens.surfaceDefaultLight,
+      ),
+      'surfaceRaisedLight': (
+        AppColors.surfaceRaisedLight,
+        KTokens.surfaceRaisedLight,
+      ),
+      'textPrimaryLight': (
+        AppColors.textPrimaryLight,
+        KTokens.textPrimaryLight,
+      ),
+      'textSecondaryLight': (
+        AppColors.textSecondaryLight,
+        KTokens.textSecondaryLight,
+      ),
+      'textTertiaryLight': (
+        AppColors.textTertiaryLight,
+        KTokens.textTertiaryLight,
+      ),
+      'textInverseLight': (
+        AppColors.textInverseLight,
+        KTokens.textInverseLight,
+      ),
+      'borderDefaultLight': (
+        AppColors.borderDefaultLight,
+        KTokens.borderDefaultLight,
+      ),
+      'borderStrongLight': (
+        AppColors.borderStrongLight,
+        KTokens.borderStrongLight,
+      ),
+      'primaryAmberContrastLight': (
+        AppColors.primaryAmberContrastLight,
+        KTokens.colorPrimaryContrastLight,
+      ),
+      'textErrorLight': (AppColors.textErrorLight, KTokens.textErrorLight),
+      'primaryAmberLight': (
+        AppColors.primaryAmberLight,
+        KTokens.colorPrimaryLight,
+      ),
+      'bgPrimaryDark': (AppColors.bgPrimaryDark, KTokens.bgPrimaryDark),
+      'surfaceDefaultDark': (
+        AppColors.surfaceDefaultDark,
+        KTokens.surfaceDefaultDark,
+      ),
+      'surfaceRaisedDark': (
+        AppColors.surfaceRaisedDark,
+        KTokens.surfaceRaisedDark,
+      ),
+      'textPrimaryDark': (AppColors.textPrimaryDark, KTokens.textPrimaryDark),
+      'textSecondaryDark': (
+        AppColors.textSecondaryDark,
+        KTokens.textSecondaryDark,
+      ),
+      'textTertiaryDark': (
+        AppColors.textTertiaryDark,
+        KTokens.textTertiaryDark,
+      ),
+      'textInverseDark': (AppColors.textInverseDark, KTokens.textInverseDark),
+      'borderDefaultDark': (
+        AppColors.borderDefaultDark,
+        KTokens.borderDefaultDark,
+      ),
+      'borderStrongDark': (
+        AppColors.borderStrongDark,
+        KTokens.borderStrongDark,
+      ),
+      'primaryAmberContrastDark': (
+        AppColors.primaryAmberContrastDark,
+        KTokens.colorPrimaryContrastDark,
+      ),
+      'textErrorDark': (AppColors.textErrorDark, KTokens.textErrorDark),
+      'bgErrorDark': (AppColors.bgErrorDark, KTokens.bgErrorDark),
       'successLight': (AppColors.successLight, KTokens.bgSuccessLight),
       'warningLight': (AppColors.warningLight, KTokens.bgWarningLight),
       'errorLight': (AppColors.errorLight, KTokens.bgErrorLight),

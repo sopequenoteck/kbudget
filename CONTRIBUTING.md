@@ -58,7 +58,9 @@ so a pull request opened from a fork gets a real result without waiting for
 anyone. A fourth, **En-tetes de licence MPL**, runs there too, and so does **Styles APP
 (tokens uniquement)**, which replays `npm run lint:styles`. **Captures APP (écrans de
 référence)** compares the key screens pixel by pixel with the committed
-references (`app/e2e/visual/README.md`).
+references (`app/e2e/visual/README.md`). On the Flutter side, golden tests
+(`flutter/test/goldens`) run inside **Tests Flutter** and compare the main
+screens with references produced by CI (`flutter/CLAUDE.md`).
 
 These six checks, plus **Verifier la signature du CLA**, are required: a pull
 request into `develop` or `main` cannot be merged until they pass, and the rule

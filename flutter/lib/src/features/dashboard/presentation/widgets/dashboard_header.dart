@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -15,7 +16,7 @@ class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});
 
   String _greeting(AppLocalizations l10n, String? userName) {
-    final hour = DateTime.now().hour;
+    final hour = clock.now().hour;
     final hasName = userName != null ? 'yes' : 'no';
     final name = userName ?? '';
     if (hour < 12) {

@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -27,7 +28,7 @@ class TransactionListNotifier extends Notifier<TransactionListState>
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546).
     watchSession(ref);
-    final now = DateTime.now();
+    final now = clock.now();
     return TransactionListState(
       selectedMonth: now.month,
       selectedYear: now.year,

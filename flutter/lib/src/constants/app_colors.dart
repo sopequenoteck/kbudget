@@ -72,6 +72,41 @@ class AppColors {
 
   // ===== Thème clair =====
 
+  // Fond de page
+  /// Alias de [KTokens.bgPrimaryLight].
+  static const Color bgPrimaryLight = KTokens.bgPrimaryLight;
+
+  // Surfaces
+  /// Alias de [KTokens.surfaceDefaultLight].
+  static const Color surfaceDefaultLight = KTokens.surfaceDefaultLight;
+  /// Alias de [KTokens.surfaceRaisedLight].
+  static const Color surfaceRaisedLight = KTokens.surfaceRaisedLight;
+
+  // Texte
+  /// Alias de [KTokens.textPrimaryLight].
+  static const Color textPrimaryLight = KTokens.textPrimaryLight;
+  /// Alias de [KTokens.textSecondaryLight].
+  static const Color textSecondaryLight = KTokens.textSecondaryLight;
+  /// Alias de [KTokens.textTertiaryLight].
+  static const Color textTertiaryLight = KTokens.textTertiaryLight;
+  /// Alias de [KTokens.textInverseLight].
+  static const Color textInverseLight = KTokens.textInverseLight;
+
+  // Bordures
+  /// Alias de [KTokens.borderDefaultLight].
+  static const Color borderDefaultLight = KTokens.borderDefaultLight;
+  /// Alias de [KTokens.borderStrongLight].
+  static const Color borderStrongLight = KTokens.borderStrongLight;
+
+  // Action et erreur
+  /// Alias de [KTokens.colorPrimaryLight].
+  static const Color primaryAmberLight = KTokens.colorPrimaryLight;
+  /// Alias de [KTokens.colorPrimaryContrastLight].
+  static const Color primaryAmberContrastLight =
+      KTokens.colorPrimaryContrastLight;
+  /// Alias de [KTokens.textErrorLight].
+  static const Color textErrorLight = KTokens.textErrorLight;
+
   // Fonds de feedback
   /// Alias de [KTokens.bgSuccessLight].
   static const Color successLight = KTokens.bgSuccessLight;
@@ -129,6 +164,41 @@ class AppColors {
   static const Color iconCircleBgLight = KTokens.iconCircleBgLight;
 
   // ===== Thème sombre =====
+
+  // Fond de page
+  /// Alias de [KTokens.bgPrimaryDark].
+  static const Color bgPrimaryDark = KTokens.bgPrimaryDark;
+
+  // Surfaces
+  /// Alias de [KTokens.surfaceDefaultDark].
+  static const Color surfaceDefaultDark = KTokens.surfaceDefaultDark;
+  /// Alias de [KTokens.surfaceRaisedDark].
+  static const Color surfaceRaisedDark = KTokens.surfaceRaisedDark;
+
+  // Texte
+  /// Alias de [KTokens.textPrimaryDark].
+  static const Color textPrimaryDark = KTokens.textPrimaryDark;
+  /// Alias de [KTokens.textSecondaryDark].
+  static const Color textSecondaryDark = KTokens.textSecondaryDark;
+  /// Alias de [KTokens.textTertiaryDark].
+  static const Color textTertiaryDark = KTokens.textTertiaryDark;
+  /// Alias de [KTokens.textInverseDark].
+  static const Color textInverseDark = KTokens.textInverseDark;
+
+  // Bordures
+  /// Alias de [KTokens.borderDefaultDark].
+  static const Color borderDefaultDark = KTokens.borderDefaultDark;
+  /// Alias de [KTokens.borderStrongDark].
+  static const Color borderStrongDark = KTokens.borderStrongDark;
+
+  // Action et erreur
+  /// Alias de [KTokens.colorPrimaryContrastDark].
+  static const Color primaryAmberContrastDark =
+      KTokens.colorPrimaryContrastDark;
+  /// Alias de [KTokens.textErrorDark].
+  static const Color textErrorDark = KTokens.textErrorDark;
+  /// Alias de [KTokens.bgErrorDark].
+  static const Color bgErrorDark = KTokens.bgErrorDark;
 
   // Action
   /// Alias de [KTokens.colorPrimaryDark].

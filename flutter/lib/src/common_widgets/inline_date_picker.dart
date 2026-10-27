@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart'
     show DiagnosticPropertiesBuilder, IterableProperty;
 import 'package:flutter/material.dart';
@@ -430,7 +431,7 @@ class _InlineDatePickerState extends State<InlineDatePicker> {
   void initState() {
     super.initState();
     final parsed = _isoToDate(widget.value);
-    final ref = parsed ?? DateTime.now();
+    final ref = parsed ?? clock.now();
     _currentMonth = ref.month;
     _currentYear = ref.year;
   }
@@ -464,7 +465,7 @@ class _InlineDatePickerState extends State<InlineDatePicker> {
   }
 
   void _goToToday() {
-    final now = DateTime.now();
+    final now = clock.now();
     setState(() {
       _currentMonth = now.month;
       _currentYear = now.year;
@@ -486,7 +487,7 @@ class _InlineDatePickerState extends State<InlineDatePicker> {
     final minIso = widget.minDate;
     final maxIso = widget.maxDate;
 
-    final todayIso = _toIsoDate(DateTime.now());
+    final todayIso = _toIsoDate(clock.now());
 
     final firstDay = DateTime(year, month, 1);
     final startOffset = _normalizeStartOffset(firstDay);

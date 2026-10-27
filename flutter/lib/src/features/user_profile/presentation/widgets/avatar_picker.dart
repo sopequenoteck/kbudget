@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,7 +76,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
   Future<File?> _compressImage(String sourcePath) async {
     final dir = await getTemporaryDirectory();
     final targetPath =
-        '${dir.path}/avatar_compressed_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        '${dir.path}/avatar_compressed_${clock.now().millisecondsSinceEpoch}.jpg';
 
     final result = await FlutterImageCompress.compressAndGetFile(
       sourcePath,
@@ -94,7 +95,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
     // Si toujours > cible, recompresser avec qualité 60
     if (sizeKb > _targetSizeKb) {
       final targetPath2 =
-          '${dir.path}/avatar_compressed2_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          '${dir.path}/avatar_compressed2_${clock.now().millisecondsSinceEpoch}.jpg';
       final result2 = await FlutterImageCompress.compressAndGetFile(
         sourcePath,
         targetPath2,
@@ -289,11 +290,11 @@ class _AvatarCircle extends StatelessWidget {
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: theme.colorScheme.primaryContainer,
+      backgroundColor: theme.colorScheme.primary,
       child: Text(
         initials.length > 2 ? initials.substring(0, 2).toUpperCase() : initials.toUpperCase(),
         style: theme.textTheme.headlineSmall?.copyWith(
-          color: theme.colorScheme.onPrimaryContainer,
+          color: theme.colorScheme.onPrimary,
           fontWeight: FontWeight.w600,
         ),
       ),
