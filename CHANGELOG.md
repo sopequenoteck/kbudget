@@ -19,6 +19,13 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Mobile app on the shared K Design colours** (KKS-589): the Flutter app now
+  takes its colours from k-design, like the web client. In the light theme,
+  income and expense amounts, debts, and warning and information text get the
+  deeper shades that pass WCAG AA contrast (#166534, #b91c1c, #854d0e,
+  #1d4ed8), and the muted amber backgrounds follow the #c66e05 amber. The dark
+  theme is unchanged.
+
 - **Readable labels on red and amber buttons, standard focus ring on fields**
   (KKS-590): in the dark theme, delete buttons and the notification badge now
   use a dark label on the red background (white gave 3.1:1, below WCAG AA);
