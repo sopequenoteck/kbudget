@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,7 +56,7 @@ class BudgetSummarySection extends ConsumerWidget {
       orElse: () => Currency.eur,
     );
     final locale = ref.watch(intlLocaleProvider);
-    final monthLabel = DateFormat.yMMMM(locale).format(DateTime.now());
+    final monthLabel = DateFormat.yMMMM(locale).format(clock.now());
     final spentFormatted = AmountFormatter.format(
       overview.totalSpent,
       currency: currencyEnum,

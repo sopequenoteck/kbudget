@@ -9,74 +9,80 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 
+/// Thèmes Material de l'app. Chaque couleur pointe un token sémantique de
+/// k-design (via [AppColors]), comme le web : fond de page `bg-primary`,
+/// chrome (en-tête, barre du bas) `surface-raised`, contenu `surface-default`,
+/// action `color-primary` avec `color-primary-contrast` dessus (D2), texte
+/// secondaire `text-secondary`, erreur `text-error` avec `text-inverse` sur
+/// son aplat (KKS-600). Seul le secondaire indigo reste local.
 class AppTheme {
   AppTheme._();
 
+  /// Thème clair.
   static ThemeData get light => ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
         fontFamily: AppTypography.fontFamily,
+        // surface (surface-default, #ffffff) et onError (text-inverse,
+        // #ffffff) valent le défaut de ColorScheme.light : non répétés,
+        // vérifiés par app_theme_test.dart.
         colorScheme: const ColorScheme.light(
-          // primary: amber600 (#d97706) — conforme _light.scss `--color-primary`
-          primary: AppColors.amber600,
-          onPrimary: Colors.white,
-          primaryContainer: AppColors.amber100,
-          onPrimaryContainer: AppColors.amber900,
+          primary: AppColors.primaryAmberLight,
+          onPrimary: AppColors.primaryAmberContrastLight,
+          primaryContainer: AppColors.primaryMutedLight,
+          onPrimaryContainer: AppColors.textPrimaryLight,
           secondary: AppColors.indigo600,
-          onSecondary: Colors.white,
+          onSecondary: AppColors.textInverseLight,
           secondaryContainer: AppColors.indigo100,
-          surface: Colors.white,
-          onSurface: AppColors.gray900,
-          error: AppColors.error,
-          onError: Colors.white,
+          onSurface: AppColors.textPrimaryLight,
+          onSurfaceVariant: AppColors.textSecondaryLight,
+          surfaceContainerHighest: AppColors.surfaceRaisedLight,
+          error: AppColors.textErrorLight,
           errorContainer: AppColors.errorLight,
-          outline: AppColors.gray300,
-          outlineVariant: AppColors.gray200,
-          // surfaceContainerHighest: gray100 (#f5f5f5) — palette propriétaire v5
-          surfaceContainerHighest: AppColors.gray100,
+          onErrorContainer: AppColors.textErrorLight,
+          outline: AppColors.borderStrongLight,
+          outlineVariant: AppColors.borderDefaultLight,
         ),
-        scaffoldBackgroundColor: AppColors.gray50,
+        scaffoldBackgroundColor: AppColors.bgPrimaryLight,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: AppColors.gray900,
+          backgroundColor: AppColors.surfaceRaisedLight,
+          foregroundColor: AppColors.textPrimaryLight,
           elevation: 0,
           scrolledUnderElevation: 1,
         ),
         cardTheme: CardThemeData(
-          color: Colors.white,
+          color: AppColors.surfaceDefaultLight,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            side: const BorderSide(color: AppColors.gray200),
+            side: const BorderSide(color: AppColors.borderDefaultLight),
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Colors.white,
-          // selectedItemColor: amber600 — sémantique primary light
-          selectedItemColor: AppColors.amber600,
-          unselectedItemColor: AppColors.gray400,
+          backgroundColor: AppColors.surfaceRaisedLight,
+          selectedItemColor: AppColors.primaryAmberLight,
+          unselectedItemColor: AppColors.textSecondaryLight,
           type: BottomNavigationBarType.fixed,
           elevation: 8,
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          // backgroundColor: amber600 — sémantique primary light
-          backgroundColor: AppColors.amber600,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.primaryAmberLight,
+          foregroundColor: AppColors.primaryAmberContrastLight,
           elevation: 4,
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
-            borderSide: const BorderSide(color: AppColors.gray300),
+            borderSide: const BorderSide(color: AppColors.borderDefaultLight),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
-            borderSide: const BorderSide(color: AppColors.gray300),
+            borderSide: const BorderSide(color: AppColors.borderDefaultLight),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
-            // focusedBorder: amber600 — sémantique primary light
-            borderSide: const BorderSide(color: AppColors.amber600, width: 2),
+            borderSide:
+                const BorderSide(color: AppColors.primaryAmberLight, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.space4,
@@ -85,9 +91,8 @@ class AppTheme {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            // backgroundColor: amber600 — sémantique primary light
-            backgroundColor: AppColors.amber600,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.primaryAmberLight,
+            foregroundColor: AppColors.primaryAmberContrastLight,
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
@@ -99,80 +104,69 @@ class AppTheme {
         ],
       );
 
+  /// Thème sombre.
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
         fontFamily: AppTypography.fontFamily,
         colorScheme: const ColorScheme.dark(
-          // primary: primaryAmberDark (#e0a820) — sémantique v5, conforme _dark.scss `--color-primary`
-          // (était amber400 #FBBF24 — Tailwind)
           primary: AppColors.primaryAmberDark,
-          // onPrimary: gray900 (#0a0a0a) — palette propriétaire v5
-          onPrimary: AppColors.gray900,
-          // primaryContainer/onPrimaryContainer: conservation usages structurels Material
-          primaryContainer: AppColors.amber800,
-          onPrimaryContainer: AppColors.amber100,
+          onPrimary: AppColors.primaryAmberContrastDark,
+          primaryContainer: AppColors.primaryMutedDark,
+          onPrimaryContainer: AppColors.textPrimaryDark,
           secondary: AppColors.indigo400,
-          onSecondary: AppColors.gray900,
+          onSecondary: AppColors.textInverseDark,
           secondaryContainer: AppColors.indigo800,
-          // surface: gray800 (#141414) — palette propriétaire v5
-          surface: AppColors.gray800,
-          onSurface: AppColors.gray50,
-          error: Color(0xFFF87171),
-          onError: Colors.white,
-          errorContainer: Color(0x1AEF4444),
-          outline: AppColors.gray600,
-          outlineVariant: AppColors.gray700,
-          // surfaceContainerHighest: gray700 (#1e1e1e) — palette propriétaire v5
-          surfaceContainerHighest: AppColors.gray700,
-          // surfaceContainer: gray800 (#141414)
-          surfaceContainer: AppColors.gray800,
+          surface: AppColors.surfaceDefaultDark,
+          onSurface: AppColors.textPrimaryDark,
+          onSurfaceVariant: AppColors.textSecondaryDark,
+          surfaceContainerHighest: AppColors.surfaceRaisedDark,
+          surfaceContainer: AppColors.surfaceDefaultDark,
+          error: AppColors.textErrorDark,
+          onError: AppColors.textInverseDark,
+          errorContainer: AppColors.bgErrorDark,
+          onErrorContainer: AppColors.textErrorDark,
+          outline: AppColors.borderStrongDark,
+          outlineVariant: AppColors.borderDefaultDark,
         ),
-        // scaffoldBackgroundColor: gray900 (#0a0a0a) — palette propriétaire v5
-        scaffoldBackgroundColor: AppColors.gray900,
+        scaffoldBackgroundColor: AppColors.bgPrimaryDark,
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.gray900,
-          foregroundColor: AppColors.gray50,
+          backgroundColor: AppColors.surfaceRaisedDark,
+          foregroundColor: AppColors.textPrimaryDark,
           elevation: 0,
           scrolledUnderElevation: 1,
         ),
         cardTheme: CardThemeData(
-          color: AppColors.gray800,
+          color: AppColors.surfaceDefaultDark,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            side: const BorderSide(color: AppColors.gray700),
+            side: const BorderSide(color: AppColors.borderDefaultDark),
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: AppColors.gray800,
-          // selectedItemColor: primaryAmberDark (#e0a820) — sémantique primary dark
-          // (était amber400 #FBBF24 — Tailwind)
+          backgroundColor: AppColors.surfaceRaisedDark,
           selectedItemColor: AppColors.primaryAmberDark,
-          unselectedItemColor: AppColors.gray500,
+          unselectedItemColor: AppColors.textSecondaryDark,
           type: BottomNavigationBarType.fixed,
           elevation: 8,
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          // backgroundColor: primaryAmberDark (#e0a820) — sémantique primary dark
-          // (était amber400 #FBBF24 — Tailwind)
           backgroundColor: AppColors.primaryAmberDark,
-          foregroundColor: AppColors.gray900,
+          foregroundColor: AppColors.primaryAmberContrastDark,
           elevation: 4,
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
-            borderSide: const BorderSide(color: AppColors.gray600),
+            borderSide: const BorderSide(color: AppColors.borderDefaultDark),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
-            borderSide: const BorderSide(color: AppColors.gray600),
+            borderSide: const BorderSide(color: AppColors.borderDefaultDark),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
-            // focusedBorder: primaryAmberDark (#e0a820) — sémantique primary dark
-            // (était amber400 #FBBF24 — Tailwind)
             borderSide:
                 const BorderSide(color: AppColors.primaryAmberDark, width: 2),
           ),
@@ -183,10 +177,8 @@ class AppTheme {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            // backgroundColor: primaryAmberDark (#e0a820) — sémantique primary dark
-            // (était amber400 #FBBF24 — Tailwind)
             backgroundColor: AppColors.primaryAmberDark,
-            foregroundColor: AppColors.gray900,
+            foregroundColor: AppColors.primaryAmberContrastDark,
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),

@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -53,7 +54,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
   void initState() {
     super.initState();
     _selectedDate = widget.debt.reminderDate ??
-        DateTime.now().add(const Duration(days: 1));
+        clock.now().add(const Duration(days: 1));
 
     if (widget.debt.reminderTime != null) {
       final parts = widget.debt.reminderTime!.split(':');
@@ -71,7 +72,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
   }
 
   String? _validateDate(AppLocalizations l10n) {
-    final now = DateTime.now();
+    final now = clock.now();
     final today = DateTime(now.year, now.month, now.day);
     if (!_selectedDate.isAfter(today)) {
       return l10n.debtsDialogReminderDatePast;
@@ -83,7 +84,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now(),
+      firstDate: clock.now(),
       lastDate: DateTime(2100),
       locale: ref.read(displayLocaleProvider),
     );

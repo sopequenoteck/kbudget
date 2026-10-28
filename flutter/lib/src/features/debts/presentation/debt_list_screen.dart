@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -216,7 +217,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     }
 
     // Data — groupement temporel
-    final today = DateTime.now();
+    final today = clock.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     final groups = _groupByDueDate(state.items, todayDate);
     final themeExt = theme.extension<AppThemeExtension>();

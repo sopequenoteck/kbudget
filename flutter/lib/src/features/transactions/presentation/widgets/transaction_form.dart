@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -79,7 +80,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     _libelleController = TextEditingController();
     _montantController = TextEditingController();
     _noteController = TextEditingController();
-    _selectedDate = DateTime.now();
+    _selectedDate = clock.now();
     _libelleController.addListener(_onLibelleChanged);
   }
 
@@ -149,7 +150,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
     final tx = Transaction(
       id: widget.transaction?.id ??
-          'pending-${DateTime.now().millisecondsSinceEpoch}',
+          'pending-${clock.now().millisecondsSinceEpoch}',
       montant: double.parse(_montantController.text.trim().replaceAll(',', '.')),
       libelle: _libelleController.text.trim(),
       type: _currentType,
@@ -173,7 +174,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             frequency: _recurringFrequency.name.toUpperCase(),
             nextOccurrence: _isoFormat.format(
               _recurringNextOccurrence ??
-                  DateTime.now().add(const Duration(days: 30)),
+                  clock.now().add(const Duration(days: 30)),
             ),
             categoryId: tx.categoryId,
             accountId: tx.accountId,
@@ -365,7 +366,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             InlineDatePicker(
               value: _isoFormat.format(
                 _recurringNextOccurrence ??
-                    DateTime.now().add(const Duration(days: 30)),
+                    clock.now().add(const Duration(days: 30)),
               ),
               onChanged: (v) =>
                   setState(() => _recurringNextOccurrence = DateTime.parse(v)),

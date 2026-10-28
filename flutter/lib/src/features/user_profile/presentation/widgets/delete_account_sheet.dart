@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
@@ -123,7 +122,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
             Text(
               l10n.usersActionDeleteAccount,
               style: theme.textTheme.titleLarge?.copyWith(
-                color: AppColors.error,
+                color: theme.colorScheme.error,
               ),
             ),
             const SizedBox(height: AppSpacing.space2),
@@ -180,19 +179,19 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
                 const SizedBox(width: AppSpacing.space3),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    foregroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.error,
+                    foregroundColor: theme.colorScheme.onError,
                     disabledBackgroundColor:
-                        AppColors.error.withValues(alpha: 0.4),
+                        theme.colorScheme.error.withValues(alpha: 0.4),
                   ),
                   onPressed: _canSubmit ? _submit : null,
                   child: _isSubmitting
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: theme.colorScheme.onError,
                           ),
                         )
                       : Text(l10n.usersActionDeleteAccount),

@@ -58,11 +58,11 @@ class UserMenuButton extends ConsumerWidget {
       ],
       child: CircleAvatar(
         radius: 16,
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         child: PhosphorIcon(
           PhosphorIconsRegular.user,
           size: 18,
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
     );

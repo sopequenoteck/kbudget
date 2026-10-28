@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -126,7 +127,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
 
     final budget = Budget(
       id: widget.budget?.id ??
-          'pending-${DateTime.now().millisecondsSinceEpoch}',
+          'pending-${clock.now().millisecondsSinceEpoch}',
       categoryId: _selectedCategoryId!,
       montant: double.parse(_montantController.text.trim()),
       frequence: _selectedFrequence,

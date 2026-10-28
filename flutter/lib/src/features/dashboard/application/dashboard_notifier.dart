@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
@@ -114,7 +115,7 @@ class DashboardNotifier extends Notifier<DashboardState>
               );
 
       // Resume mensuel mois courant
-      final now = DateTime.now();
+      final now = clock.now();
       final prevMonth = now.month == 1 ? 12 : now.month - 1;
       final prevYear = now.month == 1 ? now.year - 1 : now.year;
 

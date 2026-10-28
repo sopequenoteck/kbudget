@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:clock/clock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
@@ -161,7 +162,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // exp est en secondes Unix, on ajoute 30s de marge
       final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
-      return DateTime.now().isAfter(expiry.subtract(const Duration(seconds: 30)));
+      return clock.now().isAfter(expiry.subtract(const Duration(seconds: 30)));
     } on Exception {
       return true;
     }

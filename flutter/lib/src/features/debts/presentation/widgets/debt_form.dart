@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -79,7 +80,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
     _currentDebtType = widget.debtType;
     _personneController = TextEditingController();
     _montantController = TextEditingController();
-    _selectedDate = DateTime.now();
+    _selectedDate = clock.now();
   }
 
   @override
@@ -149,7 +150,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
     setState(() => _isSubmitting = true);
 
     final debt = Debt(
-      id: widget.debt?.id ?? 'pending-${DateTime.now().millisecondsSinceEpoch}',
+      id: widget.debt?.id ?? 'pending-${clock.now().millisecondsSinceEpoch}',
       personne: _personneController.text.trim(),
       montant: double.parse(_montantController.text.trim().replaceAll(',', '.')),
       sens: _currentDebtType,
@@ -262,7 +263,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
       child: InlineDatePicker(
         value: _dueDate != null
             ? _isoFormat.format(_dueDate!)
-            : _isoFormat.format(DateTime.now()),
+            : _isoFormat.format(clock.now()),
         onChanged: (v) => setState(() {
           _dueDate = DateTime.parse(v);
           _expandedSection = null;
@@ -291,7 +292,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
           InlineDatePicker(
             value: _reminderDate != null
                 ? _isoFormat.format(_reminderDate!)
-                : _isoFormat.format(DateTime.now()),
+                : _isoFormat.format(clock.now()),
             onChanged: (v) async {
               final picked = DateTime.parse(v);
               setState(() => _reminderDate = picked);

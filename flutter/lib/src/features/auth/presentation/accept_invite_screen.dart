@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,7 +69,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
       final dataSource = AuthRemoteDataSource(dio);
       final repo = AuthRepositoryImpl(dataSource);
 
-      final timezone = DateTime.now().timeZoneName;
+      final timezone = clock.now().timeZoneName;
 
       // Appeler le endpoint accept-invite directement
       final response = await dio.post<Map<String, dynamic>>(

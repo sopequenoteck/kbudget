@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +54,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
   late int _selectedYear;
 
   bool get _isCurrentMonth {
-    final now = DateTime.now();
+    final now = clock.now();
     return _selectedMonth == now.month && _selectedYear == now.year;
   }
 
@@ -69,7 +70,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
 
   void _parseMonth() {
     if (widget.month == null) {
-      final now = DateTime.now();
+      final now = clock.now();
       _selectedMonth = now.month;
       _selectedYear = now.year;
       return;
@@ -84,7 +85,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
         return;
       }
     }
-    final now = DateTime.now();
+    final now = clock.now();
     _selectedMonth = now.month;
     _selectedYear = now.year;
   }
@@ -607,7 +608,7 @@ List<_TxGroup> _groupByDate(
   AppLocalizations l10n,
   String locale,
 ) {
-  final today = DateTime.now();
+  final today = clock.now();
   final todayDate = DateTime(today.year, today.month, today.day);
   final yesterdayDate = todayDate.subtract(const Duration(days: 1));
 

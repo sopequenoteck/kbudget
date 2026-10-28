@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:dio/dio.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/avatar_metadata.dart';
@@ -84,8 +85,8 @@ class UserProfileRepositoryRemote implements UserProfileRepository {
 
     final filename = _extractFilename(
       response.headers.value('content-disposition'),
-      fallback:
-          'kbudget-export-${DateTime.now().millisecondsSinceEpoch}.$fallbackExtension',
+      fallback: 'kbudget-export-${clock.now().millisecondsSinceEpoch}'
+          '.$fallbackExtension',
     );
 
     final dir = await _getExportDirectory();

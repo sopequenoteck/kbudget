@@ -19,6 +19,16 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Mobile app themes aligned with the web** (KKS-600): in the Flutter app,
+  secondary text (dates, hints, labels) now uses the secondary grey instead of
+  the primary text colour, as on the web. In the light theme, the amber of
+  buttons, the floating button and the active tab is the deeper #c66e05 with a
+  dark label, the page background is #f0f0f0 and the header and bottom bar
+  are #f5f5f5; error text is #b91c1c. In the dark theme, the header and bottom
+  bar are #1e1e1e, errors use #d97777 with a dark label on red buttons, and
+  field borders are the subtle #1e1e1e. Avatars use the amber with a dark
+  label, as on the web.
+
 - **Mobile app on the shared K Design colours** (KKS-589): the Flutter app now
   takes its colours from k-design, like the web client. In the light theme,
   income and expense amounts, debts, and warning and information text get the
