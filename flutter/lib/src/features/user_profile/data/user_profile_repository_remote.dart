@@ -85,8 +85,8 @@ class UserProfileRepositoryRemote implements UserProfileRepository {
 
     final filename = _extractFilename(
       response.headers.value('content-disposition'),
-      fallback:
-          'kbudget-export-${clock.now().millisecondsSinceEpoch}.$fallbackExtension',
+      fallback: 'kbudget-export-${clock.now().millisecondsSinceEpoch}'
+          '.$fallbackExtension',
     );
 
     final dir = await _getExportDirectory();

@@ -102,7 +102,8 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>>
       final index = state.items.indexWhere((e) => e.id == id);
       if (index != -1 && !state.items[index].read) {
         final updated = List<NotificationModel>.of(state.items);
-        updated[index] = updated[index].copyWith(read: true, readAt: clock.now());
+        updated[index] =
+            updated[index].copyWith(read: true, readAt: clock.now());
         state = state.copyWith(
           items: updated,
           mutatingIds: {...state.mutatingIds}..remove(id),

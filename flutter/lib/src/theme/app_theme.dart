@@ -23,6 +23,9 @@ class AppTheme {
         useMaterial3: true,
         brightness: Brightness.light,
         fontFamily: AppTypography.fontFamily,
+        // surface (surface-default, #ffffff) et onError (text-inverse,
+        // #ffffff) valent le défaut de ColorScheme.light : non répétés,
+        // vérifiés par app_theme_test.dart.
         colorScheme: const ColorScheme.light(
           primary: AppColors.primaryAmberLight,
           onPrimary: AppColors.primaryAmberContrastLight,
@@ -31,12 +34,10 @@ class AppTheme {
           secondary: AppColors.indigo600,
           onSecondary: AppColors.textInverseLight,
           secondaryContainer: AppColors.indigo100,
-          surface: AppColors.surfaceDefaultLight,
           onSurface: AppColors.textPrimaryLight,
           onSurfaceVariant: AppColors.textSecondaryLight,
           surfaceContainerHighest: AppColors.surfaceRaisedLight,
           error: AppColors.textErrorLight,
-          onError: AppColors.textInverseLight,
           errorContainer: AppColors.errorLight,
           onErrorContainer: AppColors.textErrorLight,
           outline: AppColors.borderStrongLight,
