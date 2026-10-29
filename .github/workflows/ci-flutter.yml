@@ -160,6 +160,9 @@ jobs:
       # `flutter gen-l10n` regenere app_localizations.dart sans lui, en
       # silence — le fichier etant versionne, l'en-tete disparaissait du depot
       # a chaque modification de traduction.
+      # k_tokens.dart est exclu : copie generee par scripts/sync.mjs de k-design,
+      # ecrasee a chaque mise a jour, dont la sortie Dart ne porte plus l'en-tete
+      # depuis k-design v0.4.0 (D16 caduque, KKS-595).
       - name: Verifier que chaque source de flutter/lib porte l'en-tete
         run: |
           missing=""
@@ -167,7 +170,8 @@ jobs:
             if ! head -5 "$file" | grep -q "Mozilla Public"; then
               missing="${missing}  ${file}\n"
             fi
-          done < <(find flutter/lib -name '*.dart' -not -name '*.g.dart' -not -name '*.freezed.dart')
+          done < <(find flutter/lib -name '*.dart' -not -name '*.g.dart' -not -name '*.freezed.dart' \
+            -not -path 'flutter/lib/src/theme/k_tokens.dart')
 
           if [ -n "$missing" ]; then
             echo "::error::Des sources de flutter/lib n'ont pas l'en-tete MPL-2.0."
