@@ -22,7 +22,7 @@ Pour l'historique des decisions : voir `DESIGN-REFONTE.md` (20 sessions).
 
 ## Tokens : k-design
 
-Les valeurs ne sont plus donnees ici. Elles vivent dans **k-design** (`tokens.json`, decisions D1–D16 dans `docs/decisions.md`) et dans le design system Quiet Utility qu'il genere ; K-Budget en recoit une copie par son `scripts/sync.mjs` (manifeste `k-design.json`) : `app/src/styles/k/k-tokens.css` (`--k-*`) pour le web, `flutter/lib/src/theme/k_tokens.dart` (`KTokens`) pour Flutter, ou `AppColors` en est un alias (KKS-589). Les tableaux ci-dessous donnent le role de chaque token.
+Les valeurs ne sont plus donnees ici. Elles vivent dans **k-design** (`tokens.json`, decisions D1–D16 dans `docs/decisions.md`) et dans le design system Quiet Utility qu'il genere ; K-Budget en recoit une copie par son `scripts/sync.mjs` (manifeste `k-design.json`) : `app/src/styles/k/k-tokens.css` (`--k-*`) pour le web, `flutter/lib/src/theme/k_tokens.dart` (`KTokens`) pour Flutter, ou `AppColors` en est un alias (KKS-589). A chaque version de k-design, son workflow ouvre une PR `chore/k-design-sync` vers `develop` : la copie, puis `node scripts/k-design-update.mjs <version>`, qui ajoute la puce des deux CHANGELOG (KKS-595). Les tableaux ci-dessous donnent le role de chaque token.
 
 ## Couleurs — 4 canaux
 

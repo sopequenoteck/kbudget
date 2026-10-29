@@ -53,6 +53,7 @@ This project follows [Semantic Versioning](https://semver.org/).
   and stronger income, expense, warning and info colours that now pass WCAG AA
   contrast. The theme is set by `data-theme` on the page and is dark by
   default.
+- New k-design releases now arrive through an automatic pull request.
 
 ### Fixed
 
