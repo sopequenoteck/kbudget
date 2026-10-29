@@ -1,7 +1,9 @@
-// K Design v0.5.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer.
+// K Design v0.6.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer.
 // ignore_for_file: constant_identifier_names
 
 import 'dart:ui';
+
+import 'package:flutter/animation.dart' show Cubic;
 
 /// Tokens K Design. Thème sombre en premier : `xxxDark` / `xxxLight`.
 class KTokens {
@@ -276,6 +278,20 @@ class KTokens {
   static const double lineHeightNormal = 1.5;
   /// Texte long, rare.
   static const double lineHeightRelaxed = 1.75;
+
+  // ----- Mouvement (D20) -----
+  /// Retours immédiats : survol, appui, bascule d'un interrupteur.
+  static const Duration durationFast = Duration(milliseconds: 120);
+  /// Transitions courantes : ouverture d'un menu, d'une feuille, d'un panneau.
+  static const Duration durationNormal = Duration(milliseconds: 200);
+  /// Mouvements amples et rares : entrée d'un écran, déplacement d'un bloc.
+  static const Duration durationSlow = Duration(milliseconds: 400);
+  /// Courbe par défaut, pour un élément qui change d'état sur place.
+  static const Cubic easingDefault = Cubic(0.4, 0, 0.2, 1);
+  /// Élément qui sort de l'écran.
+  static const Cubic easingIn = Cubic(0.4, 0, 1, 1);
+  /// Élément qui entre à l'écran.
+  static const Cubic easingOut = Cubic(0, 0, 0.2, 1);
 
   static const String fontFamily = 'Inter Variable';
 }
