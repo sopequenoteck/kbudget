@@ -239,7 +239,8 @@ void main() {
           .take(6)
           .join('\n');
 
-      expect(header, contains('Mozilla Public'));
+      // Plus d'en-tete MPL depuis k-design v0.4.0 (D16 caduque) : le fichier est
+      // exclu du controle de licence de ci-flutter.yml (KKS-595).
       expect(header, matches(RegExp(r'K Design v\d+\.\d+\.\d+')));
     });
   });
