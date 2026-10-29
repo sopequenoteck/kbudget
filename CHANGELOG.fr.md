@@ -57,6 +57,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   boutons pleins, et des couleurs de revenu, dépense, avertissement et
   information plus soutenues qui passent le contraste WCAG AA. Le thème est
   posé par `data-theme` sur la page, sombre par défaut.
+- Les nouvelles versions de k-design arrivent désormais par une pull request automatique.
 
 ### Fixed
 
