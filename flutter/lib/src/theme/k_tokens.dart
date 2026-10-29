@@ -1,8 +1,4 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
-// K Design v0.3.1 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer.
+// K Design v0.5.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer.
 // ignore_for_file: constant_identifier_names
 
 import 'dart:ui';

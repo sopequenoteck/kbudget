@@ -54,6 +54,7 @@ This project follows [Semantic Versioning](https://semver.org/).
   contrast. The theme is set by `data-theme` on the page and is dark by
   default.
 - New k-design releases now arrive through an automatic pull request.
+- Design tokens updated to k-design v0.5.0.
 
 ### Fixed
 
