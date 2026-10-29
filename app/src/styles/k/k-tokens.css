@@ -1,4 +1,4 @@
-/* K Design v0.5.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer. */
+/* K Design v0.6.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer. */
 @font-face { font-family: 'Inter Variable'; src: url('./fonts/inter-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
 :root, [data-theme="dark"] {
   color-scheme: dark;
@@ -151,8 +151,25 @@
   --k-z-modal: 400;
   --k-z-toast: 500;
   --k-sidebar-width: 240px;
+  --k-duration-fast: 120ms;
+  --k-duration-normal: 200ms;
+  --k-duration-slow: 400ms;
+  --k-easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --k-easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --k-easing-out: cubic-bezier(0, 0, 0.2, 1);
   --k-font-family: 'Inter Variable', system-ui, -apple-system, sans-serif;
   --k-font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  --k-safe-top: env(safe-area-inset-top, 0px);
+  --k-safe-right: env(safe-area-inset-right, 0px);
+  --k-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --k-safe-left: env(safe-area-inset-left, 0px);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --k-duration-fast: 0ms;
+    --k-duration-normal: 0ms;
+    --k-duration-slow: 0ms;
+  }
 }
 .k-hero-amount { font-family: var(--k-font-family); font-size: 30px; line-height: 1.5; font-weight: 700; letter-spacing: -0.02em; }
 .k-page-title { font-family: var(--k-font-family); font-size: 18px; line-height: 1.5; font-weight: 700; }

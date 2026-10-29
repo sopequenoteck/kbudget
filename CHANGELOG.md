@@ -55,6 +55,7 @@ This project follows [Semantic Versioning](https://semver.org/).
   default.
 - New k-design releases now arrive through an automatic pull request.
 - Design tokens updated to k-design v0.5.0.
+- Design tokens updated to k-design v0.6.0.
 
 ### Fixed
 
