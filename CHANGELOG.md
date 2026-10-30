@@ -7,6 +7,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.14.0] - 2026-10-30
+
 ### Added
 
 - **Bank profiles added without rebuilding the image** (KKS-329): an instance
@@ -295,7 +297,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.14.0...HEAD
+[6.14.0]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...v6.14.0
 [6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
