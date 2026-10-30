@@ -66,6 +66,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   l'application web demande désormais Node 24 : les images de la CI, l'image
   de l'application web et la documentation de contribution et de déploiement
   suivent.
+- Tokens de design mis à jour vers k-design v0.7.0.
 
 ### Fixed
 
