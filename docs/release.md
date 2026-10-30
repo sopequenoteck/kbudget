@@ -24,8 +24,12 @@ Le reste du processus :
    parite — bloc `Unreleased` promu, liens de comparaison. `CHANGELOG.md` est
    en anglais depuis la 6.10.0 ; `CHANGELOG.fr.md` garde tout l'historique
    francais
-2. Commit sur `develop`, puis PR `develop` -> `main` (le push direct sur `main`
-   est bloque)
+2. Commit sur la branche de release, PR vers `develop`. Les ecrans de connexion
+   et de reglages affichent la version : le job « Captures APP » echoue donc a
+   chaque release. Regenerer les references en lancant `visual.yml` a la main
+   sur la branche (`gh workflow run visual.yml --ref chore/release-X.Y.Z`) :
+   il commite `app/e2e/visual/baseline` sur la branche, la CI repart
+3. PR `develop` -> `main` (le push direct sur `main` est bloque)
 4. **Ne jamais pousser le tag** : la CI le cree au merge, apres le gate de tests
    et la publication des images. Un tag `vX.Y.Z` implique donc qu'une image
    `:X.Y.Z` existe
