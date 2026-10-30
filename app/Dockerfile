@@ -1,7 +1,7 @@
 # ---- Stage build ----
 # Epingle sur l'architecture du runner : le bundle Angular produit est statique
 # et independant de l'architecture cible (KKS-308).
-FROM --platform=$BUILDPLATFORM node:22-alpine AS build
+FROM --platform=$BUILDPLATFORM node:24-alpine AS build
 WORKDIR /app
 
 # Cache des dependances npm

@@ -320,7 +320,7 @@ prochaine connexion.
 
 ## Sans Docker
 
-Necessite Java 21, PostgreSQL 15+ et Node 22.
+Necessite Java 21, PostgreSQL 15+ et Node 24.
 
 ```bash
 psql -c "CREATE USER budget_u WITH PASSWORD 'changeme';"

@@ -306,7 +306,7 @@ Setting `password_reset_required` forces the change screen at next sign-in.
 
 ## Running without Docker
 
-Requires Java 21, PostgreSQL 15+ and Node 22.
+Requires Java 21, PostgreSQL 15+ and Node 24.
 
 ```bash
 psql -c "CREATE USER budget_u WITH PASSWORD 'changeme';"

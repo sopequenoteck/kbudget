@@ -23,7 +23,7 @@ real bank statement**, not even your own.
 
 ## Running the project
 
-You need PostgreSQL 15+, Java 21, Node 22 and — for the mobile app — Flutter
+You need PostgreSQL 15+, Java 21, Node 24 and — for the mobile app — Flutter
 3.41 (the version CI pins; later versions do not build the app yet).
 
 ```bash

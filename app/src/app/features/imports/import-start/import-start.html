@@ -62,10 +62,10 @@
         @if (detection()?.accountSuffix; as suffix) {
           {{
             'imports.detail.recognizedWithSuffix'
-              | transloco: { profile: detection()?.profileName, suffix: suffix }
+              | transloco: { profile: $safeNavigationMigration(detection()?.profileName), suffix: suffix }
           }}
         } @else {
-          {{ 'imports.detail.recognized' | transloco: { profile: detection()?.profileName } }}
+          {{ 'imports.detail.recognized' | transloco: { profile: $safeNavigationMigration(detection()?.profileName) } }}
         }
       </span>
     </p>

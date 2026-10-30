@@ -60,6 +60,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Les nouvelles versions de k-design arrivent désormais par une pull request automatique.
 - Tokens de design mis à jour vers k-design v0.5.0.
 - Tokens de design mis à jour vers k-design v0.6.0.
+- **Application web sur Angular 22.2** (KKS-614) : le client web passe
+  d'Angular 21.1 à 22.2 (TypeScript 6.0), la version d'Angular commune aux
+  applications K. Aucun changement pour les utilisateurs. La construction de
+  l'application web demande désormais Node 24 : les images de la CI, l'image
+  de l'application web et la documentation de contribution et de déploiement
+  suivent.
 
 ### Fixed
 
