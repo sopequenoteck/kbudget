@@ -67,6 +67,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   de l'application web et la documentation de contribution et de déploiement
   suivent.
 - Tokens de design mis à jour vers k-design v0.7.0.
+- `k-base.css`, `k-patterns.css` et le socle PWA de k-design (`k-design/pwa/` : fragment nginx, contrôle `k-pwa-check.mjs`, service de mise à jour) sont livrés sans être chargés ; leur adoption viendra avec son propre ticket.
 
 ### Fixed
 
