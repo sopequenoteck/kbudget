@@ -1,4 +1,4 @@
-// K Design v0.6.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer.
+// K Design v0.7.0 — généré par scripts/build.mjs depuis tokens.json. Ne pas éditer.
 // ignore_for_file: constant_identifier_names
 
 import 'dart:ui';

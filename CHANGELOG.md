@@ -60,6 +60,8 @@ This project follows [Semantic Versioning](https://semver.org/).
   to 22.2 (TypeScript 6.0), the single Angular version shared across the K
   apps. No change for users. Building the web app now requires Node 24: the
   CI images, the web app image and the contributor and deployment docs follow.
+- Design tokens updated to k-design v0.7.0.
+- `k-base.css`, `k-patterns.css` and the k-design PWA foundation (`k-design/pwa/`: nginx fragment, `k-pwa-check.mjs` check, update service) are delivered but not loaded yet; adopting them comes with its own ticket.
 
 ### Fixed
 
