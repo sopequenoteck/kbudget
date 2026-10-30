@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'dart:async';
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
@@ -101,7 +102,8 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>>
       final index = state.items.indexWhere((e) => e.id == id);
       if (index != -1 && !state.items[index].read) {
         final updated = List<NotificationModel>.of(state.items);
-        updated[index] = updated[index].copyWith(read: true, readAt: DateTime.now());
+        updated[index] =
+            updated[index].copyWith(read: true, readAt: clock.now());
         state = state.copyWith(
           items: updated,
           mutatingIds: {...state.mutatingIds}..remove(id),
@@ -130,7 +132,7 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>>
       if (isStale(token)) {
         return;
       }
-      final now = DateTime.now();
+      final now = clock.now();
       state = state.copyWith(
         items: state.items.map((n) => n.copyWith(read: true, readAt: now)).toList(),
         isLoading: false,

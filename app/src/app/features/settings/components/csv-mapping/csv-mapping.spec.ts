@@ -349,4 +349,102 @@ describe('CsvMapping', () => {
     expect(fixture.componentInstance.importError()).toBe('Erreur API');
     expect(fixture.componentInstance.importing()).toBe(false);
   });
+
+  describe('cleanupPatterns', () => {
+    const CARD = String.raw`CARTE\s+\w+\d{4}\s+\d{2}/\d{2}\s+`;
+
+    const ready = async () => {
+      const file = new File(['a'], 'releve.csv');
+      const fixture = setup({ file, accountId: 'acc-1' });
+      await fixture.whenStable();
+      fixture.componentInstance.dateColumn.set('Date');
+      fixture.componentInstance.labelColumn.set('Libelle');
+      fixture.componentInstance.amountColumn.set('Montant');
+      return { file, cmp: fixture.componentInstance };
+    };
+
+    it('should_send_empty_cleanup_patterns_when_text_is_empty', async () => {
+      const { file, cmp } = await ready();
+      await cmp.import();
+      expect(importServiceMock.uploadWithMapping).toHaveBeenCalledWith(
+        file,
+        'acc-1',
+        expect.objectContaining({ cleanupPatterns: [] }),
+      );
+    });
+
+    it('should_split_trim_and_drop_blank_lines_keeping_order', async () => {
+      const { cmp } = await ready();
+      cmp.cleanupPatternsText.set('  A  \n\nB\r\n   ');
+      expect(cmp.cleanupPatterns()).toEqual(['A', 'B']);
+    });
+
+    it('should_send_patterns_when_not_saving_as_profile', async () => {
+      const { file, cmp } = await ready();
+      cmp.cleanupPatternsText.set('A\nB');
+      await cmp.import();
+      expect(importServiceMock.uploadWithMapping).toHaveBeenCalledWith(
+        file,
+        'acc-1',
+        expect.objectContaining({ saveAsProfile: false, cleanupPatterns: ['A', 'B'] }),
+      );
+    });
+
+    it('should_send_patterns_when_saving_as_profile', async () => {
+      const { file, cmp } = await ready();
+      cmp.saveAsProfile.set(true);
+      cmp.profileName.set('Ma banque');
+      cmp.cleanupPatternsText.set('A\nB');
+      await cmp.import();
+      expect(importServiceMock.uploadWithMapping).toHaveBeenCalledWith(
+        file,
+        'acc-1',
+        expect.objectContaining({ saveAsProfile: true, cleanupPatterns: ['A', 'B'] }),
+      );
+    });
+
+    it('should_set_exactly_the_card_pattern_when_text_is_empty', () => {
+      const cmp = setup().componentInstance;
+      cmp.addCardPattern();
+      expect(cmp.cleanupPatternsText()).toBe(CARD);
+    });
+
+    it('should_keep_text_unchanged_when_card_pattern_added_twice', () => {
+      const cmp = setup().componentInstance;
+      cmp.addCardPattern();
+      cmp.addCardPattern();
+      expect(cmp.cleanupPatternsText()).toBe(CARD);
+    });
+
+    it('should_keep_text_unchanged_when_card_pattern_already_among_other_lines', () => {
+      const cmp = setup().componentInstance;
+      const text = `A\n  ${CARD}  \nB`;
+      cmp.cleanupPatternsText.set(text);
+      cmp.addCardPattern();
+      expect(cmp.cleanupPatternsText()).toBe(text);
+    });
+
+    it('should_append_card_pattern_on_a_new_line_keeping_other_lines', () => {
+      const cmp = setup().componentInstance;
+      cmp.cleanupPatternsText.set('A\nB');
+      cmp.addCardPattern();
+      expect(cmp.cleanupPatternsText()).toBe(`A\nB\n${CARD}`);
+    });
+
+    it('should_not_add_a_blank_line_when_text_ends_with_a_newline', () => {
+      const cmp = setup().componentInstance;
+      cmp.cleanupPatternsText.set('A\n');
+      cmp.addCardPattern();
+      expect(cmp.cleanupPatternsText()).toBe(`A\n${CARD}`);
+    });
+
+    it('should_keep_the_text_when_the_api_rejects_the_import', async () => {
+      importServiceMock.uploadWithMapping.mockReturnValue(throwError(() => ({ error: {} })));
+      const { cmp } = await ready();
+      cmp.cleanupPatternsText.set('A\n(');
+      await cmp.import();
+      expect(cmp.importError()).toBe('Erreur API');
+      expect(cmp.cleanupPatternsText()).toBe('A\n(');
+    });
+  });
 });

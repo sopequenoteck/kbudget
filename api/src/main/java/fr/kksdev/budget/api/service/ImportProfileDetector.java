@@ -112,7 +112,7 @@ public class ImportProfileDetector {
                 profile.getEncoding(),
                 profile.getDecimalSeparator(),
                 profile.getSkipHeaderLines() != null ? profile.getSkipHeaderLines() : 0,
-                List.of(),
+                profile.getCleanupPatterns() != null ? profile.getCleanupPatterns() : List.of(),
                 mappedColumns,
                 null,
                 null);

@@ -1,22 +1,23 @@
 .speed-dial-overlay {
   position: fixed;
   inset: 0;
-  z-index: var(--z-overlay);
-  background: var(--surface-overlay);
+  z-index: var(--k-z-overlay);
+  background: var(--k-surface-overlay);
 }
 
 .speed-dial-menu {
   position: fixed;
-  bottom: calc(var(--space-6) + 48px + var(--space-3));
-  right: calc(var(--space-6) + var(--safe-right));
-  z-index: calc(var(--z-overlay) + 1);
+  // Mobile : au-dessus de la barre du bas (desktop : media query plus bas)
+  bottom: calc(var(--bottom-nav-height) + var(--k-space-4) + 48px + var(--k-space-3));
+  right: calc(var(--k-space-6) + var(--safe-right));
+  z-index: calc(var(--k-z-overlay) + 1);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0;
-  background: var(--surface-raised);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  background: var(--k-surface-raised);
+  border: 1px solid var(--k-border-default);
+  border-radius: var(--k-radius-lg);
   overflow: hidden;
   opacity: 0;
   transform: translateY(8px);
@@ -27,16 +28,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--k-space-3);
   width: 100%;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--k-space-3) var(--k-space-4);
   border: none;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--k-border-default);
   border-radius: 0;
   background: transparent;
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  color: var(--k-text-primary);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
   cursor: pointer;
   white-space: nowrap;
   transition: background var(--duration-fast) var(--easing-default);
@@ -46,17 +47,17 @@
   }
 
   &:hover {
-    background: var(--bg-tertiary);
+    background: var(--k-bg-tertiary);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--k-color-primary);
     outline-offset: -2px;
   }
 }
 
 .speed-dial-icon {
-  color: var(--text-tertiary);
+  color: var(--k-text-tertiary);
   line-height: 1;
 }
 
@@ -66,9 +67,10 @@
 
 .fab-button {
   position: fixed;
-  bottom: var(--space-6);
-  right: calc(var(--space-6) + var(--safe-right));
-  z-index: calc(var(--z-overlay) + 2);
+  // Mobile : au-dessus de la barre du bas (desktop : media query plus bas)
+  bottom: calc(var(--bottom-nav-height) + var(--k-space-4));
+  right: calc(var(--k-space-6) + var(--safe-right));
+  z-index: calc(var(--k-z-overlay) + 2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,21 +78,21 @@
   height: 48px;
   padding: 0;
   border: none;
-  border-radius: var(--radius-round);
-  background: var(--color-primary);
-  color: var(--color-primary-contrast);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--k-radius-round);
+  background: var(--k-color-primary);
+  color: var(--k-color-primary-contrast);
+  box-shadow: var(--k-shadow-sm);
   cursor: pointer;
   transition:
     background var(--duration-normal) var(--easing-default),
     box-shadow var(--duration-normal) var(--easing-default);
 
   &:hover {
-    background: var(--color-primary-hover);
+    background: var(--k-color-primary-hover);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--k-color-primary);
     outline-offset: 2px;
   }
 
@@ -100,29 +102,20 @@
 }
 
 .fab-icon {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--k-font-size-xl);
+  font-weight: var(--k-font-weight-bold);
   line-height: 1;
   transition: transform var(--duration-normal) var(--easing-default);
-}
-
-// -- Mobile: FAB above bottom nav --
-.fab-button {
-  bottom: calc(var(--bottom-nav-height) + var(--space-4));
-}
-
-.speed-dial-menu {
-  bottom: calc(var(--bottom-nav-height) + var(--space-4) + 48px + var(--space-3));
 }
 
 // -- Desktop: restore original positions --
 @media (min-width: 768px) {
   .fab-button {
-    bottom: calc(var(--space-6) + var(--safe-bottom));
+    bottom: calc(var(--k-space-6) + var(--safe-bottom));
   }
 
   .speed-dial-menu {
-    bottom: calc(var(--space-6) + var(--safe-bottom) + 48px + var(--space-3));
+    bottom: calc(var(--k-space-6) + var(--safe-bottom) + 48px + var(--k-space-3));
   }
 }
 

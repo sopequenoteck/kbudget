@@ -32,7 +32,7 @@ class AdminUserListItem extends StatelessWidget {
       leading: CircleAvatar(
         backgroundColor: isDisabled
             ? AppColors.gray600
-            : theme.colorScheme.primaryContainer,
+            : theme.colorScheme.primary,
         child: Text(
           user.displayName.isNotEmpty
               ? user.displayName[0].toUpperCase()
@@ -40,7 +40,7 @@ class AdminUserListItem extends StatelessWidget {
           style: TextStyle(
             color: isDisabled
                 ? AppColors.gray400
-                : theme.colorScheme.onPrimaryContainer,
+                : theme.colorScheme.onPrimary,
             fontWeight: FontWeight.w600,
           ),
         ),

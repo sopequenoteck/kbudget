@@ -4,52 +4,52 @@
   flex-direction: column;
   // Hors shell (connexion, invitation, version incompatible) : rien sous l'encoche.
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background-color: var(--bg-primary);
+  background-color: var(--k-bg-primary);
 }
 
 .auth-shell__header {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-8) var(--space-5) var(--space-4);
+  gap: var(--k-space-2);
+  padding: var(--k-space-8) var(--k-space-5) var(--k-space-4);
 }
 
 .auth-shell__logo {
   width: 64px;
   height: 64px;
   flex-shrink: 0;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--k-space-2);
 }
 
 .auth-shell__header-text {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--k-space-2);
 }
 
 .auth-shell__title {
   margin: 0;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  font-size: var(--k-font-size-3xl);
+  font-weight: var(--k-font-weight-bold);
+  color: var(--k-text-primary);
   line-height: 1.1;
 }
 
 .auth-shell__tagline {
   margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  color: var(--k-text-secondary);
 }
 
 .auth-shell__main {
   flex: 1;
   width: 100%;
   max-width: 480px;
-  padding: var(--space-6) var(--space-5);
+  padding: var(--k-space-6) var(--k-space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--k-space-5);
 }
 
 .auth-shell__main--md {
@@ -57,19 +57,19 @@
 }
 
 .auth-shell__error {
-  padding: var(--space-3);
-  background-color: var(--bg-error);
-  color: var(--text-error);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+  padding: var(--k-space-3);
+  background-color: var(--k-bg-error);
+  color: var(--k-text-error);
+  border-radius: var(--k-radius-md);
+  font-size: var(--k-font-size-sm);
 }
 
 .auth-shell__footer {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--k-space-4) var(--k-space-5);
 }
 
 .auth-shell__version {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
 }
 

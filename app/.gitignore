@@ -6,6 +6,14 @@
 /out-tsc
 /bazel-out
 
+# Captures visuelles (e2e/visual, paquet separe) : dependances et resultats d'execution, jamais les references
+/e2e/visual/node_modules
+/e2e/visual/test-results
+/e2e/visual/playwright-report
+
+# Journaux de postcss-angular (syntaxe Stylelint des styles inline .ts)
+/.postcss-angular
+
 # Node
 /node_modules
 npm-debug.log

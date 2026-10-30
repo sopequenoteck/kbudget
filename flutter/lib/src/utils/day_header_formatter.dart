@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 
@@ -22,7 +23,7 @@ class DayHeaderFormatter {
     required AppLocalizations l10n,
     DateTime? now,
   }) {
-    final ref = now ?? DateTime.now();
+    final ref = now ?? clock.now();
     final today = DateTime(ref.year, ref.month, ref.day);
     final target = DateTime(date.year, date.month, date.day);
 

@@ -1,0 +1,69 @@
+name: Qualité - styles (Angular)
+
+# Garde-fous de la règle « tokens uniquement » de DESIGN.md (KKS-590).
+#
+#   - Stylelint (app/.stylelintrc.json), sur les .scss et les styles inline des
+#     composants .ts : pas de hex, pas de rgb()/hsl(), pas de couleur nommée ;
+#     couleurs, rayons, ombres, tailles et graisses passent par var(--k-…) ou un
+#     mot-clé. Exceptions nommées, ligne par ligne (stylelint-disable-next-line
+#     avec sa raison).
+#   - scripts/check-css-vars.mjs : aucune variable CSS inconnue (absente de
+#     k-tokens.css ou des déclarations locales), aucun --k-* redéclaré.
+#   - Sélecteurs en double : no-duplicate-selectors par fichier (Stylelint) et,
+#     sur la feuille globale compilée, scripts/check-global-duplicates.mjs.
+#
+# Runner GitHub, sans infra maison : une PR de fork l'exécute aussi, et un
+# contributeur reproduit l'échec en local avec `cd app && npm run lint:styles`.
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+    paths:
+      - 'app/**'
+      - 'scripts/check-css-vars.mjs'
+      - 'scripts/check-global-duplicates.mjs'
+      - '.github/workflows/quality.yml'
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # Fichiers de la PR : les jobs suivants sont sautés si elle ne touche pas le
+  # motif (.github/actions/changed). Un job sauté satisfait un check obligatoire.
+  changes:
+    name: Fichiers concernés (styles)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.changed.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: changed
+        uses: ./.github/actions/changed
+        with:
+          pattern: '^(app/|scripts/check-css-vars\.mjs$|scripts/check-global-duplicates\.mjs$|\.github/workflows/quality\.yml$|\.github/actions/changed/)'
+
+  styles:
+    name: Styles APP (tokens uniquement)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: node:24
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stylelint + variables inconnues
+        working-directory: app
+        run: |
+          npm ci
+          npm run lint:styles

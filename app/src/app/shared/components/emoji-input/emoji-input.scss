@@ -3,16 +3,17 @@
   display: inline-block;
 
   .emoji-trigger {
-    width: var(--space-12);
-    height: var(--space-12);
+    width: var(--k-space-12);
+    height: var(--k-space-12);
+    // stylelint-disable-next-line scale-unlimited/declaration-strict-value -- taille de glyphe d'emoji, hors échelle typographique
     font-size: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl);
-    background-color: var(--surface-default);
+    border: 1px solid var(--k-border-default);
+    border-radius: var(--k-radius-xl);
+    background-color: var(--k-surface-default);
     cursor: pointer;
     user-select: none;
     transition:
@@ -20,13 +21,13 @@
       box-shadow var(--duration-fast) var(--easing-default);
 
     &:focus-visible {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 4px var(--color-primary-light);
+      outline: 2px solid var(--k-color-primary);
+      outline-offset: 2px;
+      border-color: var(--k-color-primary);
     }
 
     &:hover {
-      border-color: var(--color-primary);
+      border-color: var(--k-color-primary);
     }
   }
 
@@ -44,7 +45,7 @@
 
 /* Surcharges emoji-mart — layout & text scale (couleurs gérées en JS via setProperty) */
 ::ng-deep em-emoji-picker {
-  --border-radius: var(--radius-xl);
-  --shadow: var(--shadow-lg);
+  --border-radius: var(--k-radius-xl);
+  --shadow: var(--k-shadow-lg);
   --font-size: 0.9375rem; /* 15px/16 en rem — suit le text scale */
 }

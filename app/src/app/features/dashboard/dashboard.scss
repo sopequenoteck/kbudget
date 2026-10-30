@@ -6,10 +6,10 @@
 :host {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
+  padding: var(--k-space-4);
   position: relative;
   // Intentional spacing: hero breathes more than detail sections
-  gap: var(--space-8);
+  gap: var(--k-space-8);
 }
 
 // =============================================================================
@@ -19,7 +19,7 @@
 .hero {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--k-space-4);
 }
 
 .hero__top-row {
@@ -29,22 +29,22 @@
 }
 
 .hero__greeting {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-normal);
+  color: var(--k-text-secondary);
 }
 
 // -- Montant principal --
 .hero__amount {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--k-space-1);
 }
 
 .hero__amount-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -52,25 +52,25 @@
 .hero__amount-value-row {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--k-space-2);
 }
 
 .hero__amount-value {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
+  font-size: var(--k-font-size-3xl);
+  font-weight: var(--k-font-weight-bold);
+  line-height: var(--k-line-height-tight);
 }
 
 .hero__converted {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
 }
 
 .hero__meta-row {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-4);
-  margin-top: var(--space-1);
+  gap: var(--k-space-4);
+  margin-top: var(--k-space-1);
 }
 
 .hero__meta-group {
@@ -82,23 +82,23 @@
 .hero__meta-line {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  gap: var(--k-space-1);
+  font-size: var(--k-font-size-xs);
+  color: var(--k-text-tertiary);
 
   ::ng-deep ng-icon {
     min-width: 14px;
   }
 
   &--expense {
-    color: var(--color-expense);
+    color: var(--k-color-expense);
   }
 
   &--clickable {
     cursor: pointer;
 
     &:hover {
-      color: var(--text-secondary);
+      color: var(--k-text-secondary);
     }
   }
 }
@@ -111,21 +111,21 @@
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
-  gap: var(--space-1);
+  gap: var(--k-space-1);
   padding: 0;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-medium);
 
   &--positive {
-    color: var(--text-success);
+    color: var(--k-text-success);
   }
 
   &--negative {
-    color: var(--text-error);
+    color: var(--k-text-error);
   }
 
   &--neutral {
-    color: var(--text-secondary);
+    color: var(--k-text-secondary);
   }
 }
 
@@ -134,13 +134,13 @@
 // =============================================================================
 
 .missing-rate-icon {
-  color: var(--text-warning);
+  color: var(--k-text-warning);
   flex-shrink: 0;
   cursor: default;
 }
 
 .state-loading--accounts {
-  padding: var(--space-4);
+  padding: var(--k-space-4);
 }
 
 
@@ -151,7 +151,7 @@
 .dashboard-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--k-space-3);
 
   &__header {
     display: flex;
@@ -160,17 +160,17 @@
   }
 
   &__title {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-secondary);
+    font-size: var(--k-font-size-base);
+    font-weight: var(--k-font-weight-semibold);
+    color: var(--k-text-secondary);
     margin: 0;
   }
 
   &__link {
-    font-size: var(--font-size-sm);
-    color: var(--color-primary);
+    font-size: var(--k-font-size-sm);
+    color: var(--k-color-primary);
     text-decoration: none;
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--k-font-weight-medium);
 
     &:hover {
       text-decoration: underline;
@@ -185,12 +185,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
+  background-color: var(--k-surface-default);
+  border-radius: var(--k-radius-xl);
   overflow: hidden;
 
   li {
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--k-border-default);
 
     &:last-child {
       border-bottom: none;
@@ -208,12 +208,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-6) var(--space-4);
-  gap: var(--space-4);
-  color: var(--text-secondary);
+  padding: var(--k-space-6) var(--k-space-4);
+  gap: var(--k-space-4);
+  color: var(--k-text-secondary);
 }
 
 .state-loading--summary {
-  padding: var(--space-4);
+  padding: var(--k-space-4);
 }
 

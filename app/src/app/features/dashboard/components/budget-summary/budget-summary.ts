@@ -70,7 +70,7 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
     :host {
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
+      gap: var(--k-space-3);
     }
 
     .budget-summary__subtitle {
@@ -78,9 +78,9 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
       justify-content: space-between;
       align-items: center;
       margin: 0;
-      font-size: var(--font-size-xs);
-      font-weight: var(--font-weight-medium);
-      color: var(--text-secondary);
+      font-size: var(--k-font-size-xs);
+      font-weight: var(--k-font-weight-medium);
+      color: var(--k-text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -97,56 +97,56 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
       padding: 0;
       display: flex;
       flex-direction: column;
-      background-color: var(--surface-default);
-      border-radius: var(--radius-xl);
+      background-color: var(--k-surface-default);
+      border-radius: var(--k-radius-xl);
       overflow: hidden;
     }
 
     .budget-item {
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
-      padding: var(--space-3) var(--space-4);
+      gap: var(--k-space-2);
+      padding: var(--k-space-3) var(--k-space-4);
     }
 
     .budget-item__header {
       display: flex;
       align-items: center;
-      gap: var(--space-2);
+      gap: var(--k-space-2);
     }
 
     .budget-item__icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: var(--space-8);
-      height: var(--space-8);
-      font-size: var(--font-size-lg);
-      background-color: var(--icon-circle-bg);
-      border-radius: var(--radius-round);
+      width: var(--k-space-8);
+      height: var(--k-space-8);
+      font-size: var(--k-font-size-lg);
+      background-color: var(--k-icon-circle-bg);
+      border-radius: var(--k-radius-round);
       line-height: 1;
       flex-shrink: 0;
     }
 
     .budget-item__name {
       flex: 1;
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-      color: var(--text-primary);
+      font-size: var(--k-font-size-sm);
+      font-weight: var(--k-font-weight-medium);
+      color: var(--k-text-primary);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .budget-item__amounts {
-      font-size: var(--font-size-xs);
-      color: var(--text-tertiary);
+      font-size: var(--k-font-size-xs);
+      color: var(--k-text-tertiary);
       white-space: nowrap;
       flex-shrink: 0;
 
       &.over-budget {
-        color: var(--color-expense);
-        font-weight: var(--font-weight-semibold);
+        color: var(--k-color-expense);
+        font-weight: var(--k-font-weight-semibold);
       }
     }
 
@@ -154,15 +154,15 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
       position: relative;
       width: 100%;
       height: 4px;
-      background-color: var(--border-default);
-      border-radius: var(--radius-round);
+      background-color: var(--k-border-default);
+      border-radius: var(--k-radius-round);
       overflow: hidden;
     }
 
     .budget-bar__fill {
       height: 100%;
-      border-radius: var(--radius-round);
-      background-color: var(--color-income);
+      border-radius: var(--k-radius-round);
+      background-color: var(--k-color-income);
       opacity: 0.7;
       transition: width var(--duration-slow) var(--easing-out);
       min-width: 0;
@@ -172,11 +172,11 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
       }
 
       &.budget-bar__fill--warning {
-        background-color: var(--text-warning);
+        background-color: var(--k-text-warning);
       }
 
       &.budget-bar__fill--exceeded {
-        background-color: var(--color-expense);
+        background-color: var(--k-color-expense);
       }
     }
 
@@ -186,8 +186,8 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
       top: 0;
       width: 3px;
       height: 100%;
-      background-color: var(--color-expense);
-      border-radius: 0 var(--radius-round) var(--radius-round) 0;
+      background-color: var(--k-color-expense);
+      border-radius: 0 var(--k-radius-round) var(--k-radius-round) 0;
     }
   `,
 })

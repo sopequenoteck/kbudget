@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -80,7 +81,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
     _selectedFrequency = widget.frequence;
     _nomController = TextEditingController();
     _montantController = TextEditingController();
-    _selectedDate = DateTime.now();
+    _selectedDate = clock.now();
   }
 
   @override
@@ -151,7 +152,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
 
     final sub = Subscription(
       id: widget.subscription?.id ??
-          'pending-${DateTime.now().millisecondsSinceEpoch}',
+          'pending-${clock.now().millisecondsSinceEpoch}',
       nom: _nomController.text.trim(),
       montant: double.parse(_montantController.text.trim().replaceAll(',', '.')),
       frequence: _selectedFrequency,

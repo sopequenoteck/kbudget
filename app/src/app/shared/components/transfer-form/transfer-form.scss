@@ -1,22 +1,22 @@
 .transfer-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--k-space-4);
 }
 
 .transfer-form__no-accounts {
   text-align: center;
-  padding: var(--space-6) var(--space-4);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  padding: var(--k-space-6) var(--k-space-4);
+  color: var(--k-text-secondary);
+  font-size: var(--k-font-size-sm);
 }
 
 .form-error-banner {
-  padding: var(--space-2) var(--space-3);
-  background: var(--bg-error);
-  color: var(--text-error);
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
+  padding: var(--k-space-2) var(--k-space-3);
+  background: var(--k-bg-error);
+  color: var(--k-text-error);
+  border-radius: var(--k-radius-lg);
+  font-size: var(--k-font-size-sm);
 }
 
 textarea {
@@ -27,6 +27,6 @@ textarea {
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
+  gap: var(--k-space-3);
+  padding-top: var(--k-space-3);
 }

@@ -2,13 +2,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
+
 /// Helpers partagés pour la gestion du mois sélectionné dans les écrans budget.
 mixin BudgetMonthHelpers {
   int get selectedMonth;
   int get selectedYear;
 
   bool get isCurrentMonth {
-    final now = DateTime.now();
+    final now = clock.now();
     return selectedMonth == now.month && selectedYear == now.year;
   }
 
@@ -18,7 +20,7 @@ mixin BudgetMonthHelpers {
   }
 
   bool isPastMonthLimit(int month, int year) {
-    final now = DateTime.now();
+    final now = clock.now();
     final limit = DateTime(now.year - 1, now.month);
     final selected = DateTime(year, month);
     return selected.isBefore(limit);

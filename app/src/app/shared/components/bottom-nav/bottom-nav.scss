@@ -5,9 +5,9 @@
   left: 0;
   right: 0;
   height: var(--bottom-nav-height);
-  background-color: var(--surface-raised);
-  border-top: 1px solid var(--border-default);
-  z-index: var(--z-sticky);
+  background-color: var(--k-surface-raised);
+  border-top: 1px solid var(--k-border-default);
+  z-index: var(--k-z-sticky);
   // `--bottom-nav-height` inclut `--safe-bottom` : les 72px utiles restent entiers.
   padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
@@ -25,19 +25,20 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: var(--space-2) var(--space-1);
+  padding: var(--k-space-2) var(--k-space-1);
   text-decoration: none;
-  color: var(--text-secondary);
+  color: var(--k-text-secondary);
   position: relative;
   transition: color var(--duration-normal) var(--easing-default);
 
   &.active {
-    color: var(--color-primary);
-    font-weight: var(--font-weight-semibold);
+    color: var(--k-color-primary);
+    font-weight: var(--k-font-weight-semibold);
   }
 }
 
 .bottom-nav-icon {
+  // stylelint-disable-next-line scale-unlimited/declaration-strict-value -- taille de glyphe d'icône, hors échelle typographique
   font-size: 1.625rem;
   line-height: 1;
   position: relative;
@@ -45,7 +46,7 @@
 }
 
 .bottom-nav-label {
-  font-size: var(--font-size-xs);
+  font-size: var(--k-font-size-xs);
   line-height: 1;
   white-space: nowrap;
   width: 100%;
@@ -56,5 +57,5 @@
 
 // Police réduite pour 6+ items
 :host([data-item-count="6"]) .bottom-nav-label {
-  font-size: 0.625rem;
+  font-size: var(--k-font-size-2xs);
 }

@@ -2,22 +2,22 @@
 .shell-header {
   position: sticky;
   top: 0;
-  z-index: var(--z-sticky);
+  z-index: var(--k-z-sticky);
   display: flex;
   align-items: center;
   justify-content: space-between;
   // `--header-height` inclut `--safe-top` : l'en-tete passe sous la barre d'etat
   // (`black-translucent`) et son contenu reste centre sur les 64px utiles.
   height: var(--header-height);
-  padding: var(--safe-top) calc(var(--space-4) + var(--safe-right)) 0 calc(var(--space-4) + var(--safe-left));
-  background-color: var(--surface-raised);
-  border-bottom: 1px solid var(--border-default);
+  padding: var(--safe-top) calc(var(--k-space-4) + var(--safe-right)) 0 calc(var(--k-space-4) + var(--safe-left));
+  background-color: var(--k-surface-raised);
+  border-bottom: 1px solid var(--k-border-default);
 }
 
 .shell-brand {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--k-space-2);
   text-decoration: none;
 }
 
@@ -27,16 +27,16 @@
 }
 
 .shell-brand-name {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  font-size: var(--k-font-size-xl);
+  font-weight: var(--k-font-weight-bold);
+  color: var(--k-color-primary);
 }
 
 // -- Header actions (contextual per page) --
 .shell-header__actions {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--k-space-4);
 }
 
 // -- User menu & dropdown --
@@ -54,7 +54,7 @@
   border-radius: 50%;
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--k-color-primary);
     outline-offset: 2px;
   }
 }
@@ -66,10 +66,10 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: var(--color-primary);
-  color: var(--color-primary-contrast);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  background-color: var(--k-color-primary);
+  color: var(--k-color-primary-contrast);
+  font-size: var(--k-font-size-xs);
+  font-weight: var(--k-font-weight-bold);
   user-select: none;
   overflow: hidden;
 
@@ -83,37 +83,37 @@
 
 .shell-dropdown {
   position: absolute;
-  top: calc(100% + var(--space-2));
+  top: calc(100% + var(--k-space-2));
   right: 0;
-  z-index: var(--z-overlay);
+  z-index: var(--k-z-overlay);
   min-width: 180px;
-  background-color: var(--surface-default);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-2) 0;
+  background-color: var(--k-surface-default);
+  border: 1px solid var(--k-border-default);
+  border-radius: var(--k-radius-lg);
+  box-shadow: var(--k-shadow-md);
+  padding: var(--k-space-2) 0;
 }
 
 .shell-dropdown-name {
-  padding: var(--space-2) var(--space-4);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-default);
-  margin-bottom: var(--space-1);
+  padding: var(--k-space-2) var(--k-space-4);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-semibold);
+  color: var(--k-text-primary);
+  border-bottom: 1px solid var(--k-border-default);
+  margin-bottom: var(--k-space-1);
 }
 
 .shell-dropdown-item {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--k-space-2);
   width: 100%;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--k-space-2) var(--k-space-4);
   background: none;
   border: none;
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  color: var(--k-text-secondary);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
   text-decoration: none;
   cursor: pointer;
   transition:
@@ -121,21 +121,21 @@
     color var(--duration-normal) var(--easing-default);
 
   &:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
+    background-color: var(--k-hover-bg);
+    color: var(--k-text-primary);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--k-color-primary);
     outline-offset: -2px;
   }
 }
 
 .shell-dropdown-logout {
-  color: var(--text-error);
+  color: var(--k-text-error);
 
   &:hover {
-    color: var(--text-error);
+    color: var(--k-text-error);
   }
 }
 
@@ -160,37 +160,37 @@ bottom-nav {
 .shell-content {
   min-height: calc(100dvh - var(--header-height));
   padding-right: var(--safe-right);
-  padding-bottom: calc(var(--bottom-nav-height) + var(--space-6) + 56px + var(--space-4));
+  padding-bottom: calc(var(--bottom-nav-height) + var(--k-space-6) + 56px + var(--k-space-4));
   padding-left: var(--safe-left);
 }
 
 // -- Footer actions de Modal (ex: catégorie depuis Settings) --
 .modal__actions {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--k-space-3);
   justify-content: flex-end;
-  padding: var(--space-4) 0 0;
-  border-top: 1px solid var(--border-default);
-  margin-top: var(--space-4);
+  padding: var(--k-space-4) 0 0;
+  border-top: 1px solid var(--k-border-default);
+  margin-top: var(--k-space-4);
 }
 
 // -- Toggle type transaction (header modal) → segmented control iOS --
 .type-toggle {
   display: flex;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  border-radius: var(--radius-lg);
-  background-color: var(--bg-tertiary);
+  gap: var(--k-space-1);
+  padding: var(--k-space-1);
+  border-radius: var(--k-radius-lg);
+  background-color: var(--k-bg-tertiary);
   flex-shrink: 0;
 
   button {
-    padding: var(--space-1) var(--space-3);
+    padding: var(--k-space-1) var(--k-space-3);
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--k-radius-md);
     background-color: transparent;
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
+    color: var(--k-text-secondary);
+    font-size: var(--k-font-size-xs);
+    font-weight: var(--k-font-weight-medium);
     cursor: pointer;
     transition:
       background-color var(--duration-normal) var(--easing-default),
@@ -198,9 +198,9 @@ bottom-nav {
       box-shadow var(--duration-normal) var(--easing-default);
 
     &.active {
-      background-color: var(--surface-default);
-      color: var(--text-primary);
-      box-shadow: var(--shadow-sm);
+      background-color: var(--k-surface-default);
+      color: var(--k-text-primary);
+      box-shadow: var(--k-shadow-sm);
     }
   }
 }
@@ -214,40 +214,40 @@ bottom-nav {
     top: var(--header-height);
     left: 0;
     bottom: 0;
-    width: var(--sidebar-width);
-    padding: var(--space-3);
-    background-color: var(--surface-default);
+    width: var(--k-sidebar-width);
+    padding: var(--k-space-3);
+    background-color: var(--k-surface-default);
     transform: translateX(0);
     box-shadow: none;
 
     a {
       display: block;
-      padding: var(--space-3) var(--space-4);
-      margin-bottom: var(--space-1);
-      color: var(--text-secondary);
+      padding: var(--k-space-3) var(--k-space-4);
+      margin-bottom: var(--k-space-1);
+      color: var(--k-text-secondary);
       text-decoration: none;
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-      border-radius: var(--radius-lg);
+      font-size: var(--k-font-size-sm);
+      font-weight: var(--k-font-weight-medium);
+      border-radius: var(--k-radius-lg);
       transition:
         background-color var(--duration-normal) var(--easing-default),
         color var(--duration-normal) var(--easing-default);
       cursor: pointer;
 
       &:hover {
-        background-color: var(--hover-bg);
+        background-color: var(--k-hover-bg);
       }
 
       &.active {
-        color: var(--color-primary);
-        background-color: var(--color-primary-light);
+        color: var(--k-color-primary);
+        background-color: var(--k-color-primary-light);
       }
     }
   }
 
   .shell-content {
-    margin-left: var(--sidebar-width);
-    padding-bottom: calc(56px + var(--space-6) + var(--space-4));
+    margin-left: var(--k-sidebar-width);
+    padding-bottom: calc(56px + var(--k-space-6) + var(--k-space-4));
   }
 
   bottom-nav {

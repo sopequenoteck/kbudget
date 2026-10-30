@@ -191,6 +191,11 @@ public class ImportController {
         try {
             mapping = OBJECT_MAPPER.readValue(mappingJson, CsvMappingRequest.class);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+                if (cause instanceof IllegalArgumentException invalid) {
+                    throw invalid;
+                }
+            }
             throw new IllegalArgumentException("Invalid JSON mapping (" + e.getClass().getSimpleName() + ")");
         }
         ImportDraftResponse response = importService.uploadWithMapping(file, accountId, mapping, userId);

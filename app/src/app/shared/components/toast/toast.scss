@@ -1,47 +1,47 @@
 .toast-container {
   position: fixed;
-  bottom: calc(var(--bottom-nav-height, 64px) + var(--space-4, 16px));
-  right: calc(var(--space-4, 16px) + var(--safe-right, 0px));
+  bottom: calc(var(--bottom-nav-height, 64px) + var(--k-space-4, 16px));
+  right: calc(var(--k-space-4, 16px) + var(--safe-right, 0px));
   z-index: 2000;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2, 8px);
+  gap: var(--k-space-2, 8px);
   pointer-events: none;
-  width: min(360px, calc(100vw - var(--space-8, 32px)));
+  width: min(360px, calc(100vw - var(--k-space-8, 32px)));
 }
 
 .toast {
   display: flex;
   align-items: center;
-  gap: var(--space-3, 12px);
-  padding: var(--space-3, 12px) var(--space-4, 16px);
-  border-radius: var(--radius-md, 8px);
-  box-shadow: var(--shadow-md);
-  font-size: var(--font-sm, 14px);
-  font-weight: 500;
+  gap: var(--k-space-3, 12px);
+  padding: var(--k-space-3, 12px) var(--k-space-4, 16px);
+  border-radius: var(--k-radius-md, 8px);
+  box-shadow: var(--k-shadow-md);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
   pointer-events: auto;
   animation: toast-slide-in 0.25s ease-out;
 
   &--success {
-    background-color: var(--text-success);
-    color: var(--text-inverse);
+    background-color: var(--k-text-success);
+    color: var(--k-text-inverse);
   }
 
   &--error {
-    background-color: var(--text-error);
-    color: var(--text-inverse);
+    background-color: var(--k-text-error);
+    color: var(--k-text-inverse);
   }
 
   &--info {
-    background-color: var(--color-primary);
-    color: var(--text-inverse);
+    background-color: var(--k-color-primary);
+    color: var(--k-color-primary-contrast);
   }
 }
 
 .toast-icon {
   flex-shrink: 0;
-  font-size: var(--font-base, 16px);
-  font-weight: 700;
+  font-size: var(--k-font-size-base);
+  font-weight: var(--k-font-weight-bold);
   line-height: 1;
 }
 
@@ -60,7 +60,7 @@
   opacity: 0.8;
   padding: 0;
   line-height: 1;
-  font-size: var(--font-sm, 14px);
+  font-size: var(--k-font-size-sm);
   transition: opacity 0.15s;
 
   &:hover {
@@ -70,7 +70,7 @@
 
 @keyframes toast-slide-in {
   from {
-    transform: translateX(calc(100% + var(--space-4, 16px)));
+    transform: translateX(calc(100% + var(--k-space-4, 16px)));
     opacity: 0;
   }
   to {
@@ -84,7 +84,7 @@
     right: 0;
     left: 0;
     width: 100%;
-    bottom: calc(var(--bottom-nav-height, 64px) + var(--space-2, 8px));
-    padding: 0 calc(var(--space-3, 12px) + var(--safe-right, 0px)) 0 calc(var(--space-3, 12px) + var(--safe-left, 0px));
+    bottom: calc(var(--bottom-nav-height, 64px) + var(--k-space-2, 8px));
+    padding: 0 calc(var(--k-space-3, 12px) + var(--safe-right, 0px)) 0 calc(var(--k-space-3, 12px) + var(--safe-left, 0px));
   }
 }

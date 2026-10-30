@@ -357,7 +357,9 @@ describe('AuthService — restauration de session (KKS-448)', () => {
       service.refreshAccessToken().subscribe();
 
       // Assert
-      httpTesting.expectOne(isRefreshCall).flush(refreshResponse());
+      const refreshCalls = httpTesting.match(isRefreshCall);
+      expect(refreshCalls).toHaveLength(1);
+      refreshCalls[0].flush(refreshResponse());
     });
 
     it('should_allow_a_new_refresh_once_the_previous_one_has_failed', async () => {
@@ -376,7 +378,9 @@ describe('AuthService — restauration de session (KKS-448)', () => {
       service.refreshAccessToken().subscribe({ error: () => undefined });
 
       // Assert
-      httpTesting.expectOne(isRefreshCall).flush('Unavailable', {
+      const refreshCalls = httpTesting.match(isRefreshCall);
+      expect(refreshCalls).toHaveLength(1);
+      refreshCalls[0].flush('Unavailable', {
         status: 503,
         statusText: 'Service Unavailable',
       });

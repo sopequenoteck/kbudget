@@ -494,6 +494,7 @@
   },
   "imports": {
     "action": {
+      "addCardPattern": "Add the card payment pattern",
       "addRule": "Add a rule",
       "analyse": "Analyse the statement",
       "apply": "Apply",
@@ -576,6 +577,9 @@
       "category": "Category",
       "categoryPlaceholder": "-- Select a category --",
       "categoryRequired": "The category is required.",
+      "cleanupPatterns": "Label clean-up patterns",
+      "cleanupPatternsHint": "Regular expressions removed from the label before categorisation.",
+      "cleanupPatternsPlaceholder": "one expression per line",
       "creditColumn": "Credit column",
       "dateColumn": "Date column",
       "dateFormat": "Date format",

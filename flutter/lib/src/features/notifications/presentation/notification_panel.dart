@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -178,7 +179,11 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.space4),
         color: theme.colorScheme.error,
-        child: const PhosphorIcon(PhosphorIconsRegular.trash, color: Colors.white, size: 20),
+        child: PhosphorIcon(
+          PhosphorIconsRegular.trash,
+          color: theme.colorScheme.onError,
+          size: 20,
+        ),
       ),
       onDismissed: (_) {
         ref.read(notificationNotifierProvider.notifier).delete(notification.id);
@@ -464,7 +469,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
 
   List<_NotificationGroup> _groupByDay(List<NotificationModel> notifications, AppLocalizations l10n) {
     final sorted = [...notifications]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final now = DateTime.now();
+    final now = clock.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final map = <String, List<NotificationModel>>{};

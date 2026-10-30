@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,7 +59,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
+    final now = clock.now();
     _selectedMonth = now.month;
     _selectedYear = now.year;
 

@@ -9,7 +9,7 @@ Pour l'historique des decisions : voir `DESIGN-REFONTE.md` (20 sessions).
 2. **Typographie + spacing** : la hierarchie vient des tailles, graisses et espacements — pas des bordures ni des ombres.
 3. **Dark-first** : le dark mode est l'experience primaire. Elevation par luminosite (fond sombre < surface < raised).
 4. **Un seul niveau de surface modale** : bottom sheet OU dialog centre. Jamais deux empiles.
-5. **Tokens uniquement** : `var(--token)` partout. Jamais de hex/rgba hardcode dans les composants.
+5. **Tokens uniquement** : `var(--k-*)` partout (k-design), `var(--x)` pour les seuls tokens locaux de `styles/_app-tokens.scss`. Jamais de hex/rgba hardcode dans les composants. Controle par `cd app && npm run lint:styles` (Stylelint, variables inconnues, selecteurs en double dans la feuille globale ; job CI **Styles APP**, KKS-590) ; une exception se nomme sur sa ligne (`stylelint-disable-next-line … -- raison`).
 
 ## Anti-patterns
 
@@ -20,36 +20,42 @@ Pour l'historique des decisions : voir `DESIGN-REFONTE.md` (20 sessions).
 - Segmented controls pour filtrer (preferer groupement + sections)
 - Couleur secondaire sans role semantique
 
+## Tokens : k-design
+
+Les valeurs ne sont plus donnees ici. Elles vivent dans **k-design** (`tokens.json`, decisions D1–D16 dans `docs/decisions.md`) et dans le design system Quiet Utility qu'il genere ; K-Budget en recoit une copie par son `scripts/sync.mjs` (manifeste `k-design.json`) : `app/src/styles/k/k-tokens.css` (`--k-*`) pour le web, `flutter/lib/src/theme/k_tokens.dart` (`KTokens`) pour Flutter, ou `AppColors` en est un alias (KKS-589). A chaque version de k-design, son workflow ouvre une PR `chore/k-design-sync` vers `develop` : la copie, puis `node scripts/k-design-update.mjs <version>`, qui ajoute la puce des deux CHANGELOG (KKS-595). Les tableaux ci-dessous donnent le role de chaque token.
+
 ## Couleurs — 4 canaux
 
-| Canal | Token | Dark | Light | Usage |
-|-------|-------|------|-------|-------|
-| Action | `--color-primary` | #e0a820 | amber-600 | CTA, toggles actifs, FAB, liens |
-| Revenu | `--color-income` | #6dc990 | #16a34a | Montants positifs, prets |
-| Depense | `--color-expense` | #d97777 | #dc2626 | Montants negatifs, emprunts |
-| Structure | `--text-primary/secondary/tertiary` | gray-50/400/500 | gray-900/600/400 | Texte, icones, labels |
+| Canal | Token | Usage |
+|-------|-------|-------|
+| Action | `--k-color-primary` (texte dessus : `--k-color-primary-contrast`) | CTA, toggles actifs, FAB, liens |
+| Revenu | `--k-color-income` | Montants positifs, prets |
+| Depense | `--k-color-expense` | Montants negatifs, emprunts |
+| Structure | `--k-text-primary/secondary/tertiary` | Texte, icones, labels |
 
 Pas de couleur secondaire. L'indigo (`#6366f1`) existe uniquement dans les palettes utilisateur (categories/comptes).
 
 ## Surfaces — 3 niveaux
 
-| Niveau | Token | Dark | Light | Usage |
-|--------|-------|------|-------|-------|
-| Fond page | `--bg-primary` | #0a0a0a | #f0f0f0 | Background global |
-| Contenu | `--surface-default` | gray-800 | #fff | Cards, conteneurs, listes |
-| Chrome | `--surface-raised` | gray-700 | gray-100 | Header, bottom nav, FAB, sticky headers |
+| Niveau | Token | Usage |
+|--------|-------|-------|
+| Fond page | `--k-bg-primary` | Background global |
+| Contenu | `--k-surface-default` | Cards, conteneurs, listes |
+| Chrome | `--k-surface-raised` | Header, bottom nav, FAB, sticky headers |
 
 ## Typographie
 
-| Role | Token | Taille | Poids |
-|------|-------|--------|-------|
-| Hero montant | `--font-size-3xl` | 30px | bold |
-| Titre page | `--font-size-lg` | 18px | bold |
-| Section header | `--font-size-base` | 16px | semibold, `--text-secondary` |
-| List row titre | `--font-size-sm` | 14px | medium, `--text-secondary` |
-| List row montant | `--font-size-xs` | 12px | medium |
-| Label uppercase | `--font-size-xs` | 12px | medium, uppercase, letter-spacing 0.05em, `--text-tertiary` |
-| Meta/hints | `--font-size-xs` | 12px | normal, `--text-tertiary` |
+Police : Inter Variable, embarquee par k-design (`--k-font-family`).
+
+| Role | Token | Poids |
+|------|-------|-------|
+| Hero montant | `--k-font-size-3xl` | bold |
+| Titre page | `--k-font-size-lg` | bold |
+| Section header | `--k-font-size-base` | semibold, `--k-text-secondary` |
+| List row titre | `--k-font-size-sm` | medium, `--k-text-secondary` |
+| List row montant | `--k-font-size-xs` | medium |
+| Label uppercase | `--k-font-size-xs` | medium, uppercase, letter-spacing 0.05em, `--k-text-tertiary` |
+| Meta/hints | `--k-font-size-xs` | normal, `--k-text-tertiary` |
 
 ## Patterns
 
@@ -75,15 +81,15 @@ Classe : `.page-header`, `.page-header__back`, `.page-header__title`
 
 Bloc identite fort en haut des pages d'authentification. Composition :
 
-- Logo SVG 64px + wordmark 3xl bold / `--text-primary` + sous-titre sm / `--text-secondary`
-- Aligne a gauche, padding vertical genereux (`--space-8` en haut), pas de border-bottom separatrice
-- Formulaire rendu directement sur `--bg-primary` — pas de card ni de `.form-block` wrapper
+- Logo SVG 64px + wordmark 3xl bold / `--k-text-primary` + sous-titre sm / `--k-text-secondary`
+- Aligne a gauche, padding vertical genereux (`--k-space-8` en haut), pas de border-bottom separatrice
+- Formulaire rendu directement sur `--k-bg-primary` — pas de card ni de `.form-block` wrapper
 
 Composant : `<app-auth-shell>` (inputs : `title`, `tagline`, `error`, `size`) — footer discret en bas a gauche affichant la version (`vX.Y.Z`, xs/tertiary, sans bordure ni fond)
 
-Sections avec labels uppercase (accept-invite uniquement) : regroupement "VOTRE IDENTITE" et "PREFERENCES" via la classe `.form-section` + `.form-section__label` (xs/medium/uppercase/letter-spacing 0.05em/`--text-tertiary`). Spacing entre sections : `--space-8`. Devise et fuseau horaire en grille 2 colonnes (`grid-template-columns: 1fr 1fr`, retour 1 colonne sous 360px).
+Sections avec labels uppercase (accept-invite uniquement) : regroupement "VOTRE IDENTITE" et "PREFERENCES" via la classe `.form-section` + `.form-section__label` (xs/medium/uppercase/letter-spacing 0.05em/`--k-text-tertiary`). Spacing entre sections : `--k-space-8`. Devise et fuseau horaire en grille 2 colonnes (`grid-template-columns: 1fr 1fr`, retour 1 colonne sous 360px).
 
-Exception input prefix icon : les inputs des pages auth (login, accept-invite, first-login-reset) utilisent une icone prefix Phosphor 16px en `--text-tertiary` (envelope/lock/user/coin/globe) via l'input optionnel `prefixIcon` de `<app-form-field>`. Pattern non propage au reste de l'app.
+Exception input prefix icon : les inputs des pages auth (login, accept-invite, first-login-reset) utilisent une icone prefix Phosphor 16px en `--k-text-tertiary` (envelope/lock/user/coin/globe) via l'input optionnel `prefixIcon` de `<app-form-field>`. Pattern non propage au reste de l'app.
 
 ### Section header (sticky)
 
@@ -95,7 +101,7 @@ Classes : `.section-header`, `.section-header.stuck`, `.section-header__title`, 
 
 Conteneur arrondi `surface-default` + `radius-xl`. Items separes par `border-default` 1px. Pas de cards individuelles.
 
-- Icone cercle 36px (`--icon-circle-bg`) + couleur categorie en fond 15%
+- Icone cercle 36px (`--k-icon-circle-bg`) + couleur categorie en fond 15%
 - Titre sm/text-secondary + subtitle xs/text-tertiary
 - Montant xs/medium a droite + conversion italique
 - Date labels (tertiary, amber si aujourd'hui, rouge si en retard)
@@ -167,7 +173,7 @@ Comportement :
 
 Integration cote parent : precharger les categories via `toSignal(CategoryService.getAll())` converti en signal mutable, ecouter `(created)` pour ajouter la nouvelle categorie au cache local, `(selected)` pour collapser l'expand (`expandedSection.set(null)`), `(isCreating)` pour desactiver le footer du sheet.
 
-Style : tokens uniquement, pattern `.cs__*` derive de `_list-patterns.scss` (icon-circle 36px avec fond colore a 15% via suffixe hex `+ '26'`, selection en `--primary-subtle`).
+Style : tokens uniquement, pattern `.cs__*` derive de `_list-patterns.scss` (icon-circle 36px avec fond colore a 15% via suffixe hex `+ '26'`, selection en `--k-primary-subtle`).
 
 Composant : `<app-category-select>` dans `app/src/app/shared/components/category-select/`
 
@@ -181,26 +187,24 @@ Classes : `.skeleton-item`, `.skeleton-circle`, `.skeleton-line`, `.skeleton-her
 
 | Token | Usage |
 |-------|-------|
-| `--hover-bg` | Fond hover sur rows et boutons |
-| `--hover-subtle` | Fond tres leger (4%) |
-| `--primary-subtle` | Fond amber 10% (selection legere) |
-| `--primary-muted` | Fond amber 15% (boutons soft) |
-| `--primary-border` | Bordure amber 25% |
-| `--icon-circle-bg` | Fond cercle icone (6% blanc dark, 4% noir light) |
-| `--highlight-subtle` | Press feedback (10%) |
+| `--k-hover-bg` | Fond hover sur rows et boutons |
+| `--k-hover-subtle` | Fond tres leger (4%) |
+| `--k-primary-subtle` | Fond amber 10% (selection legere) |
+| `--k-primary-muted` | Fond amber 15% (boutons soft) |
+| `--k-primary-border` | Bordure amber 25% |
+| `--k-icon-circle-bg` | Fond cercle icone (6% blanc dark, 4% noir light) |
+| `--k-highlight-subtle` | Press feedback (10%) |
 
 ## Zones sures (PWA installee)
 
-`viewport-fit=cover` : le contenu passe sous l'encoche et la barre de gestes. Tout element colle a un bord (en-tete, barre du bas, FAB, feuilles, toasts, panneaux) ajoute `--safe-top` / `--safe-right` / `--safe-bottom` / `--safe-left` (`env(safe-area-inset-*)`, 0 hors iPhone a encoche). `--header-height` et `--bottom-nav-height` incluent deja la zone sure. Barre d'etat iOS en `black-translucent` : l'en-tete passe dessous (texte de la barre blanc, illisible en theme clair, limite acceptee) ; `theme-color` suit `--surface-raised` (Android, Safari hors PWA).
+`viewport-fit=cover` : le contenu passe sous l'encoche et la barre de gestes. Tout element colle a un bord (en-tete, barre du bas, FAB, feuilles, toasts, panneaux) ajoute `--safe-top` / `--safe-right` / `--safe-bottom` / `--safe-left` (`env(safe-area-inset-*)`, 0 hors iPhone a encoche). `--header-height` et `--bottom-nav-height` incluent deja la zone sure. Barre d'etat iOS en `black-translucent` : l'en-tete passe dessous (texte de la barre blanc, illisible en theme clair, limite acceptee) ; `theme-color` suit `--k-surface-raised` (Android, Safari hors PWA).
 
 ## Fichiers SCSS partages
 
 | Fichier | Contenu |
 |---------|---------|
-| `styles/tokens/_primitives.scss` | Variables SCSS (palettes, spacing, typo) |
-| `styles/tokens/_tokens.scss` | CSS custom properties sur :root |
-| `styles/themes/_dark.scss` | Tokens semantiques dark |
-| `styles/themes/_light.scss` | Tokens semantiques light |
+| `styles/k/k-tokens.css` | Tokens k-design (`--k-*`), copie generee, ne pas editer (k-design D14). Charge avant `styles.scss` par `angular.json`. Theme : `data-theme="dark|light"` sur `<html>`, sombre par defaut, pose par `ThemeService` |
+| `styles/_app-tokens.scss` | Tokens propres a K-Budget, non portes par k-design : zones sures, hauteurs d'en-tete et de barre basse, durees et easings (KKS-597) |
 | `styles/_list-patterns.scss` | Hero, section-header, list-group, list-row, skeleton |
 | `styles/_bottom-sheet.scss` | Bottom sheet 4 rows, pills, expand, actions |
 | `styles/_forms.scss` | Inputs, selects, textareas, utilities |

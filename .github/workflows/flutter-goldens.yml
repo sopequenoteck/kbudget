@@ -1,0 +1,102 @@
+name: Captures - références golden (Flutter)
+
+# Régénère les captures golden des écrans Flutter (flutter/test/goldens,
+# KKS-600) et les commite sur la branche, en commit dédié de
+# github-actions[bot]. À lancer sur la branche d'une PR qui change un écran :
+#
+#   gh workflow run flutter-goldens.yml --ref <branche>
+#
+# La comparaison n'a pas lieu ici : les tests golden tournent avec les autres
+# dans « Tests Flutter » (ci-flutter.yml), dans la même image. Les références
+# sont donc produites dans cette image, jamais sur un poste : le rendu d'un
+# golden dépend de la plateforme.
+#
+# Le push passe par le secret VISUAL_PUSH_TOKEN, partagé avec visual.yml (jeton
+# à grain fin, dépôt kbudget seul, Contents: read and write) : poussé avec
+# GITHUB_TOKEN, le commit ne déclencherait aucun workflow et la PR resterait
+# sans checks. Le job qui commite n'exécute aucun code du projet.
+
+on:
+  workflow_dispatch:
+  # Seulement pour que GitHub enregistre le workflow avant qu'il soit sur la
+  # branche par défaut : visual.yml, exécuté une première fois sur sa PR, a pu
+  # ensuite être lancé par l'API (KKS-590). Sur pull_request, les deux jobs
+  # sont sautés.
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '.github/workflows/flutter-goldens.yml'
+
+concurrency:
+  group: flutter-goldens-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  goldens:
+    name: Références golden (Flutter)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      # Même image que flutter-tests (ci-flutter.yml) : les références doivent
+      # sortir du rendu qui les compare.
+      image: ghcr.io/cirruslabs/flutter:3.41.2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dépendances + code generation
+        working-directory: flutter
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Régénération
+        working-directory: flutter
+        run: flutter test --update-goldens --tags golden
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: golden-references
+          path: flutter/test/goldens/references
+          retention-days: 1
+
+  commit-references:
+    name: Commit des références golden
+    needs: goldens
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Secret VISUAL_PUSH_TOKEN présent
+        env:
+          VISUAL_PUSH_TOKEN: ${{ secrets.VISUAL_PUSH_TOKEN }}
+        run: |
+          if [ -z "$VISUAL_PUSH_TOKEN" ]; then
+            echo "::error::Secret VISUAL_PUSH_TOKEN absent : voir l'en-tête de .github/workflows/flutter-goldens.yml"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.VISUAL_PUSH_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: golden-references
+          path: flutter/test/goldens/references
+
+      - name: Commit dédié si les références changent
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add flutter/test/goldens/references
+          if git diff --cached --quiet; then
+            echo 'Références inchangées.'
+            exit 0
+          fi
+          git commit -m "chore: références golden Flutter régénérées en CI (${GITHUB_REF_NAME})"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

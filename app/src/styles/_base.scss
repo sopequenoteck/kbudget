@@ -3,12 +3,13 @@
 // =============================================================================
 
 body {
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-normal);
-  line-height: var(--line-height-normal);
-  color: var(--text-primary);
-  background-color: var(--bg-primary);
+  min-height: 100dvh;
+  font-family: var(--k-font-family);
+  font-size: var(--k-font-size-base);
+  font-weight: var(--k-font-weight-normal);
+  line-height: var(--k-line-height-normal);
+  color: var(--k-text-primary);
+  background-color: var(--k-bg-primary);
   transition:
     color var(--duration-normal) var(--easing-default),
     background-color var(--duration-normal) var(--easing-default);
@@ -17,12 +18,12 @@ body {
 }
 
 ::selection {
-  background-color: var(--color-primary);
-  color: var(--color-primary-contrast);
+  background-color: var(--k-color-primary);
+  color: var(--k-color-primary-contrast);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--k-color-primary);
   outline-offset: 2px;
 }
 
@@ -30,22 +31,22 @@ h1,
 h2,
 h3,
 h4 {
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
+  font-weight: var(--k-font-weight-semibold);
+  line-height: var(--k-line-height-tight);
 }
 
 h1 {
-  font-size: var(--font-size-3xl);
+  font-size: var(--k-font-size-3xl);
 }
 
 h2 {
-  font-size: var(--font-size-2xl);
+  font-size: var(--k-font-size-2xl);
 }
 
 h3 {
-  font-size: var(--font-size-xl);
+  font-size: var(--k-font-size-xl);
 }
 
 h4 {
-  font-size: var(--font-size-lg);
+  font-size: var(--k-font-size-lg);
 }

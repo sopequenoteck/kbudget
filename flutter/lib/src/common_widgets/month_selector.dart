@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -47,7 +48,7 @@ class _MonthSelectorState extends State<MonthSelector> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
+    final now = clock.now();
     final initialMonth = widget.initialMonth;
     if (initialMonth != null && initialMonth >= 1 && initialMonth <= 12) {
       _month = initialMonth;

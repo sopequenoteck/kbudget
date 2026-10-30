@@ -7,6 +7,80 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.14.0] - 2026-10-30
+
+### Added
+
+- **Bank profiles added without rebuilding the image** (KKS-329): an instance
+  can now load extra statement import profiles from the directory set by
+  `IMPORT_PROFILES_DIR` (a volume to uncomment in the supplied
+  `docker-compose.yml`), read at startup after the bundled profiles. A bundled
+  profile is never replaced, and an invalid file is ignored and reported in the
+  logs. Profiles can also name their `contributor` and the date they were last
+  checked on a real statement (`validatedOn`).
+
+### Changed
+
+- **Mobile app themes aligned with the web** (KKS-600): in the Flutter app,
+  secondary text (dates, hints, labels) now uses the secondary grey instead of
+  the primary text colour, as on the web. In the light theme, the amber of
+  buttons, the floating button and the active tab is the deeper #c66e05 with a
+  dark label, the page background is #f0f0f0 and the header and bottom bar
+  are #f5f5f5; error text is #b91c1c. In the dark theme, the header and bottom
+  bar are #1e1e1e, errors use #d97777 with a dark label on red buttons, and
+  field borders are the subtle #1e1e1e. Avatars use the amber with a dark
+  label, as on the web.
+
+- **Mobile app on the shared K Design colours** (KKS-589): the Flutter app now
+  takes its colours from k-design, like the web client. In the light theme,
+  income and expense amounts, debts, and warning and information text get the
+  deeper shades that pass WCAG AA contrast (#166534, #b91c1c, #854d0e,
+  #1d4ed8), and the muted amber backgrounds follow the #c66e05 amber. The dark
+  theme is unchanged.
+
+- **Readable labels on red and amber buttons, standard focus ring on fields**
+  (KKS-590): in the dark theme, delete buttons and the notification badge now
+  use a dark label on the red background (white gave 3.1:1, below WCAG AA);
+  in the light theme, the selected day of the date picker, the info toast and
+  a few primary buttons get the dark label already used on solid amber
+  buttons (white gave 3.7:1). Focused form fields show the 2px amber outline
+  used everywhere else instead of a faint halo.
+
+- **Web app on the shared K Design tokens** (KKS-588): the web client now takes
+  its colours, spacing, radii, shadows and type from k-design, the visual base
+  shared by the K apps. Visible changes: the embedded Inter Variable typeface
+  (the web app loaded none before and fell back to whatever was installed),
+  more readable tertiary text (dates, hints, conversions, placeholders), and in
+  the light theme a deeper amber (#c66e05) with dark labels on solid buttons
+  and stronger income, expense, warning and info colours that now pass WCAG AA
+  contrast. The theme is set by `data-theme` on the page and is dark by
+  default.
+- New k-design releases now arrive through an automatic pull request.
+- Design tokens updated to k-design v0.5.0.
+- Design tokens updated to k-design v0.6.0.
+- **Web app on Angular 22.2** (KKS-614): the web client moves from Angular 21.1
+  to 22.2 (TypeScript 6.0), the single Angular version shared across the K
+  apps. No change for users. Building the web app now requires Node 24: the
+  CI images, the web app image and the contributor and deployment docs follow.
+- Design tokens updated to k-design v0.7.0.
+- `k-base.css`, `k-patterns.css` and the k-design PWA foundation (`k-design/pwa/`: nginx fragment, `k-pwa-check.mjs` check, update service) are delivered but not loaded yet; adopting them comes with its own ticket.
+
+### Fixed
+
+- **Light-theme modal backdrop** (KKS-588): the backdrop colour was written in
+  an invalid form and ignored by browsers, so the light theme did not dim the
+  page behind dialogs and bottom sheets. It now does.
+
+- **Manual CSV mapping: label clean-up patterns for custom import profiles**
+  (KKS-442): a statement imported through the manual mapping kept noise such as
+  "CARTE X1234 14/09" in its labels, and the automatic category rules learned
+  from them did not recognise the same merchant paid another way. The mapping
+  screen now takes clean-up patterns (regular expressions removed from the
+  label before categorisation, one per line, with a ready-made card payment
+  pattern). They apply to the imported file, are saved with the custom profile
+  and reused when a later file is recognised by it, and appear in the data
+  export. Each pattern gets a 50 ms budget per label, after which it is skipped.
+
 ## [6.13.1] - 2026-10-24
 
 ### Fixed
@@ -223,7 +297,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.14.0...HEAD
+[6.14.0]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...v6.14.0
 [6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0

@@ -18,7 +18,7 @@ describe('EmojiInput', () => {
   });
 
   afterEach(() => {
-    document.documentElement.classList.remove('theme-dark');
+    delete document.documentElement.dataset['theme'];
   });
 
   // === Affichage ===
@@ -145,14 +145,14 @@ describe('EmojiInput', () => {
   // === Détection du thème ===
 
   describe('Détection du thème', () => {
-    it('should_detect_dark_theme_when_body_has_theme_dark_class', () => {
-      document.documentElement.classList.add('theme-dark');
-      expect(document.documentElement.classList.contains('theme-dark')).toBe(true);
+    it('should_detect_dark_theme_when_html_has_data_theme_dark', () => {
+      document.documentElement.dataset['theme'] = 'dark';
+      expect(document.documentElement.dataset['theme']).toBe('dark');
     });
 
-    it('should_detect_light_theme_when_body_has_no_theme_dark_class', () => {
-      document.documentElement.classList.remove('theme-dark');
-      expect(document.documentElement.classList.contains('theme-dark')).toBe(false);
+    it('should_detect_light_theme_when_html_has_data_theme_light', () => {
+      document.documentElement.dataset['theme'] = 'light';
+      expect(document.documentElement.dataset['theme']).toBe('light');
     });
   });
 });

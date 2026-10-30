@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 final class ImportProfileFileParser {
 
     static final int SUPPORTED_FORMAT_VERSION = 1;
+    static final int CONTRIBUTOR_MAX_LENGTH = 100;
 
     private static final String SIGNATURE = "signature";
     private static final String STATEMENT_HEADER = "statementHeader";
@@ -68,7 +69,9 @@ final class ImportProfileFileParser {
                 cleanupPatterns(file.get("cleanupPatterns")),
                 signatureColumns(file.get(SIGNATURE)),
                 statementHeader(file.get(STATEMENT_HEADER)),
-                purchaseDate(file.get(PURCHASE_DATE)));
+                purchaseDate(file.get(PURCHASE_DATE)),
+                contributor(file),
+                validatedOn(file));
     }
 
     private static void checkFormatVersion(Object version) {
@@ -160,6 +163,26 @@ final class ImportProfileFileParser {
             throw new IllegalArgumentException(PURCHASE_DATE + " must be a mapping");
         }
         return PurchaseDateSpec.of(optionalString(section, "pattern"), optionalString(section, "format"));
+    }
+
+    private static String contributor(Map<?, ?> file) {
+        String contributor = optionalString(file, "contributor");
+        if (contributor != null && contributor.length() > CONTRIBUTOR_MAX_LENGTH) {
+            throw new IllegalArgumentException("contributor must not exceed " + CONTRIBUTOR_MAX_LENGTH + " characters");
+        }
+        return contributor;
+    }
+
+    private static LocalDate validatedOn(Map<?, ?> file) {
+        String value = optionalString(file, "validatedOn");
+        if (value == null) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeException e) {
+            throw new IllegalArgumentException("validatedOn must be an ISO date (yyyy-MM-dd): " + value);
+        }
     }
 
     private static String requiredString(Map<?, ?> map, String key) {

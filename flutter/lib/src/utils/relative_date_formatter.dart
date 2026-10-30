@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:clock/clock.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 
@@ -32,7 +33,7 @@ class RelativeDateFormatter {
   }) {
     if (value == null) return '';
 
-    final today = now ?? DateTime.now();
+    final today = now ?? clock.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     final targetDate = DateTime(value.year, value.month, value.day);
 
@@ -72,7 +73,7 @@ class RelativeDateFormatter {
     required AppLocalizations l10n,
     DateTime? now,
   }) {
-    final today = now ?? DateTime.now();
+    final today = now ?? clock.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     final targetDate = DateTime(value.year, value.month, value.day);
 

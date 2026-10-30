@@ -31,7 +31,7 @@
       @if (currentUser(); as user) {
         <!-- Nom (inline éditable) -->
         <div class="settings-row settings-row--no-border">
-          <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+          <span class="settings-row__icon" style="background: var(--k-icon-circle-bg); color: var(--k-text-tertiary)">
             <ng-icon name="phosphorUser" size="20" />
           </span>
           <div class="settings-row__content">
@@ -85,7 +85,7 @@
 
         <!-- Email (read-only) -->
         <div class="settings-row settings-row--last">
-          <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+          <span class="settings-row__icon" style="background: var(--k-icon-circle-bg); color: var(--k-text-tertiary)">
             <ng-icon name="phosphorUser" size="20" />
           </span>
           <div class="settings-row__content">
@@ -107,7 +107,7 @@
         class="settings-row settings-row--link settings-row--last"
         (click)="onChangePassword()"
       >
-        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary)">
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--k-color-primary) 15%, transparent); color: var(--k-color-primary)">
           <ng-icon name="phosphorLock" size="20" />
         </span>
         <div class="settings-row__content">
@@ -130,7 +130,7 @@
         [disabled]="isExportingJson() || isExportingCsv()"
         [attr.aria-busy]="isExportingJson()"
       >
-        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary)">
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--k-color-primary) 15%, transparent); color: var(--k-color-primary)">
           <ng-icon name="phosphorDatabase" size="20" />
         </span>
         <div class="settings-row__content">
@@ -155,7 +155,7 @@
         [disabled]="isExportingJson() || isExportingCsv()"
         [attr.aria-busy]="isExportingCsv()"
       >
-        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-income) 15%, transparent); color: var(--color-income)">
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--k-color-income) 15%, transparent); color: var(--k-color-income)">
           <ng-icon name="phosphorFileCsv" size="20" />
         </span>
         <div class="settings-row__content">
@@ -185,7 +185,7 @@
         class="settings-row settings-row--link"
         (click)="onLogout()"
       >
-        <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+        <span class="settings-row__icon" style="background: var(--k-icon-circle-bg); color: var(--k-text-tertiary)">
           <ng-icon name="phosphorSignOut" size="20" />
         </span>
         <div class="settings-row__content">

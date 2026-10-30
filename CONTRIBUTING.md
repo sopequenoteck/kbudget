@@ -23,7 +23,7 @@ real bank statement**, not even your own.
 
 ## Running the project
 
-You need PostgreSQL 15+, Java 21, Node 22 and — for the mobile app — Flutter
+You need PostgreSQL 15+, Java 21, Node 24 and — for the mobile app — Flutter
 3.41 (the version CI pins; later versions do not build the app yet).
 
 ```bash
@@ -49,13 +49,23 @@ the build fails early with instructions instead.
 | Stack | Command |
 |-------|---------|
 | API | `cd api && mvn verify` |
-| Angular | `cd app && npm test && npx ng lint` |
+| Angular | `cd app && npm test && npx ng lint && npm run lint:styles` |
 | Flutter | `cd flutter && flutter analyze && flutter test` |
 
 CI replays all three. Three jobs — **Tests API**, **Tests APP** and **Tests
 Flutter**, each suffixed *(runner GitHub)* — run on GitHub's own infrastructure,
 so a pull request opened from a fork gets a real result without waiting for
-anyone. A fourth, **En-tetes de licence MPL**, runs there too.
+anyone. A fourth, **En-tetes de licence MPL**, runs there too, and so does **Styles APP
+(tokens uniquement)**, which replays `npm run lint:styles`. **Captures APP (écrans de
+référence)** compares the key screens pixel by pixel with the committed
+references (`app/e2e/visual/README.md`). On the Flutter side, golden tests
+(`flutter/test/goldens`) run inside **Tests Flutter** and compare the main
+screens with references produced by CI (`flutter/CLAUDE.md`).
+
+These six checks, plus **Verifier la signature du CLA**, are required: a pull
+request into `develop` or `main` cannot be merged until they pass, and the rule
+binds maintainers too. Each runs only when the pull request touches its part of
+the repository; otherwise it is skipped, which counts as passing.
 
 The Sonar analysis jobs are the exception: the SonarQube server sits on a
 private network, so they run on a self-hosted runner that never executes
@@ -129,7 +139,7 @@ principles frame what is accepted — notably strict per-user data isolation,
 simplicity (no CQRS, DDD or Event Sourcing), and the API as the single source
 of truth for every client.
 
-Code conventions and build commands are in [`CLAUDE.md`](CLAUDE.md).
+Build commands are in [`CLAUDE.md`](CLAUDE.md); code conventions per module are in [`api/CLAUDE.md`](api/CLAUDE.md), [`app/CLAUDE.md`](app/CLAUDE.md) and [`flutter/CLAUDE.md`](flutter/CLAUDE.md).
 
 ### API changes
 

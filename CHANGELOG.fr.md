@@ -7,6 +7,89 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.14.0] - 2026-10-30
+
+### Added
+
+- **Profils bancaires ajoutés sans reconstruire l'image** (KKS-329) : une
+  instance peut désormais charger des profils d'import de relevé
+  supplémentaires depuis le répertoire indiqué par `IMPORT_PROFILES_DIR` (un
+  volume à décommenter dans le `docker-compose.yml` fourni), lus au démarrage
+  après les profils embarqués. Un profil embarqué n'est jamais remplacé, et un
+  fichier invalide est ignoré et signalé dans les logs. Un profil peut aussi
+  nommer son contributeur (`contributor`) et la date de sa dernière
+  vérification sur un relevé réel (`validatedOn`).
+
+### Changed
+
+- **Thèmes de l'application mobile alignés sur le web** (KKS-600) : dans
+  l'application Flutter, les textes secondaires (dates, indications, libellés)
+  prennent le gris secondaire au lieu de la couleur du texte principal, comme
+  sur le web. En thème clair, l'ambre des boutons, du bouton flottant et de
+  l'onglet actif devient le #c66e05, plus soutenu, avec un libellé sombre ; le
+  fond de page passe à #f0f0f0, l'en-tête et la barre du bas à #f5f5f5 ; le
+  texte d'erreur à #b91c1c. En thème sombre, l'en-tête et la barre du bas
+  passent à #1e1e1e, les erreurs à #d97777 avec un libellé sombre sur les
+  boutons rouges, et les bordures des champs au #1e1e1e discret. Les avatars
+  prennent l'ambre avec un libellé sombre, comme sur le web.
+
+- **Application mobile sur les couleurs communes K Design** (KKS-589) :
+  Flutter reçoit désormais ses couleurs de k-design, comme le client web. En
+  thème clair, les montants de revenu et de dépense, les dettes et les textes
+  d'avertissement et d'information prennent les teintes plus soutenues qui
+  passent le contraste WCAG AA (#166534, #b91c1c, #854d0e, #1d4ed8), et les
+  fonds ambrés atténués suivent l'ambre #c66e05. Thème sombre inchangé.
+
+- **Libellés lisibles sur les boutons rouges et ambre, focus standard sur les
+  champs** (KKS-590) : en thème sombre, les boutons de suppression et le badge
+  de notifications portent un libellé sombre sur le rouge (le blanc donnait
+  3,1:1, sous le seuil WCAG AA) ; en thème clair, le jour sélectionné du
+  calendrier, le toast d'information et quelques boutons primaires prennent le
+  libellé sombre déjà employé sur les boutons ambre pleins (le blanc donnait
+  3,7:1). Un champ qui a le focus affiche le contour ambre de 2px employé
+  partout ailleurs, au lieu d'un halo à peine visible.
+
+- **Application web sur les tokens communs K Design** (KKS-588) : le client
+  web prend désormais ses couleurs, espacements, rayons, ombres et sa
+  typographie dans k-design, le socle visuel commun des applications K.
+  Changements visibles : la police Inter Variable embarquée (l'application web
+  n'en chargeait aucune et retombait sur celle installée sur l'appareil), un
+  texte tertiaire plus lisible (dates, aides, conversions, champs vides), et en
+  thème clair un ambre plus soutenu (#c66e05) avec des libellés sombres sur les
+  boutons pleins, et des couleurs de revenu, dépense, avertissement et
+  information plus soutenues qui passent le contraste WCAG AA. Le thème est
+  posé par `data-theme` sur la page, sombre par défaut.
+- Les nouvelles versions de k-design arrivent désormais par une pull request automatique.
+- Tokens de design mis à jour vers k-design v0.5.0.
+- Tokens de design mis à jour vers k-design v0.6.0.
+- **Application web sur Angular 22.2** (KKS-614) : le client web passe
+  d'Angular 21.1 à 22.2 (TypeScript 6.0), la version d'Angular commune aux
+  applications K. Aucun changement pour les utilisateurs. La construction de
+  l'application web demande désormais Node 24 : les images de la CI, l'image
+  de l'application web et la documentation de contribution et de déploiement
+  suivent.
+- Tokens de design mis à jour vers k-design v0.7.0.
+- `k-base.css`, `k-patterns.css` et le socle PWA de k-design (`k-design/pwa/` : fragment nginx, contrôle `k-pwa-check.mjs`, service de mise à jour) sont livrés sans être chargés ; leur adoption viendra avec son propre ticket.
+
+### Fixed
+
+- **Fond des fenêtres en thème clair** (KKS-588) : sa couleur était écrite
+  sous une forme invalide, ignorée par les navigateurs ; le thème clair
+  n'assombrissait pas la page derrière les fenêtres et les feuilles du bas.
+  C'est désormais le cas.
+
+- **Mapping CSV manuel : motifs de nettoyage du libellé pour les profils
+  d'import personnalisés** (KKS-442) : un relevé importé par mapping manuel
+  gardait dans ses libellés un bruit comme « CARTE X1234 14/09 », et les règles
+  de catégorisation automatique apprises sur eux ne reconnaissaient pas le même
+  commerçant payé autrement. L'écran de mapping accepte désormais des motifs de
+  nettoyage (expressions régulières retirées du libellé avant catégorisation,
+  une par ligne, avec un motif prêt à l'emploi pour les paiements carte). Ils
+  s'appliquent au fichier importé, sont enregistrés avec le profil personnalisé
+  et réutilisés quand un fichier suivant est reconnu par ce profil, et figurent
+  dans l'export des données. Chaque motif dispose de 50 ms par libellé, au-delà
+  il est ignoré.
+
 ## [6.13.1] - 2026-10-24
 
 ### Fixed
@@ -1753,7 +1836,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.14.0...HEAD
+[6.14.0]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...v6.14.0
 [6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0

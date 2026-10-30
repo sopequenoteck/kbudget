@@ -166,11 +166,11 @@
           >{{ getIcon(transaction) }}</span>
           <div class="list-row__content">
             <span class="list-row__title">{{ transaction.libelle }}</span>
-            <span class="list-row__subtitle">{{ (transaction.category?.nom ?? '') | categoryName: transaction.category?.systemKey }}</span>
+            <span class="list-row__subtitle">{{ (transaction.category?.nom ?? '') | categoryName: $safeNavigationMigration(transaction.category?.systemKey) }}</span>
           </div>
           <div class="list-row__right">
             <span class="list-row__amount" [class]="getValueClass(transaction)">
-              {{ transaction.montant | amount: transaction.type : transaction.account?.currency }}
+              {{ transaction.montant | amount: transaction.type : $safeNavigationMigration(transaction.account?.currency) }}
             </span>
             @if (transaction.account?.currency && transaction.account!.currency !== preferenceService.primaryCurrency()) {
               <span class="list-row__converted">

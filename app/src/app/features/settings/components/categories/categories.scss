@@ -1,8 +1,8 @@
 :host {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
-  gap: var(--space-5);
+  padding: var(--k-space-4);
+  gap: var(--k-space-5);
 }
 
 // =============================================================================
@@ -14,8 +14,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 var(--space-4);
-    margin-bottom: var(--space-2);
+    padding: 0 var(--k-space-4);
+    margin-bottom: var(--k-space-2);
   }
 
   &__add {
@@ -25,32 +25,32 @@
     width: 28px;
     height: 28px;
     padding: 0;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-round);
+    border: 1px solid var(--k-border-default);
+    border-radius: var(--k-radius-round);
     background: transparent;
-    color: var(--text-tertiary);
+    color: var(--k-text-tertiary);
     cursor: pointer;
 
     &:active {
-      color: var(--text-primary);
-      background-color: var(--hover-bg);
+      color: var(--k-text-primary);
+      background-color: var(--k-hover-bg);
     }
   }
 
   &__label {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
+    font-size: var(--k-font-size-xs);
+    font-weight: var(--k-font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--text-tertiary);
+    color: var(--k-text-tertiary);
   }
 
   &__container {
     list-style: none;
     padding: 0;
     margin: 0;
-    background-color: var(--surface-default);
-    border-radius: var(--radius-xl);
+    background-color: var(--k-surface-default);
+    border-radius: var(--k-radius-xl);
     overflow: hidden;
   }
 }
@@ -62,9 +62,9 @@
 .cat-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-default);
+  gap: var(--k-space-3);
+  padding: var(--k-space-3) var(--k-space-4);
+  border-bottom: 1px solid var(--k-border-default);
 
   &:last-child {
     border-bottom: none;
@@ -80,17 +80,17 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    font-size: var(--font-size-base);
-    border-radius: var(--radius-round);
+    font-size: var(--k-font-size-base);
+    border-radius: var(--k-radius-round);
     flex-shrink: 0;
     line-height: 1;
   }
 
   &__name {
     flex: 1;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
+    font-size: var(--k-font-size-sm);
+    font-weight: var(--k-font-weight-medium);
+    color: var(--k-text-secondary);
     min-width: 0;
   }
 
@@ -103,21 +103,21 @@
 
   &__confirm {
     width: 100%;
-    margin-top: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    background: var(--surface-raised);
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    margin-top: var(--k-space-2);
+    padding: var(--k-space-3) var(--k-space-4);
+    border-radius: var(--k-radius-lg);
+    background: var(--k-surface-raised);
+    font-size: var(--k-font-size-sm);
+    color: var(--k-text-secondary);
 
     p {
-      margin: 0 0 var(--space-2);
+      margin: 0 0 var(--k-space-2);
     }
   }
 
   &__confirm-actions {
     display: flex;
-    gap: var(--space-2);
+    gap: var(--k-space-2);
     justify-content: flex-end;
   }
 }
@@ -134,44 +134,44 @@
   height: 32px;
   padding: 0;
   border: none;
-  border-radius: var(--radius-round);
+  border-radius: var(--k-radius-round);
   background: transparent;
-  color: var(--text-tertiary);
+  color: var(--k-text-tertiary);
   cursor: pointer;
   transition: background-color var(--duration-fast);
 
   &:active {
-    background: var(--hover-bg);
+    background: var(--k-hover-bg);
   }
 
   &--danger {
-    color: var(--color-expense);
+    color: var(--k-color-expense);
   }
 }
 
 .btn-cancel {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-round);
+  padding: var(--k-space-1) var(--k-space-3);
+  border: 1px solid var(--k-border-default);
+  border-radius: var(--k-radius-round);
   background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  color: var(--k-text-secondary);
+  font-size: var(--k-font-size-sm);
   font-family: inherit;
   cursor: pointer;
 
   &:active {
-    background-color: var(--hover-bg);
+    background-color: var(--k-hover-bg);
   }
 }
 
 .btn-delete {
-  padding: var(--space-1) var(--space-3);
+  padding: var(--k-space-1) var(--k-space-3);
   border: none;
-  border-radius: var(--radius-round);
-  background-color: var(--color-expense);
-  color: white;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  border-radius: var(--k-radius-round);
+  background-color: var(--k-color-expense);
+  color: var(--k-text-inverse);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
   font-family: inherit;
   cursor: pointer;
 

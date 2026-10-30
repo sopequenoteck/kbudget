@@ -75,6 +75,27 @@ invite depuis **Parametres → Utilisateurs**, et l'invite recoit un lien pour
 definir son propre mot de passe. Les donnees de chaque utilisateur sont
 strictement isolees de celles des autres.
 
+### Ajouter un profil bancaire
+
+L'import de releve reconnait les banques dont le profil est embarque dans
+l'application. Pour ajouter une autre banque sans reconstruire l'image :
+
+1. Dans `docker-compose.yml`, decommenter la ligne de volume
+   `- ./import-profiles:/app/import-profiles:ro` du service `api`.
+2. Deposer les fichiers de profil (`.yaml`) dans `./import-profiles` sur
+   l'hote. Copier comme modele
+   [`api/src/main/resources/import-profiles/sg.yaml`](../api/src/main/resources/import-profiles/sg.yaml)
+   du depot : son commentaire d'en-tete documente le format.
+3. Recreer le container de l'API (`docker compose up -d api`) : un simple
+   `restart` ne monte pas un volume ajoute. Ensuite, `docker compose restart api`
+   suffit pour prendre en compte un fichier ajoute ou modifie, les profils
+   n'etant lus qu'au demarrage.
+
+Un fichier invalide est ignore et signale par un avertissement dans les logs de
+l'API ; il n'empeche jamais l'API de demarrer. Un profil dont le `bankCode` est
+deja embarque dans l'application ne le remplace pas : le fichier externe est
+ignore.
+
 ## HTTPS et reverse proxy
 
 Le compose sert du HTTP en clair sur `APP_PORT`. Sur un reseau local ou via un
@@ -299,7 +320,7 @@ prochaine connexion.
 
 ## Sans Docker
 
-Necessite Java 21, PostgreSQL 15+ et Node 22.
+Necessite Java 21, PostgreSQL 15+ et Node 24.
 
 ```bash
 psql -c "CREATE USER budget_u WITH PASSWORD 'changeme';"
@@ -332,3 +353,4 @@ sauvegarde fonctionnent aussi avec `MODE=native`.
 | `RATE_LIMIT_WINDOW_SECONDS` | non | `60` | Duree de cette fenetre |
 | `TRUSTED_PROXIES` | non | plages privees | Prefixes d'IP dont le `X-Forwarded-For` est cru. Ne jamais faire confiance a tout : l'en-tete est fourni par le client, le croire sans condition rend la limitation contournable |
 | `AVATAR_STORAGE_PATH` | non | `/app/data/avatars` | Fixe dans le container ; le volume `api-avatars` est monte dessus |
+| `IMPORT_PROFILES_DIR` | non | `/app/import-profiles` avec le compose fourni, vide sinon | Repertoire de profils bancaires supplementaires, lus apres les profils embarques. Vide ou repertoire absent : profils embarques seuls. Voir [Ajouter un profil bancaire](#ajouter-un-profil-bancaire) |

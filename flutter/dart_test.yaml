@@ -1,0 +1,3 @@
+tags:
+  # Captures golden des écrans (test/goldens), régénérées par flutter-goldens.yml
+  golden:

@@ -4,26 +4,26 @@
 
 // --- Recherche ---
 .cs__search-wrapper {
-  padding-bottom: var(--space-2);
+  padding-bottom: var(--k-space-2);
 }
 
 .cs__search {
   width: 100%;
-  padding: var(--space-2) var(--space-3);
-  background: var(--bg-tertiary);
+  padding: var(--k-space-2) var(--k-space-3);
+  background: var(--k-bg-tertiary);
   border: none;
-  border-radius: var(--radius-xl);
+  border-radius: var(--k-radius-xl);
   box-shadow: none;
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
+  color: var(--k-text-primary);
+  font-size: var(--k-font-size-sm);
   outline: none;
 
   &::placeholder {
-    color: var(--text-tertiary);
+    color: var(--k-text-tertiary);
   }
 
   &:focus {
-    background: var(--surface-raised);
+    background: var(--k-surface-raised);
   }
 
   &:disabled {
@@ -36,19 +36,19 @@
 .cs__list {
   max-height: 60vh;
   overflow-y: auto;
-  border-radius: var(--radius-xl);
-  background: var(--surface-default);
+  border-radius: var(--k-radius-xl);
+  background: var(--k-surface-default);
   scrollbar-width: thin;
-  scrollbar-color: var(--border-default) transparent;
+  scrollbar-color: var(--k-border-default) transparent;
 }
 
 // --- Items ---
 .cs__item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--k-space-3);
   width: 100%;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--k-space-3) var(--k-space-4);
   border: none;
   border-radius: 0;
   background: transparent;
@@ -58,16 +58,16 @@
   min-height: 44px; // NFR-007 zone tactile mobile
 
   &:not(:last-child) {
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--k-border-default);
   }
 
   &:hover,
   &.highlighted {
-    background: var(--hover-bg);
+    background: var(--k-hover-bg);
   }
 
   &.selected {
-    background: var(--primary-subtle);
+    background: var(--k-primary-subtle);
   }
 }
 
@@ -77,17 +77,17 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-round);
-  font-size: var(--font-size-base);
+  border-radius: var(--k-radius-round);
+  font-size: var(--k-font-size-base);
   flex-shrink: 0;
 }
 
 .cs__item-name {
   flex: 1;
   min-width: 0;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
+  color: var(--k-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -95,9 +95,9 @@
 
 // --- No results ---
 .cs__no-results {
-  padding: var(--space-4);
-  font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
+  padding: var(--k-space-4);
+  font-size: var(--k-font-size-sm);
+  color: var(--k-text-tertiary);
   text-align: center;
 }
 
@@ -107,13 +107,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-4);
-  padding: var(--space-10) var(--space-4);
+  gap: var(--k-space-4);
+  padding: var(--k-space-10) var(--k-space-4);
 }
 
 .cs__empty-message {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  font-size: var(--k-font-size-sm);
+  color: var(--k-text-secondary);
   text-align: center;
 }
 
@@ -121,22 +121,22 @@
 .cs__create-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-round);
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  gap: var(--k-space-2);
+  margin-top: var(--k-space-2);
+  padding: var(--k-space-2) var(--k-space-4);
+  background: var(--k-color-primary-light);
+  border: 1px solid var(--k-color-primary);
+  border-radius: var(--k-radius-round);
+  color: var(--k-color-primary);
+  font-size: var(--k-font-size-sm);
+  font-weight: var(--k-font-weight-medium);
   cursor: pointer;
   transition:
     background var(--duration-fast) var(--easing-default),
     opacity var(--duration-fast);
 
   &:hover {
-    background: var(--color-primary-light);
+    background: var(--k-color-primary-light);
     opacity: 0.8;
   }
 
@@ -150,22 +150,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-2) 0 var(--space-3);
-  border-bottom: 1px solid var(--border-default);
-  margin-bottom: var(--space-3);
+  padding: var(--k-space-2) 0 var(--k-space-3);
+  border-bottom: 1px solid var(--k-border-default);
+  margin-bottom: var(--k-space-3);
 }
 
 .cs__back-btn {
-  padding: var(--space-1) var(--space-2);
+  padding: var(--k-space-1) var(--k-space-2);
   background: transparent;
   border: none;
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  color: var(--k-text-secondary);
+  font-size: var(--k-font-size-sm);
   cursor: pointer;
   transition: color var(--duration-fast);
 
   &:hover {
-    color: var(--text-primary);
+    color: var(--k-text-primary);
   }
 }
 

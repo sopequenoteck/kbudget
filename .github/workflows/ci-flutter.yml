@@ -5,7 +5,10 @@ name: CI - Flutter
 # Gate qualité : Quality Gate "Clean as You Code" (new code only) côté Sonar.
 #   - pull_request → BLOQUANT dans le run (sonar.qualitygate.wait=true) : le check
 #                    apparaît ROUGE sur la PR si le new code régresse.
-#                    Barrière HUMAINE au merge (pas de required check strict).
+#                    Barrière HUMAINE au merge : l'analyse n'est pas un check
+#                    obligatoire, le runner self-hosted ne tournant pas pour une
+#                    PR de fork non approuvée. Les jobs « runner GitHub » le sont
+#                    (règles de develop et main, CONTRIBUTING.md).
 #   - push (merge) → scan de référence non bloquant, alimente le dashboard Sonar.
 #
 # PRÉREQUIS INFRA (hors repo) :
@@ -21,9 +24,6 @@ name: CI - Flutter
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'flutter/**'
-      - '.github/workflows/ci-flutter.yml'
   push:
     branches: [main, develop]
     paths:
@@ -40,12 +40,31 @@ permissions:
   contents: read
 
 jobs:
+  # Fichiers de la PR : les jobs suivants sont sautés si elle ne touche pas le
+  # motif (.github/actions/changed). Un job sauté satisfait un check obligatoire.
+  changes:
+    name: Fichiers concernés (Flutter)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.changed.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: changed
+        uses: ./.github/actions/changed
+        with:
+          pattern: '^(flutter/|\.github/workflows/ci-flutter\.yml$|\.github/actions/changed/)'
+
   # Tests sur runner GitHub : c'est le seul job de tests qu'une PR de fork peut
   # executer, le self-hosted n'acceptant pas de code externe non approuve (cf.
   # PREREQUIS INFRA). Sans lui, une PR de fork touchant flutter/ ne verifiait
   # que les en-tetes de licence.
   flutter-tests:
     name: Tests Flutter (runner GitHub)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     container:
@@ -69,6 +88,8 @@ jobs:
 
   flutter-analysis:
     name: Analyse Flutter
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: [self-hosted, kbudget-ci]
     timeout-minutes: 20
     container:
@@ -127,6 +148,8 @@ jobs:
   # runner self-hosted.
   licence-headers:
     name: En-tetes de licence MPL
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.run != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -137,6 +160,9 @@ jobs:
       # `flutter gen-l10n` regenere app_localizations.dart sans lui, en
       # silence — le fichier etant versionne, l'en-tete disparaissait du depot
       # a chaque modification de traduction.
+      # k_tokens.dart est exclu : copie generee par scripts/sync.mjs de k-design,
+      # ecrasee a chaque mise a jour, dont la sortie Dart ne porte plus l'en-tete
+      # depuis k-design v0.4.0 (D16 caduque, KKS-595).
       - name: Verifier que chaque source de flutter/lib porte l'en-tete
         run: |
           missing=""
@@ -144,7 +170,8 @@ jobs:
             if ! head -5 "$file" | grep -q "Mozilla Public"; then
               missing="${missing}  ${file}\n"
             fi
-          done < <(find flutter/lib -name '*.dart' -not -name '*.g.dart' -not -name '*.freezed.dart')
+          done < <(find flutter/lib -name '*.dart' -not -name '*.g.dart' -not -name '*.freezed.dart' \
+            -not -path 'flutter/lib/src/theme/k_tokens.dart')
 
           if [ -n "$missing" ]; then
             echo "::error::Des sources de flutter/lib n'ont pas l'en-tete MPL-2.0."

@@ -1,11 +1,10 @@
 // =============================================================================
 // Styles — Orchestrateur
-// Ordre : tokens -> themes -> reset -> base -> utilities
+// Ordre : tokens -> reset -> base -> utilities
+// Les tokens `--k-*` (k-design) sont charges avant ce fichier par angular.json.
 // =============================================================================
 
-@use 'tokens/tokens';
-@use 'themes/light';
-@use 'themes/dark';
+@use 'app-tokens';
 @use 'reset';
 @use 'base';
 @use 'forms';
