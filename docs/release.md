@@ -26,10 +26,10 @@ Le reste du processus :
    francais
 2. Commit sur `develop`, puis PR `develop` -> `main` (le push direct sur `main`
    est bloque)
-3. **Ne jamais pousser le tag** : la CI le cree au merge, apres le gate de tests
+4. **Ne jamais pousser le tag** : la CI le cree au merge, apres le gate de tests
    et la publication des images. Un tag `vX.Y.Z` implique donc qu'une image
    `:X.Y.Z` existe
-4. Apres le tag, la CI cree la GitHub Release `vX.Y.Z` (job `github-release`)
+5. Apres le tag, la CI cree la GitHub Release `vX.Y.Z` (job `github-release`)
    avec pour notes le bloc de la version du `CHANGELOG.md` anglais
    (`.github/scripts/release-notes.sh`), sans fichier joint. `version-check`
    refuse une PR vers `main` sans bloc de version dans les deux changelogs
