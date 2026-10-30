@@ -168,7 +168,7 @@
             [iconColor]="transaction.category?.couleur ?? null"
             [title]="transaction.libelle"
             [subtitle]="(transaction.date | relativeDate) + (transaction.account?.nom ? ' · ' + transaction.account!.nom : '')"
-            [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"
+            [value]="transaction.montant | amount: transaction.type : $safeNavigationMigration(transaction.account?.currency)"
             [valueClass]="getTransactionValueClass(transaction)"
             [valueSubtitle]="getTransactionConvertedValue(transaction)"
           />

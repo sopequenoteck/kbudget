@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     container:
-      image: node:22
+      image: node:24
     steps:
       - uses: actions/checkout@v4
 

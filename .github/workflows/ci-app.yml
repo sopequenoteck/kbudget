@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
-      image: node:22
+      image: node:24
     steps:
       - uses: actions/checkout@v4
 
@@ -86,7 +86,7 @@ jobs:
     runs-on: [self-hosted, kbudget-ci]
     timeout-minutes: 15
     container:
-      image: node:22
+      image: node:24
       options: --network ci-stack_ci-net
     steps:
       - uses: actions/checkout@v4

@@ -60,7 +60,7 @@ sign-up, by design.
 | Layer     | Technology                                     |
 |-----------|------------------------------------------------|
 | Backend   | Java 21, Spring Boot 4.0.2, Maven, Flyway      |
-| Web       | Angular 21, TypeScript 5.9, SCSS               |
+| Web       | Angular 22, TypeScript 6.0, SCSS               |
 | Mobile    | Flutter ≥ 3.27, Dart ≥ 3.6, Riverpod, Dio      |
 | Database  | PostgreSQL 15+                                 |
 | Auth      | Spring Security + JWT                          |

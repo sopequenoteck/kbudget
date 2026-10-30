@@ -74,7 +74,7 @@
       type="button"
       class="cs__submit-btn bsheet__action-pill bsheet__action-pill--primary"
       (click)="submitCategoryForm()"
-      [disabled]="categoryForm()?.submitting()"
+      [disabled]="$safeNavigationMigration(categoryForm()?.submitting())"
     >
       ✓ {{ 'categories.action.create' | transloco }}
     </button>

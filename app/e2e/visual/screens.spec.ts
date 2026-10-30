@@ -23,6 +23,16 @@ for (const theme of THEMES) {
   test.describe(`theme ${theme}`, () => {
     test.beforeEach(async ({ page }) => {
       await page.addInitScript((t) => localStorage.setItem('budget_theme', t), theme);
+      // Le theme s'applique au demarrage et declenche des transitions : meme a 0 ms, une transition
+      // encore active a la capture change l'anticrenelage des coins (1 niveau de gris, rendu instable).
+      // animations: 'disabled' ne l'empeche pas ; seul transition: none rend la capture stable.
+      await page.addInitScript(() =>
+        document.addEventListener('DOMContentLoaded', () => {
+          const style = document.createElement('style');
+          style.textContent = '*, *::before, *::after { transition: none !important; }';
+          document.head.appendChild(style);
+        }),
+      );
       await page.clock.setFixedTime(NOW);
     });
 
