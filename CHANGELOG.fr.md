@@ -7,6 +7,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.14.0] - 2026-10-30
+
 ### Added
 
 - **Profils bancaires ajoutés sans reconstruire l'image** (KKS-329) : une
@@ -1834,7 +1836,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.14.0...HEAD
+[6.14.0]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...v6.14.0
 [6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
