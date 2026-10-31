@@ -35,11 +35,12 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
 import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 import { parseLocalDate } from '../../../../shared/utils/date.utils';
+import { ListSkeleton } from '../../../../shared/components/list-skeleton/list-skeleton';
 
 @Component({
   selector: 'app-debt-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, SnoozeDialog, NgIcon, TranslocoPipe],
+  imports: [ListSkeleton, AmountPipe, ConvertAmountPipe, CategoryNamePipe, SnoozeDialog, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -85,8 +86,6 @@ export class DebtDetail {
   readonly paymentsTotal = computed(() =>
     this.payments().reduce((acc, p) => acc + p.amount, 0),
   );
-
-  readonly skeletonItems = Array(4);
 
   readonly DebtType = DebtType;
 

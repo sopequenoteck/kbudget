@@ -6,20 +6,7 @@
 </div>
 
 @if (loading()) {
-  <div class="k-list-group">
-    @for (item of skeletonItems; track $index) {
-      <div class="k-skeleton-item">
-        <div class="k-skeleton-circle"></div>
-        <div class="k-skeleton-lines">
-          <div class="k-skeleton-line k-skeleton-line--title"></div>
-          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
-        </div>
-        <div class="k-skeleton-lines k-skeleton-lines--right">
-          <div class="k-skeleton-line k-skeleton-line--value"></div>
-        </div>
-      </div>
-    }
-  </div>
+  <app-list-skeleton [count]="3" />
 } @else if (error()) {
   <app-empty-state
     icon="phosphorWarning"

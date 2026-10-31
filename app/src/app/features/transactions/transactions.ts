@@ -40,6 +40,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { RouterLink } from '@angular/router';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { ListSkeleton } from '../../shared/components/list-skeleton/list-skeleton';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
 import { formatMonthYearLabel } from '../../shared/utils/locale-format.utils';
@@ -73,7 +74,7 @@ interface EmptyStateConfig {
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, RouterLink, EmptyState, CurrencyPillSelector, TranslocoPipe],
+  imports: [ListSkeleton, AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, RouterLink, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorMagnifyingGlass,
@@ -115,7 +116,6 @@ export class Transactions implements AfterViewInit {
   readonly categories = signal<Category[]>([]);
   readonly accounts = signal<Account[]>([]);
 
-  readonly skeletonItems = Array(5);
   readonly dateGroupLabelKeys = DATE_GROUP_LABEL_KEYS;
 
   readonly activeCurrency = signal(this.preferenceService.primaryCurrency());

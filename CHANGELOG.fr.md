@@ -26,9 +26,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   feuilles `k-base.css` et `k-patterns.css` sont chargées après les tokens, les
   classes partagées prennent le préfixe `.k-`, et les SCSS locaux ne gardent
   que ce qui est propre à K·Budget (montant et devise du bottom sheet, dettes
-  remboursées, revue d'import, montants, anneau de focus des champs). Le nginx
-  de l'app inclut le fragment `k-pwa-sw.conf` de k-design pour les règles de
-  cache du service worker. Aucun changement visible pour l'utilisateur.
+  remboursées, revue d'import, montants, anneau de focus des champs). Les
+  squelettes de chargement des listes viennent d'un seul composant partagé
+  `app-list-skeleton` au lieu d'une copie par page. Le nginx de l'app inclut le
+  fragment `k-pwa-sw.conf` de k-design pour les règles de cache du service
+  worker. Aucun changement visible pour l'utilisateur.
 
 ## [6.14.0] - 2026-10-30
 

@@ -37,11 +37,12 @@ import { parseLocalDate } from '../../../../shared/utils/date.utils';
 import { PreferenceService } from '../../../../core/services/preference';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
+import { ListSkeleton } from '../../../../shared/components/list-skeleton/list-skeleton';
 
 @Component({
   selector: 'app-subscription-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, TranslocoPipe],
+  imports: [ListSkeleton, AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -77,8 +78,6 @@ export class SubscriptionDetail {
   readonly paymentsLoading = signal(true);
   readonly payInProgress = signal(false);
   readonly error = signal(false);
-
-  readonly skeletonItems = Array(4);
 
   readonly sortedPayments = computed(() =>
     [...this.payments()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),

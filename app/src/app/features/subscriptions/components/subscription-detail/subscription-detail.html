@@ -1,24 +1,5 @@
 @if (loading()) {
-  <div class="k-skeleton-hero">
-    <div class="k-skeleton-bar k-skeleton-bar--xs"></div>
-    <div class="k-skeleton-bar k-skeleton-bar--lg"></div>
-    <div class="k-skeleton-bar k-skeleton-bar--md"></div>
-    <div class="k-skeleton-bar k-skeleton-bar--sm"></div>
-  </div>
-  <div class="k-list-group" style="margin-top: var(--k-space-4)">
-    @for (item of skeletonItems; track $index) {
-      <div class="k-skeleton-item">
-        <div class="k-skeleton-circle"></div>
-        <div class="k-skeleton-lines">
-          <div class="k-skeleton-line k-skeleton-line--title"></div>
-          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
-        </div>
-        <div class="k-skeleton-lines k-skeleton-lines--right">
-          <div class="k-skeleton-line k-skeleton-line--value"></div>
-        </div>
-      </div>
-    }
-  </div>
+  <app-list-skeleton hero [count]="4" />
 } @else if (error()) {
   <div class="k-state-error">
     <p>{{ 'common.feedback.loadError' | transloco }}</p>
@@ -102,20 +83,7 @@
       }
     </div>
     @if (paymentsLoading()) {
-      <div class="k-list-group">
-        @for (item of skeletonItems; track $index) {
-          <div class="k-skeleton-item">
-            <div class="k-skeleton-circle"></div>
-            <div class="k-skeleton-lines">
-              <div class="k-skeleton-line k-skeleton-line--title"></div>
-              <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
-            </div>
-            <div class="k-skeleton-lines k-skeleton-lines--right">
-              <div class="k-skeleton-line k-skeleton-line--value"></div>
-            </div>
-          </div>
-        }
-      </div>
+      <app-list-skeleton [count]="4" />
     } @else if (sortedPayments().length === 0) {
       <p class="payments-empty">{{ 'common.empty.noPayments' | transloco }}</p>
     } @else {

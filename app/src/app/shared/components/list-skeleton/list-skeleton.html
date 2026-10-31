@@ -1,0 +1,25 @@
+@if (hero()) {
+  <div class="k-skeleton-hero">
+    <div class="k-skeleton-bar k-skeleton-bar--xs"></div>
+    <div class="k-skeleton-bar k-skeleton-bar--lg"></div>
+    <div class="k-skeleton-bar k-skeleton-bar--md"></div>
+    <div class="k-skeleton-bar k-skeleton-bar--sm"></div>
+  </div>
+}
+<div class="k-list-group" [style.margin-top]="hero() ? 'var(--k-space-4)' : null">
+  @for (item of items(); track $index) {
+    <div class="k-skeleton-item">
+      <div class="k-skeleton-circle"></div>
+      <div class="k-skeleton-lines">
+        <div class="k-skeleton-line k-skeleton-line--title"></div>
+        <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
+      </div>
+      <div class="k-skeleton-lines k-skeleton-lines--right">
+        <div class="k-skeleton-line k-skeleton-line--value"></div>
+        @if (small()) {
+          <div class="k-skeleton-line k-skeleton-line--small"></div>
+        }
+      </div>
+    </div>
+  }
+</div>
