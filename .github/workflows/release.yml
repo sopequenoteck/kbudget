@@ -62,6 +62,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Socle PWA de k-design (KKS-619), depuis la racine du depot, ou se trouve k-design.json.
+      - name: Contrôle du socle PWA
+        run: node app/k-pwa/k-pwa-check.mjs
+
       - name: Install, tests + couverture
         working-directory: app
         run: |

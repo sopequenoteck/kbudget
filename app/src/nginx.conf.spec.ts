@@ -1,6 +1,12 @@
 import { readFileSync } from 'node:fs';
 
-const nginxConfig = readFileSync('nginx.conf', 'utf8');
+const INCLUDE_DIRECTIVE = 'include /etc/nginx/k-pwa-sw.conf;';
+const appConfig = readFileSync('nginx.conf', 'utf8');
+// Depuis KKS-619, les regles des fichiers sans empreinte viennent du fragment commun de k-design,
+// copie par le Dockerfile a l'endroit que nomme l'include : la configuration servie est celle du
+// fichier de l'app, include resolu.
+const fragment = readFileSync('k-pwa/k-pwa-sw.conf', 'utf8');
+const nginxConfig = appConfig.replace(INCLUDE_DIRECTIVE, fragment);
 
 function extractLocationBlock(config: string, locationHeader: RegExp): string {
   const match = locationHeader.exec(config);
@@ -42,6 +48,25 @@ describe('nginx.conf - routage API', () => {
     expect(() => assertApiRoutingIsProtected(withoutPrefixPriority)).toThrow();
     expect(() => assertApiRoutingIsProtected(withWrongProxy)).toThrow();
   });
+});
+
+describe('nginx.conf - fragment k-pwa-sw.conf (KKS-619)', () => {
+  it('should_include_the_k_design_fragment_when_serving_unhashed_files', () => {
+    expect(appConfig).toContain(INCLUDE_DIRECTIVE);
+  });
+
+  it('should_copy_the_fragment_where_the_include_expects_it_when_building_the_image', () => {
+    expect(readFileSync('Dockerfile', 'utf8')).toMatch(
+      /^COPY k-pwa\/k-pwa-sw\.conf \/etc\/nginx\/k-pwa-sw\.conf$/m,
+    );
+  });
+
+  it.each(['/index.html', '/ngsw-worker.js', '/ngsw.json', '/manifest.webmanifest', '/safety-worker.js'])(
+    'should_not_redeclare_%s_when_the_fragment_already_declares_it',
+    (path) => {
+      expect(withoutComments(appConfig)).not.toMatch(new RegExp(`location\\s+=\\s+${path.replaceAll('.', '\\.')}\\s*\\{`));
+    },
+  );
 });
 
 interface NginxLocation {

@@ -307,13 +307,13 @@
 }
 
 // Section 5 : Actions
-.form-actions {
+.k-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--k-space-3);
   padding-top: var(--k-space-3);
 
-  .btn-danger {
+  .k-btn-danger {
     margin-right: auto;
   }
 }

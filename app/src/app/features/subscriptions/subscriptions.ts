@@ -29,6 +29,7 @@ import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { ListSkeleton } from '../../shared/components/list-skeleton/list-skeleton';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { DevLogger } from '../../core/services/dev-logger';
 import { LanguageService } from '../../core/services/language';
@@ -60,7 +61,7 @@ const SUBSCRIPTION_GROUP_LABEL_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
+  imports: [ListSkeleton, AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorCalendar, phosphorRepeat })],
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.scss',
@@ -80,7 +81,6 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
   readonly isStuck = signal(false);
   private observer: IntersectionObserver | null = null;
 
-  readonly skeletonItems = Array(5);
   readonly SUBSCRIPTION_FREQUENCY_LABEL_KEYS = SUBSCRIPTION_FREQUENCY_LABEL_KEYS;
   readonly SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS = SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS;
 

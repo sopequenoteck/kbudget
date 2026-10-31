@@ -1,8 +1,8 @@
-<div class="page-header">
-  <button class="page-header__back" (click)="goBack()" [attr.aria-label]="'common.action.back' | transloco">
+<div class="k-page-header">
+  <button class="k-page-header__back" (click)="goBack()" [attr.aria-label]="'common.action.back' | transloco">
     <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="page-header__title">{{ 'recurring.page.title' | transloco }}</h1>
+  <h1 class="k-page-header__title">{{ 'recurring.page.title' | transloco }}</h1>
 </div>
 
 <app-modal [isOpen]="selectedItem() !== null" [title]="selectedItem()?.libelle ?? ''" (closed)="selectedItem.set(null)">
@@ -45,25 +45,25 @@
 </app-modal>
 
 @if (loading()) {
-  <div class="list-group">
+  <div class="k-list-group">
     @for (item of skeletonItems; track $index) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
+      <div class="k-skeleton-item">
+        <div class="k-skeleton-circle"></div>
+        <div class="k-skeleton-lines">
+          <div class="k-skeleton-line k-skeleton-line--title"></div>
+          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
         </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
-          <div class="skeleton-line skeleton-line--small"></div>
+        <div class="k-skeleton-lines k-skeleton-lines--right">
+          <div class="k-skeleton-line k-skeleton-line--value"></div>
+          <div class="k-skeleton-line k-skeleton-line--small"></div>
         </div>
       </div>
     }
   </div>
 } @else if (error()) {
-  <div class="state-error">
+  <div class="k-state-error">
     <p>{{ 'common.feedback.loadError' | transloco }}</p>
-    <button class="btn-outline" (click)="reload()">{{ 'common.action.retry' | transloco }}</button>
+    <button class="k-btn-outline" (click)="reload()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (sortedRecurringTransactions().length === 0) {
   <app-empty-state
@@ -85,11 +85,11 @@
   }
 
   @for (group of groupedByStatus(); track group.status) {
-    <div class="date-label" [class]="'date-label--' + group.status">
+    <div class="k-date-label" [class]="'k-date-label--' + group.status">
       <span>{{ group.labelKey | transloco }}</span>
       @if (group.status === 'overdue') {
         <button
-          class="date-label__action"
+          class="k-date-label__action"
           [disabled]="actionInProgress() !== null"
           (click)="onValidateAll(group.items)"
         >

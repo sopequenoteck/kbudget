@@ -1,22 +1,22 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="k-bsheet">
   @if (errorMessage()) {
-    <div class="bsheet__error">{{ errorMessage() }}</div>
+    <div class="k-bsheet__error">{{ errorMessage() }}</div>
   }
 
-  <div class="bsheet__top">
-    <div class="bsheet__handle"></div>
-    <div class="bsheet__top-title">
+  <div class="k-bsheet__top">
+    <div class="k-bsheet__handle"></div>
+    <div class="k-bsheet__top-title">
       <ng-icon name="phosphorArrowCircleDown" size="16" />
       <span>{{ 'debts.dialog.repayTitle' | transloco }}</span>
     </div>
     <span class="repay-form__remaining">{{ 'debts.dialog.remaining' | transloco: { amount: (debtMontantRestant() | amount: null : debtCurrency()) } }}</span>
   </div>
 
-  <div class="bsheet__main-row bsheet__main-row--between">
+  <div class="k-bsheet__main-row k-bsheet__main-row--between">
     <span class="repay-form__personne">{{ debtPersonne() }}</span>
-    <div class="bsheet__amount-group">
+    <div class="k-bsheet__amount-group">
       <input
-        class="bsheet__amount bsheet__amount--sm bsheet__amount--right bsheet__amount--income input-naked"
+        class="k-bsheet__amount k-bsheet__amount--sm k-bsheet__amount--right k-bsheet__amount--income k-input-naked"
         [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
@@ -24,15 +24,15 @@
         placeholder="0"
         autocomplete="off"
       />
-      <span class="bsheet__currency bsheet__currency--sm bsheet__currency--income">{{ currencySymbol() }}</span>
+      <span class="k-bsheet__currency k-bsheet__currency--sm k-bsheet__currency--income">{{ currencySymbol() }}</span>
     </div>
   </div>
 
-  <div class="bsheet__meta-row bsheet__meta-row--end">
-    <div class="bsheet__meta-pills">
+  <div class="k-bsheet__meta-row k-bsheet__meta-row--end">
+    <div class="k-bsheet__meta-pills">
       <button
         type="button"
-        class="bsheet__tool-pill"
+        class="k-bsheet__tool-pill"
         [class.active]="expandedSection() === 'account'"
         (click)="toggleSection('account')"
         [attr.aria-label]="'debts.form.accountAria' | transloco"
@@ -44,7 +44,7 @@
   </div>
 
   @if (expandedSection() === 'account') {
-    <div class="bsheet__expand" @expandCollapse>
+    <div class="k-bsheet__expand" @expandCollapse>
       <app-select-picker
         formControlName="accountId"
         [items]="accountItems()"
@@ -54,17 +54,17 @@
     </div>
   }
 
-  <div class="bsheet__bottom-row">
+  <div class="k-bsheet__bottom-row">
     <button
       type="button"
-      class="bsheet__action-pill bsheet__action-pill--cancel"
+      class="k-bsheet__action-pill k-bsheet__action-pill--cancel"
       (click)="onCancel()"
     >
       {{ 'common.action.cancel' | transloco }}
     </button>
     <button
       type="submit"
-      class="bsheet__action-pill bsheet__action-pill--primary"
+      class="k-bsheet__action-pill k-bsheet__action-pill--primary"
       [disabled]="submitting()"
     >
       {{ submitting() ? '...' : ('debts.action.repay' | transloco) }}

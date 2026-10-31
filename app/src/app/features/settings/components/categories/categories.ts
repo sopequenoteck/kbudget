@@ -17,11 +17,12 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { Category } from '../../../../core/models/category.model';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { ListSkeleton } from '../../../../shared/components/list-skeleton/list-skeleton';
 
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [RouterLink, NgIcon, EmptyState, TranslocoPipe],
+  imports: [ListSkeleton, RouterLink, NgIcon, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCaretLeft,
@@ -40,8 +41,6 @@ export class Categories {
   private readonly categoryService = inject(CategoryService);
   private readonly modalService = inject(ModalService);
   private readonly logger = inject(DevLogger);
-
-  readonly skeletonItems = Array(3);
 
   readonly categories = signal<Category[]>([]);
   readonly loading = signal(true);

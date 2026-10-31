@@ -1,28 +1,28 @@
-<div class="page-header">
+<div class="k-page-header">
   <button
     type="button"
-    class="page-header__back"
+    class="k-page-header__back"
     (click)="goBack()"
     [attr.aria-label]="'common.action.back' | transloco"
   >
     <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="page-header__title">{{ 'imports.page.cleanupTitle' | transloco }}</h1>
+  <h1 class="k-page-header__title">{{ 'imports.page.cleanupTitle' | transloco }}</h1>
 </div>
 
 <p class="cleanup__description">{{ 'imports.page.cleanupDescription' | transloco }}</p>
 
 @if (loading()) {
-  <div class="list-group" aria-busy="true">
+  <div class="k-list-group" aria-busy="true">
     @for (placeholder of [1, 2, 3]; track placeholder) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
+      <div class="k-skeleton-item">
+        <div class="k-skeleton-circle"></div>
+        <div class="k-skeleton-lines">
+          <div class="k-skeleton-line k-skeleton-line--title"></div>
+          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
         </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
+        <div class="k-skeleton-lines k-skeleton-lines--right">
+          <div class="k-skeleton-line k-skeleton-line--value"></div>
         </div>
       </div>
     }
@@ -38,20 +38,20 @@
   <!-- a. Operations deja saisies -->
   @if (importedProposals().length > 0) {
     <section class="review__section" data-testid="section-imported">
-      <div class="section-header">
-        <h2 class="section-header__title">{{ 'imports.list.cleanupImportedTitle' | transloco }}</h2>
-        <span class="section-header__count">{{ importedProposals().length }}</span>
+      <div class="k-section-header">
+        <h2 class="k-section-header__title">{{ 'imports.list.cleanupImportedTitle' | transloco }}</h2>
+        <span class="k-section-header__count">{{ importedProposals().length }}</span>
       </div>
       <p class="review__hint">{{ 'imports.list.cleanupImportedHint' | transloco }}</p>
-      <div class="list-group">
+      <div class="k-list-group">
         @for (proposal of importedProposals(); track importedKey(proposal)) {
           <div class="review__item" data-testid="imported-proposal">
             <div class="review__line">
-              <span class="list-row__content">
-                <span class="list-row__title">{{ proposal.imported.libelle }}</span>
-                <span class="list-row__subtitle">{{ shortDate(proposal.imported.date) }}</span>
+              <span class="k-list-row__content">
+                <span class="k-list-row__title">{{ proposal.imported.libelle }}</span>
+                <span class="k-list-row__subtitle">{{ shortDate(proposal.imported.date) }}</span>
               </span>
-              <span class="list-row__amount" [class]="amountClass(proposal.imported.type)">
+              <span class="k-list-row__amount" [class]="amountClass(proposal.imported.type)">
                 {{
                   proposal.imported.montant
                     | amount: proposal.imported.type : proposal.imported.account.currency
@@ -68,7 +68,7 @@
                   >
                     <input
                       type="radio"
-                      class="sr-only"
+                      class="k-sr-only"
                       data-testid="candidate-radio"
                       [name]="'candidate-' + importedKey(proposal)"
                       [value]="candidate.id"
@@ -121,20 +121,20 @@
   <!-- b. Paiements d'abonnement en double -->
   @if (subscriptionProposals().length > 0) {
     <section class="review__section" data-testid="section-subscriptions">
-      <div class="section-header">
-        <h2 class="section-header__title">
+      <div class="k-section-header">
+        <h2 class="k-section-header__title">
           {{ 'imports.list.cleanupSubscriptionTitle' | transloco }}
         </h2>
-        <span class="section-header__count">{{ subscriptionProposals().length }}</span>
+        <span class="k-section-header__count">{{ subscriptionProposals().length }}</span>
       </div>
       <p class="review__hint">{{ 'imports.list.cleanupSubscriptionHint' | transloco }}</p>
-      <div class="list-group">
+      <div class="k-list-group">
         @for (proposal of subscriptionProposals(); track subscriptionKey(proposal)) {
           <div class="review__item" data-testid="subscription-proposal">
             <div class="review__line">
-              <span class="list-row__content">
-                <span class="list-row__title">{{ proposal.subscriptionName }}</span>
-                <span class="list-row__subtitle">{{
+              <span class="k-list-row__content">
+                <span class="k-list-row__title">{{ proposal.subscriptionName }}</span>
+                <span class="k-list-row__subtitle">{{
                   'imports.list.cleanupPeriod'
                     | transloco
                       : {
@@ -156,7 +156,7 @@
                   >
                     <input
                       type="radio"
-                      class="sr-only"
+                      class="k-sr-only"
                       data-testid="payment-radio"
                       [name]="'payment-' + subscriptionKey(proposal)"
                       [value]="payment.id"
@@ -209,19 +209,19 @@
   <!-- c. Sans categorie, regroupees par commercant -->
   @if (showUncategorized()) {
     <section class="review__section" data-testid="section-uncategorised">
-      <div class="section-header">
-        <h2 class="section-header__title">{{ 'imports.list.uncategorisedTitle' | transloco }}</h2>
-        <span class="section-header__count">{{ uncategorizedCount() }}</span>
+      <div class="k-section-header">
+        <h2 class="k-section-header__title">{{ 'imports.list.uncategorisedTitle' | transloco }}</h2>
+        <span class="k-section-header__count">{{ uncategorizedCount() }}</span>
       </div>
       @if (uncategorizedGroups().length > 0) {
         <p class="review__hint">{{ 'imports.list.cleanupUncategorisedHint' | transloco }}</p>
-        <div class="list-group">
+        <div class="k-list-group">
           @for (group of uncategorizedGroups(); track groupTrackKey(group)) {
             <div class="review__item" data-testid="uncategorised-group">
               <div class="review__line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ group.merchantKey }}</span>
-                  <span class="list-row__subtitle">
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ group.merchantKey }}</span>
+                  <span class="k-list-row__subtitle">
                     @if (group.amount !== null) {
                       {{
                         'imports.list.cleanupGroupCountAt'
@@ -236,7 +236,7 @@
                     }
                   </span>
                 </span>
-                <span class="list-row__amount" [class]="amountClass(group.type)">
+                <span class="k-list-row__amount" [class]="amountClass(group.type)">
                   {{ group.totalAmount | amount: group.type : currencyOf(group) }}
                 </span>
               </div>
@@ -292,25 +292,25 @@
   <!-- d. Ajustements a recaler -->
   @if (adjustmentCount() > 0) {
     <section class="review__section" data-testid="section-adjustments">
-      <div class="section-header">
-        <h2 class="section-header__title">
+      <div class="k-section-header">
+        <h2 class="k-section-header__title">
           {{ 'imports.list.cleanupAdjustmentsTitle' | transloco }}
         </h2>
-        <span class="section-header__count">{{ adjustmentCount() }}</span>
+        <span class="k-section-header__count">{{ adjustmentCount() }}</span>
       </div>
       <p class="review__hint">{{ 'imports.list.cleanupAdjustmentsHint' | transloco }}</p>
       @for (entry of adjustmentAccounts(); track entry.account.id) {
         <h3 class="cleanup__account" data-testid="adjustment-account">{{ entry.account.nom }}</h3>
-        <div class="list-group">
+        <div class="k-list-group">
           @for (adjustment of entry.adjustments; track adjustment.id) {
             <div class="review__item" data-testid="adjustment">
               <div class="review__line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ adjustment.libelle }}</span>
-                  <span class="list-row__subtitle">{{ shortDate(adjustment.date) }}</span>
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ adjustment.libelle }}</span>
+                  <span class="k-list-row__subtitle">{{ shortDate(adjustment.date) }}</span>
                 </span>
                 <span
-                  class="list-row__amount"
+                  class="k-list-row__amount"
                   [class]="amountClass(signedType(adjustment.montant))"
                 >
                   {{
@@ -366,12 +366,12 @@
   (closed)="closeCategorySheet()"
 >
   @if (categoryTarget(); as target) {
-    <div class="bsheet">
-      <div class="bsheet__top">
-        <span class="bsheet__handle"></span>
-        <span class="bsheet__top-title">{{ target.merchantKey }}</span>
+    <div class="k-bsheet">
+      <div class="k-bsheet__top">
+        <span class="k-bsheet__handle"></span>
+        <span class="k-bsheet__top-title">{{ target.merchantKey }}</span>
       </div>
-      <div class="bsheet__expand">
+      <div class="k-bsheet__expand">
         <app-category-select
           [categories]="categories()"
           (selected)="onCategorySelected($event)"
@@ -379,11 +379,11 @@
           (isCreating)="categoryCreating.set($event)"
         />
       </div>
-      <div class="bsheet__bottom-row">
-        <div class="bsheet__bottom-left">
+      <div class="k-bsheet__bottom-row">
+        <div class="k-bsheet__bottom-left">
           <button
             type="button"
-            class="bsheet__action-pill bsheet__action-pill--cancel"
+            class="k-bsheet__action-pill k-bsheet__action-pill--cancel"
             [disabled]="categoryCreating()"
             (click)="closeCategorySheet()"
           >

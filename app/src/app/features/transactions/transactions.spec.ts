@@ -25,7 +25,7 @@ import { stubIntersectionObserver } from '../../../testing/intersection-observer
 const NOW = new Date(2026, 2, 13, 10, 0, 0);
 
 // jsdom ne fournit pas IntersectionObserver (utilisé par ngAfterViewInit pour
-// le sticky-sentinel).
+// le k-sticky-sentinel).
 beforeAll(() => stubIntersectionObserver());
 
 const makeTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({
@@ -167,15 +167,15 @@ describe('Transactions', () => {
     const fixture = await createFixture([]);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.hero__amount-label')?.textContent).toBe('Solde');
-    expect(el.querySelector('.section-header__title')?.textContent).toBe('Transactions');
-    expect(el.querySelector('button.hero__nav-btn[aria-label="Mois précédent"]')).not.toBeNull();
-    expect(el.querySelector('button.hero__nav-btn[aria-label="Mois suivant"]')).not.toBeNull();
+    expect(el.querySelector('.k-hero__amount-label')?.textContent).toBe('Solde');
+    expect(el.querySelector('.k-section-header__title')?.textContent).toBe('Transactions');
+    expect(el.querySelector('button.k-hero__nav-btn[aria-label="Mois précédent"]')).not.toBeNull();
+    expect(el.querySelector('button.k-hero__nav-btn[aria-label="Mois suivant"]')).not.toBeNull();
     expect(el.querySelector('[aria-label="Rechercher"]')).not.toBeNull();
     expect(el.querySelector('[aria-label="Filtrer"]')).not.toBeNull();
     expect(el.querySelector('a[aria-label="Récurrences"]')).not.toBeNull();
 
-    const metaLines = Array.from(el.querySelectorAll('.hero__meta-line')).map((n) =>
+    const metaLines = Array.from(el.querySelectorAll('.k-hero__meta-line')).map((n) =>
       n.textContent?.trim(),
     );
     expect(metaLines).toEqual(['0 recettes', '0 dépenses']);
@@ -196,7 +196,7 @@ describe('Transactions', () => {
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
 
-    const input = el.querySelector<HTMLInputElement>('.section-header__search-input');
+    const input = el.querySelector<HTMLInputElement>('.k-section-header__search-input');
     expect(input?.getAttribute('placeholder')).toBe('Rechercher...');
     expect(el.querySelector('[aria-label="Fermer"]')).not.toBeNull();
     // Le bouton "Rechercher" disparait pendant que la recherche est ouverte.
@@ -226,8 +226,8 @@ describe('Transactions', () => {
     await flushAsyncLoad(fixture);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.state-error p')?.textContent).toBe('Erreur de chargement');
-    expect(el.querySelector('.state-error .btn-outline')?.textContent).toBe('Réessayer');
+    expect(el.querySelector('.k-state-error p')?.textContent).toBe('Erreur de chargement');
+    expect(el.querySelector('.k-state-error .k-btn-outline')?.textContent).toBe('Réessayer');
   });
 
   // ---------------------------------------------------------------------
@@ -465,7 +465,7 @@ describe('Transactions', () => {
     const fixture = await createFixture([olderTx, lastWeekTx, thisWeekTx, yesterdayTx, todayTx]);
     const el: HTMLElement = fixture.nativeElement;
 
-    const headers = Array.from(el.querySelectorAll('.date-label')).map((n) =>
+    const headers = Array.from(el.querySelectorAll('.k-date-label')).map((n) =>
       n.textContent?.trim(),
     );
     expect(headers).toEqual([

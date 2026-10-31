@@ -23,7 +23,7 @@
 }
 
 .cleanup__option {
-  // Ancre le radio masque (`sr-only`, en absolu) sur sa ligne : pas de saut de defilement au focus clavier.
+  // Ancre le radio masque (`k-sr-only`, en absolu) sur sa ligne : pas de saut de defilement au focus clavier.
   position: relative;
 
   // Le radio natif est masque : le focus clavier se voit sur la ligne, a l'interieur du groupe qui rogne.

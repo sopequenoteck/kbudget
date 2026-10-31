@@ -26,6 +26,7 @@ import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { CategoryNamePipe } from '../../shared/pipes/category-name.pipe';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { ListSkeleton } from '../../shared/components/list-skeleton/list-skeleton';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
 import { getRelativeDueDateInfo, RelativeDateInfo, RelativeDueDateKeys } from '../../shared/utils/relative-due-date.utils';
@@ -57,7 +58,7 @@ const DEBT_GROUP_LABEL_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-debts',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
+  imports: [ListSkeleton, AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorHandCoins, phosphorHandshake, phosphorClock })],
   templateUrl: './debts.html',
   styleUrl: './debts.scss',
@@ -77,7 +78,6 @@ export class Debts implements AfterViewInit, OnDestroy {
   readonly isStuck = signal(false);
   private observer: IntersectionObserver | null = null;
 
-  readonly skeletonItems = Array(5);
   readonly DEBT_TYPE_LABEL_KEYS = DEBT_TYPE_LABEL_KEYS;
 
   readonly loading = signal(true);

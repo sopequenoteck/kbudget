@@ -32,11 +32,13 @@ import { AccountBankIcon } from '../../../../shared/components/account-bank-icon
 import { CurrencyList } from '../currency-settings/currency-list';
 import { ExchangeRateManager } from '../currency-settings/exchange-rate-manager';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { ListSkeleton } from '../../../../shared/components/list-skeleton/list-skeleton';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
   imports: [
+    ListSkeleton,
     AmountPipe,
     RouterLink,
     NgIcon,
@@ -72,7 +74,6 @@ export class Accounts {
   readonly rateService = inject(ExchangeRateService);
   private readonly prefService = inject(PreferenceService);
 
-  readonly skeletonItems = Array(3);
   readonly ACCOUNT_TYPE_LABEL_KEYS = ACCOUNT_TYPE_LABEL_KEYS;
 
   readonly accounts = signal<Account[]>([]);

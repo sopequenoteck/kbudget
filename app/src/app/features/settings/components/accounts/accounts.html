@@ -1,25 +1,12 @@
-<div class="page-header">
-  <button class="page-header__back" routerLink="/settings" [attr.aria-label]="'common.action.back' | transloco">
+<div class="k-page-header">
+  <button class="k-page-header__back" routerLink="/settings" [attr.aria-label]="'common.action.back' | transloco">
     <ng-icon name="phosphorCaretLeft" size="20" />
   </button>
-  <h1 class="page-header__title"><ng-icon name="phosphorBank" size="20" /> {{ 'accounts.page.title' | transloco }}</h1>
+  <h1 class="k-page-header__title"><ng-icon name="phosphorBank" size="20" /> {{ 'accounts.page.title' | transloco }}</h1>
 </div>
 
 @if (loading()) {
-  <div class="list-group">
-    @for (item of skeletonItems; track $index) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
-        </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
-        </div>
-      </div>
-    }
-  </div>
+  <app-list-skeleton [count]="3" />
 } @else if (error()) {
   <app-empty-state
     icon="phosphorWarning"

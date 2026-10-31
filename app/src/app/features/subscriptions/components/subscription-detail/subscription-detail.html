@@ -1,70 +1,51 @@
 @if (loading()) {
-  <div class="skeleton-hero">
-    <div class="skeleton-bar skeleton-bar--xs"></div>
-    <div class="skeleton-bar skeleton-bar--lg"></div>
-    <div class="skeleton-bar skeleton-bar--md"></div>
-    <div class="skeleton-bar skeleton-bar--sm"></div>
-  </div>
-  <div class="list-group" style="margin-top: var(--k-space-4)">
-    @for (item of skeletonItems; track $index) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
-        </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
-        </div>
-      </div>
-    }
-  </div>
+  <app-list-skeleton hero [count]="4" />
 } @else if (error()) {
-  <div class="state-error">
+  <div class="k-state-error">
     <p>{{ 'common.feedback.loadError' | transloco }}</p>
-    <button class="btn-outline" (click)="retry()">{{ 'common.action.retry' | transloco }}</button>
+    <button class="k-btn-outline" (click)="retry()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (subscription(); as sub) {
-  <div class="page-header">
-    <button class="page-header__back" (click)="goBack()" [attr.aria-label]="'common.action.back' | transloco">
+  <div class="k-page-header">
+    <button class="k-page-header__back" (click)="goBack()" [attr.aria-label]="'common.action.back' | transloco">
       <ng-icon name="phosphorArrowLeft" size="20" />
     </button>
-    <h1 class="page-header__title">{{ sub.nom }}</h1>
+    <h1 class="k-page-header__title">{{ sub.nom }}</h1>
   </div>
 
-  <section class="hero">
-    <div class="hero__top">
-      <div class="hero__tags">
-        <span class="hero__label">{{ SUBSCRIPTION_FREQUENCY_LABEL_KEYS[sub.frequence] | transloco }}</span>
+  <section class="k-hero">
+    <div class="k-hero__top">
+      <div class="k-hero__tags">
+        <span class="k-hero__label">{{ SUBSCRIPTION_FREQUENCY_LABEL_KEYS[sub.frequence] | transloco }}</span>
         <span class="badge-status" [class.badge-status--actif]="sub.actif" [class.badge-status--inactif]="!sub.actif">
           {{ (sub.actif ? 'common.value.active' : 'common.value.inactive') | transloco }}
         </span>
         @if (sub.category) {
-          <span class="hero__category">{{ sub.category.icone }} {{ sub.category.nom | categoryName: sub.category.systemKey }}</span>
+          <span class="k-hero__category">{{ sub.category.icone }} {{ sub.category.nom | categoryName: sub.category.systemKey }}</span>
         }
       </div>
-      <span class="hero__date">{{ formatDate(sub.dateDebut) }}</span>
+      <span class="k-hero__date">{{ formatDate(sub.dateDebut) }}</span>
     </div>
 
-    <span class="hero__amount">{{ sub.montant | amount: null : (sub.currency || 'EUR') }}</span>
+    <span class="k-hero__amount">{{ sub.montant | amount: null : (sub.currency || 'EUR') }}</span>
     @if ((sub.currency || 'EUR') !== preferenceService.primaryCurrency()) {
-      <span class="hero__converted">{{ sub.montant | convertAmount: (sub.currency || 'EUR') : preferenceService.primaryCurrency() }}</span>
+      <span class="k-hero__converted">{{ sub.montant | convertAmount: (sub.currency || 'EUR') : preferenceService.primaryCurrency() }}</span>
     }
     @if (sub.frequence === 'ANNUEL') {
-      <span class="hero__secondary">≈ {{ sub.montant / 12 | amount: null : (sub.currency || 'EUR') }}{{ 'subscriptions.value.perMonth' | transloco }}</span>
+      <span class="k-hero__secondary">≈ {{ sub.montant / 12 | amount: null : (sub.currency || 'EUR') }}{{ 'subscriptions.value.perMonth' | transloco }}</span>
     }
     @if (sub.frequence === 'MENSUEL') {
-      <span class="hero__secondary">{{ sub.montant * 12 | amount: null : (sub.currency || 'EUR') }}{{ 'subscriptions.value.perYear' | transloco }}</span>
+      <span class="k-hero__secondary">{{ sub.montant * 12 | amount: null : (sub.currency || 'EUR') }}{{ 'subscriptions.value.perYear' | transloco }}</span>
     }
 
     @if (totalPaid(); as total) {
       @if (total.paymentCount > 0) {
-        <span class="hero__total">{{ total.totalPaid | amount: null : (sub.currency || 'EUR') }} · {{ 'subscriptions.detail.paymentCount' | transloco: { count: total.paymentCount } }}</span>
+        <span class="k-hero__total">{{ total.totalPaid | amount: null : (sub.currency || 'EUR') }} · {{ 'subscriptions.detail.paymentCount' | transloco: { count: total.paymentCount } }}</span>
       }
     }
 
     @if (sub.account) {
-      <div class="hero__account">
+      <div class="k-hero__account">
         @if (getAccountLogo(sub.account); as logo) {
           <img class="bank-logo" [src]="logo" [alt]="sub.account.nom" />
         } @else {
@@ -102,20 +83,7 @@
       }
     </div>
     @if (paymentsLoading()) {
-      <div class="list-group">
-        @for (item of skeletonItems; track $index) {
-          <div class="skeleton-item">
-            <div class="skeleton-circle"></div>
-            <div class="skeleton-lines">
-              <div class="skeleton-line skeleton-line--title"></div>
-              <div class="skeleton-line skeleton-line--subtitle"></div>
-            </div>
-            <div class="skeleton-lines skeleton-lines--right">
-              <div class="skeleton-line skeleton-line--value"></div>
-            </div>
-          </div>
-        }
-      </div>
+      <app-list-skeleton [count]="4" />
     } @else if (sortedPayments().length === 0) {
       <p class="payments-empty">{{ 'common.empty.noPayments' | transloco }}</p>
     } @else {

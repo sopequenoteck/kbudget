@@ -50,12 +50,12 @@ for (const theme of THEMES) {
       await open(page, '/transactions');
       await expect(page).toHaveScreenshot(`${theme}-transactions.png`, { fullPage: true });
 
-      await page.locator('.list-row').first().click();
-      await expect(page.locator('.bsheet')).toBeVisible();
+      await page.locator('.k-list-row').first().click();
+      await expect(page.locator('.k-bsheet')).toBeVisible();
       await expect(page).toHaveScreenshot(`${theme}-bottom-sheet.png`);
 
       // Ouvre la confirmation de suppression sans la valider : la base n'est pas modifiee.
-      await page.locator('.bsheet__action-pill--danger').click();
+      await page.locator('.k-bsheet__action-pill--danger').click();
       await expect(page.getByRole('alertdialog')).toBeVisible();
       await expect(page).toHaveScreenshot(`${theme}-confirm.png`);
 

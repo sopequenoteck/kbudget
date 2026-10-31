@@ -13,7 +13,7 @@
   }
 
   // Input neutre : structure seulement, le style visuel est porté par le contexte
-  // parent (ex : .bsheet__libelle input) pour permettre la réutilisabilité du composant.
+  // parent (ex : .k-bsheet__libelle input) pour permettre la réutilisabilité du composant.
   &__input {
     width: 100%;
     padding: 0;

@@ -5,15 +5,15 @@
 }
 
 // Transactions — styles specifiques uniquement
-// Le reste est dans _list-patterns.scss
+// Le reste est dans k-patterns.css (k-design)
 
 // Section header: plus d'espace au-dessus sur cette page
-.section-header {
+.k-section-header {
   padding-top: var(--k-space-6);
 }
 
-// Premier date-label sans padding top
-.date-label:first-of-type {
+// Premier k-date-label sans padding top
+.k-date-label:first-of-type {
   padding-top: 0;
 }
 

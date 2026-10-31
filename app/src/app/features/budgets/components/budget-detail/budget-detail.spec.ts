@@ -204,7 +204,7 @@ describe('BudgetDetail', () => {
       budgetServiceMock.getOverview.mockReturnValue(of(overview([])));
     });
 
-    const title: HTMLElement = fixture.nativeElement.querySelector('.page-header__title');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.k-page-header__title');
     expect(title.textContent?.trim()).toBe('Budget');
   });
 
@@ -238,7 +238,7 @@ describe('BudgetDetail', () => {
       );
     });
 
-    const labels = Array.from(fixture.nativeElement.querySelectorAll('.date-label')).map((el) =>
+    const labels = Array.from(fixture.nativeElement.querySelectorAll('.k-date-label')).map((el) =>
       (el as HTMLElement).textContent?.trim(),
     );
     expect(labels).toEqual(["Aujourd'hui", 'Hier']);

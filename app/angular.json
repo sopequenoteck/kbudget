@@ -57,6 +57,8 @@
             ],
             "styles": [
               "src/styles/k/k-tokens.css",
+              "src/styles/k/k-base.css",
+              "src/styles/k/k-patterns.css",
               "src/styles.scss"
             ]
           },

@@ -347,7 +347,7 @@ describe('Dashboard', () => {
 
   it('should_render_net_worth_label', async () => {
     const fixture = await render();
-    const label = fixture.nativeElement.querySelector('.hero__amount-label');
+    const label = fixture.nativeElement.querySelector('.k-hero__amount-label');
 
     expect(label?.textContent?.trim()).toBe('Patrimoine total');
   });
@@ -411,7 +411,7 @@ describe('Dashboard', () => {
 
   it('should_render_accounts_error_state', async () => {
     const fixture = await render({ accountsError: true });
-    const stateError = fixture.nativeElement.querySelector('.state-error');
+    const stateError = fixture.nativeElement.querySelector('.k-state-error');
 
     expect(stateError?.querySelector('p')?.textContent).toBe('Erreur de chargement des comptes');
     expect(stateError?.querySelector('button')?.textContent?.trim()).toBe('Réessayer');

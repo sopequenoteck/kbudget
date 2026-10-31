@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { TranslocoPipe } from '@jsverse/transloco';
 
 import { AuthShell } from '../auth/components/auth-shell/auth-shell';
-import { AppUpdateService } from '../../core/services/app-update';
+import { AppUpdateService } from '../../core/pwa/app-update';
 import { CompatibilityService } from '../../core/services/compatibility';
 
 /**

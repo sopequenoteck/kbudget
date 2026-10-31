@@ -1,25 +1,25 @@
-<div class="hero">
+<div class="k-hero">
   @if (hasActiveSubscriptions()) {
-    <div class="hero__amount">
-      <div class="hero__amount-top">
-        <span class="hero__amount-label">{{ 'subscriptions.summary.monthlyTotal' | transloco }}</span>
+    <div class="k-hero__amount">
+      <div class="k-hero__amount-top">
+        <span class="k-hero__amount-label">{{ 'subscriptions.summary.monthlyTotal' | transloco }}</span>
         <app-currency-pill-selector
           [currencies]="preferenceService.currencies()"
           [activeCurrency]="activeCurrency()"
           (currencyChange)="setActiveCurrency($event)"
         />
       </div>
-      <span class="hero__amount-value">
+      <span class="k-hero__amount-value">
         {{ activeCurrencyTotal() | amount: null : activeCurrency() }}
       </span>
       @if (heroConverted(); as converted) {
-        <span class="hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
+        <span class="k-hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
       }
-      <div class="hero__meta">
-        <div class="hero__meta-line">
+      <div class="k-hero__meta">
+        <div class="k-hero__meta-line">
           <ng-icon name="phosphorCalendar" size="14" />
           <span>{{ activeCurrencyAnnual() | amount: null : activeCurrency() }}{{ 'subscriptions.value.perYear' | transloco }}</span>
-          <span class="hero__meta-dot">&middot;</span>
+          <span class="k-hero__meta-dot">&middot;</span>
           <ng-icon name="phosphorRepeat" size="14" />
           <span>{{ 'subscriptions.summary.activeCount' | transloco: { count: activeCount() } }}</span>
         </div>
@@ -28,32 +28,18 @@
   }
 </div>
 
-<div class="sticky-sentinel" #stickySentinel></div>
-<div class="section-header" [class.stuck]="isStuck()">
-  <h2 class="section-header__title">{{ 'common.nav.subscriptions' | transloco }}</h2>
-  <span class="section-header__count">{{ 'subscriptions.list.activeCount' | transloco: { count: activeCount() } }}</span>
+<div class="k-sticky-sentinel" #stickySentinel></div>
+<div class="k-section-header" [class.stuck]="isStuck()">
+  <h2 class="k-section-header__title">{{ 'common.nav.subscriptions' | transloco }}</h2>
+  <span class="k-section-header__count">{{ 'subscriptions.list.activeCount' | transloco: { count: activeCount() } }}</span>
 </div>
 
 @if (loading()) {
-  <div class="list-group">
-    @for (item of skeletonItems; track $index) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
-        </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
-          <div class="skeleton-line skeleton-line--small"></div>
-        </div>
-      </div>
-    }
-  </div>
+  <app-list-skeleton small [count]="5" />
 } @else if (error()) {
-  <div class="state-error">
+  <div class="k-state-error">
     <p>{{ 'common.feedback.loadError' | transloco }}</p>
-    <button class="btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
+    <button class="k-btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (groupedSubscriptions().length === 0) {
   <app-empty-state
@@ -64,26 +50,26 @@
   />
 } @else {
   @for (group of groupedSubscriptions(); track group.labelKey) {
-    <div class="date-label" [class]="'date-label--' + group.status">{{ group.labelKey | transloco }}</div>
-    <div class="list-group">
+    <div class="k-date-label" [class]="'k-date-label--' + group.status">{{ group.labelKey | transloco }}</div>
+    <div class="k-list-group">
       @for (subscription of group.items; track subscription.id) {
         @let relDate = getRelativeDateInfo(subscription);
-        <button type="button" class="list-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
+        <button type="button" class="k-list-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
           <span
-            class="list-row__icon"
+            class="k-list-row__icon"
             [style.background-color]="subscription.category?.couleur ? subscription.category!.couleur + '26' : null"
           >{{ subscription.category?.icone ?? '🔄' }}</span>
-          <div class="list-row__content">
-            <span class="list-row__title">{{ subscription.nom }}</span>
-            <span class="list-row__subtitle">
+          <div class="k-list-row__content">
+            <span class="k-list-row__title">{{ subscription.nom }}</span>
+            <span class="k-list-row__subtitle">
               {{ relDate.key ? (relDate.key | transloco: relDate.params) : relDate.formatted }}
               · {{ SUBSCRIPTION_FREQUENCY_LABEL_KEYS[subscription.frequence] | transloco }}
             </span>
           </div>
-          <div class="list-row__right">
-            <span class="list-row__amount amount-expense">{{ formatAmount(subscription) }}{{ SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS[subscription.frequence] | transloco }}</span>
+          <div class="k-list-row__right">
+            <span class="k-list-row__amount amount-expense">{{ formatAmount(subscription) }}{{ SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS[subscription.frequence] | transloco }}</span>
             @if (subscription.actif && (subscription.currency || 'EUR') !== preferenceService.primaryCurrency()) {
-              <span class="list-row__converted">
+              <span class="k-list-row__converted">
                 {{ subscription.montant | convertAmount: (subscription.currency || 'EUR') : preferenceService.primaryCurrency() }}
               </span>
             }

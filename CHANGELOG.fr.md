@@ -7,9 +7,30 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **Service de mise à jour de la PWA partagé** (KKS-619) : le client web
+  emploie désormais le service de mise à jour livré par k-design 0.7.1.
+  K·Budget garde sa propre règle par `APP_UPDATE_CAN_APPLY` : une nouvelle
+  version n'est jamais appliquée sur un parcours de tâche (réglages, import de
+  relevé). Rien ne change pour l'utilisateur.
+- **Contrôle du socle PWA en CI** (KKS-619) : `app/k-pwa/k-pwa-check.mjs` tourne
+  dans les tests de l'app et dans la gate de release, et vérifie la version
+  d'Angular, la coquille HTML, le manifeste, `ngsw-config.json` et l'include
+  nginx.
+
 ### Changed
 
 - Tokens de design mis à jour vers k-design v0.7.1.
+- **Client web sur le socle front partagé de k-design** (KKS-619) : les
+  feuilles `k-base.css` et `k-patterns.css` sont chargées après les tokens, les
+  classes partagées prennent le préfixe `.k-`, et les SCSS locaux ne gardent
+  que ce qui est propre à K·Budget (montant et devise du bottom sheet, dettes
+  remboursées, revue d'import, montants, anneau de focus des champs). Les
+  squelettes de chargement des listes viennent d'un seul composant partagé
+  `app-list-skeleton` au lieu d'une copie par page. Le nginx de l'app inclut le
+  fragment `k-pwa-sw.conf` de k-design pour les règles de cache du service
+  worker. Aucun changement visible pour l'utilisateur.
 
 ## [6.14.0] - 2026-10-30
 

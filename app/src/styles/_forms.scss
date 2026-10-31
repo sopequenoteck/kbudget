@@ -1,111 +1,22 @@
 // =============================================================================
-// Forms — Styles globaux pour inputs, textarea, select
+// Forms — Derogation au focus des champs natifs de k-base.css (KKS-619)
+// Les champs natifs viennent de k-base.css (k-design). K-Budget garde l'anneau de D11
+// (outline 2px, KKS-590) au lieu du halo de k-base : derogation temporaire, retiree quand
+// k-base appliquera D11. Selecteurs identiques a ceux de k-base, charge avant : meme
+// specificite, cette feuille l'emporte par l'ordre.
 // =============================================================================
 
-input:not([type='checkbox']):not([type='radio']):not(.input-naked),
-textarea,
-select {
-  width: 100%;
-  padding: var(--k-space-3) var(--k-space-4);
-  border: 1px solid var(--k-border-default);
-  border-radius: var(--k-radius-xl);
-  background-color: var(--k-bg-secondary);
-  color: var(--k-text-primary);
-  font-family: var(--k-font-family);
-  font-size: var(--k-font-size-base);
-  line-height: var(--k-line-height-normal);
-  transition:
-    border-color var(--duration-normal) var(--easing-default),
-    box-shadow var(--duration-normal) var(--easing-default);
-
-  &::placeholder {
-    color: var(--k-text-tertiary);
-  }
-
-  &:focus {
-    outline: 2px solid var(--k-color-primary);
-    outline-offset: 2px;
-    border-color: var(--k-color-primary);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &.input-error {
-    border-color: var(--k-text-error);
-  }
-
-  &.input-error:focus {
-    outline-color: var(--k-text-error);
-  }
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not(.k-input-naked):focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--k-color-primary);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
-// appearance: none uniquement sur input et textarea (sauf color, sauf naked)
-input:not([type='checkbox']):not([type='radio']):not([type='color']):not(.input-naked),
-textarea {
-  appearance: none;
-}
-
-input[type='color'] {
-  height: 44px;
-  padding: var(--k-space-1);
-  cursor: pointer;
-
-  &::-webkit-color-swatch-wrapper {
-    padding: 0;
-  }
-
-  &::-webkit-color-swatch {
-    border: none;
-    border-radius: var(--k-radius-lg);
-  }
-
-  &::-moz-color-swatch {
-    border: none;
-    border-radius: var(--k-radius-lg);
-  }
-}
-
-// select : garder l'apparence native pour le picker mobile
-select {
-  cursor: pointer;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-// =============================================================================
-// Checkboxes & Radios — styles globaux dédiés
-// =============================================================================
-
-input[type='checkbox'],
-input[type='radio'] {
-  width: auto;
-  accent-color: var(--k-color-primary);
-  cursor: pointer;
-}
-
-// =============================================================================
-// Form layout patterns — barre d'actions
-// =============================================================================
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--k-space-5);
-}
-
-// =============================================================================
-// Form field prefix icon — ajustement padding quand icône présente
-// Exception : pages auth uniquement (voir DESIGN.md "Auth identity")
-// =============================================================================
-
-.form-field__input-wrapper--icon
-  input:not([type='checkbox']):not([type='radio']):not(.input-naked),
-.form-field__input-wrapper--icon select {
-  padding-left: var(--k-space-9);
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not(.k-input-naked).k-input-error:focus,
+textarea.k-input-error:focus,
+select.k-input-error:focus {
+  outline-color: var(--k-text-error);
+  box-shadow: none;
 }

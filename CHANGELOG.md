@@ -7,9 +7,27 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Shared PWA update service** (KKS-619): the web client now uses the update
+  service shipped by k-design 0.7.1. K·Budget keeps its own rule through
+  `APP_UPDATE_CAN_APPLY`: a new version is never applied on a task flow
+  (settings, statement import). Nothing changes for users.
+- **PWA foundation check in CI** (KKS-619): `app/k-pwa/k-pwa-check.mjs` runs in
+  the app tests and in the release gate, and checks the Angular version, the
+  HTML shell, the manifest, `ngsw-config.json` and the nginx include.
+
 ### Changed
 
 - Design tokens updated to k-design v0.7.1.
+- **Web client on the shared k-design front foundation** (KKS-619): the
+  `k-base.css` and `k-patterns.css` stylesheets are loaded after the tokens,
+  shared classes take the `.k-` prefix, and the local SCSS keeps only what is
+  specific to K·Budget (bottom sheet amount and currency, repaid debts, import
+  review, amounts, field focus ring). The loading skeletons of the lists come
+  from one shared `app-list-skeleton` component instead of a copy in each page.
+  The app nginx includes the k-design `k-pwa-sw.conf` fragment for the service
+  worker cache rules. No visible change for users.
 
 ## [6.14.0] - 2026-10-30
 

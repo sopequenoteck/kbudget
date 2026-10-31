@@ -42,12 +42,13 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { ListSkeleton } from '../../../../shared/components/list-skeleton/list-skeleton';
 import { CurrencyPillSelector } from '../../../dashboard/components/currency-pill-selector';
 
 @Component({
   selector: 'app-budget-list',
   standalone: true,
-  imports: [AmountPipe, CategoryNamePipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector, TranslocoPipe],
+  imports: [ListSkeleton, AmountPipe, CategoryNamePipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorTray, phosphorWarning, phosphorChartPie })],
   templateUrl: './budget-list.html',
   styleUrl: './budget-list.scss',
@@ -67,7 +68,6 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   readonly Math = Math;
   readonly isOverviewItem = isOverviewItem;
   readonly budgetAmount = budgetAmount;
-  readonly skeletonItems = Array(5);
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);

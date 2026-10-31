@@ -1,14 +1,13 @@
 // =============================================================================
 // Styles — Orchestrateur
-// Ordre : tokens -> reset -> base -> utilities
-// Les tokens `--k-*` (k-design) sont charges avant ce fichier par angular.json.
+// Ordre de chargement (angular.json) : k-tokens.css -> k-base.css -> k-patterns.css
+// (k-design, KKS-619) -> ce fichier. Ici, seulement ce que k-design ne porte pas :
+// tokens propres a l'app, mise en page, derogation de focus et part metier (D25).
 // =============================================================================
 
 @use 'app-tokens';
-@use 'reset';
 @use 'base';
 @use 'forms';
-@use 'buttons';
 @use 'bottom-sheet';
 @use 'list-patterns';
 @use 'review-patterns';

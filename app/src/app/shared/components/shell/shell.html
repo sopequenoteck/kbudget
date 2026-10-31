@@ -112,10 +112,10 @@
         (cancelled)="onModalClose()"
       />
       <div class="modal__actions">
-        <button type="button" class="btn-outline" (click)="onModalClose()">{{ 'common.action.cancel' | transloco }}</button>
+        <button type="button" class="k-btn-outline" (click)="onModalClose()">{{ 'common.action.cancel' | transloco }}</button>
         <button
           type="button"
-          class="btn-primary"
+          class="k-btn-primary"
           (click)="triggerCategorySubmit()"
           [disabled]="categoryFormSubmitting()"
         >

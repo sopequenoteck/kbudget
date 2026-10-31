@@ -115,7 +115,7 @@ describe('CsvMapping', () => {
   it('should_link_back_to_the_import_start', async () => {
     const fixture = setup({ file: new File(['a'], 'releve.csv'), accountId: 'acc-1' });
     await fixture.whenStable();
-    const back = fixture.nativeElement.querySelector('a.section-back') as HTMLAnchorElement;
+    const back = fixture.nativeElement.querySelector('a.k-section-back') as HTMLAnchorElement;
     expect(back.getAttribute('href')).toBe('/transactions/import');
   });
 

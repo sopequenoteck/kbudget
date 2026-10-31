@@ -30,13 +30,13 @@
 // Hero — tout condensé
 // =============================================================================
 
-.hero {
+.k-hero {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.hero__top {
+.k-hero__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -44,14 +44,14 @@
   margin-bottom: var(--k-space-1);
 }
 
-.hero__tags {
+.k-hero__tags {
   display: flex;
   align-items: center;
   gap: var(--k-space-2);
   flex-wrap: wrap;
 }
 
-.hero__label {
+.k-hero__label {
   font-size: var(--k-font-size-xs);
   font-weight: var(--k-font-weight-medium);
   color: var(--k-text-secondary);
@@ -59,43 +59,43 @@
   letter-spacing: 0.05em;
 }
 
-.hero__category {
+.k-hero__category {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
 }
 
-.hero__date {
+.k-hero__date {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
   flex-shrink: 0;
 }
 
-.hero__amount {
+.k-hero__amount {
   font-size: var(--k-font-size-3xl);
   font-weight: var(--k-font-weight-bold);
   color: var(--k-color-expense);
   letter-spacing: -0.02em;
 }
 
-.hero__converted {
+.k-hero__converted {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
 }
 
-.hero__secondary {
+.k-hero__secondary {
   font-size: var(--k-font-size-xs);
   color: var(--k-color-expense);
   opacity: 0.7;
 }
 
-.hero__total {
+.k-hero__total {
   font-size: var(--k-font-size-sm);
   color: var(--k-text-secondary);
   font-weight: var(--k-font-weight-semibold);
   margin-top: var(--k-space-2);
 }
 
-.hero__account {
+.k-hero__account {
   display: flex;
   align-items: center;
   gap: var(--k-space-2);
@@ -294,8 +294,8 @@
 // États
 // =============================================================================
 
-.state-loading,
-.state-error {
+.k-state-loading,
+.k-state-error {
   display: flex;
   flex-direction: column;
   align-items: center;

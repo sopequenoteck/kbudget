@@ -168,14 +168,14 @@ describe('HistoryCleanup', () => {
     cleanupMock.getDuplicates.mockReturnValue(pending);
     const fixture = await setup();
 
-    expect(q(fixture, '.skeleton-item')).not.toBeNull();
+    expect(q(fixture, '.k-skeleton-item')).not.toBeNull();
     expect(q(fixture, '[data-testid="section-imported"]')).toBeNull();
 
     pending.next(duplicates());
     pending.complete();
     await settle(fixture);
 
-    expect(q(fixture, '.skeleton-item')).toBeNull();
+    expect(q(fixture, '.k-skeleton-item')).toBeNull();
   });
 
   it('should_load_the_three_proposals_the_categories_and_the_accounts_at_start', async () => {
@@ -213,7 +213,7 @@ describe('HistoryCleanup', () => {
   it('should_go_back_to_the_import_settings', async () => {
     const fixture = await setup();
 
-    click(fixture, '.page-header__back');
+    click(fixture, '.k-page-header__back');
 
     expect(navigateSpy).toHaveBeenCalledWith(['/settings/import']);
   });
@@ -221,7 +221,7 @@ describe('HistoryCleanup', () => {
   it('should_show_the_page_title_and_description', async () => {
     const fixture = await setup();
 
-    expect(q(fixture, '.page-header__title')?.textContent).toContain("Rattrapage de l'historique");
+    expect(q(fixture, '.k-page-header__title')?.textContent).toContain("Rattrapage de l'historique");
     expect(text(fixture)).toContain("Rien n'est modifié sans votre validation.");
   });
 
@@ -292,7 +292,7 @@ describe('HistoryCleanup', () => {
     expect(content).toContain('Pain');
     expect(content).toContain('Courses');
     expect(content).toContain('Baguette');
-    expect(q(fixture, '.section-header__count')?.textContent).toBe('1');
+    expect(q(fixture, '.k-section-header__count')?.textContent).toBe('1');
   });
 
   it('should_color_the_imported_amount_by_its_direction', async () => {
@@ -305,7 +305,7 @@ describe('HistoryCleanup', () => {
       duplicates: duplicates([importedProposal({ imported: income })]),
     });
 
-    expect(q(fixture, '.review__line .list-row__amount')?.classList).toContain(
+    expect(q(fixture, '.review__line .k-list-row__amount')?.classList).toContain(
       'review__amount--income',
     );
   });
@@ -374,7 +374,7 @@ describe('HistoryCleanup', () => {
     expect(qa(fixture, '[data-testid="imported-proposal"]')).toHaveLength(1);
     expect(text(fixture)).toContain('CARTE TABAC');
     expect(text(fixture)).not.toContain('CARTE BOULANGERIE');
-    expect(q(fixture, '.section-header__count')?.textContent).toBe('1');
+    expect(q(fixture, '.k-section-header__count')?.textContent).toBe('1');
     expect(cleanupMock.mergeImported).not.toHaveBeenCalled();
     expect(cleanupMock.getDuplicates).toHaveBeenCalledTimes(1);
   });
@@ -520,9 +520,9 @@ describe('HistoryCleanup', () => {
     expect(content).toContain('BOULANGERIE TEST');
     expect(content).toContain('2 transactions');
     expect(content).toContain('-7,30 €');
-    expect(item.querySelector('.list-row__amount')?.classList).toContain('review__amount--expense');
+    expect(item.querySelector('.k-list-row__amount')?.classList).toContain('review__amount--expense');
     expect(
-      q(fixture, '[data-testid="section-uncategorised"] .section-header__count')?.textContent,
+      q(fixture, '[data-testid="section-uncategorised"] .k-section-header__count')?.textContent,
     ).toBe('2');
   });
 
@@ -538,7 +538,7 @@ describe('HistoryCleanup', () => {
     });
 
     expect(
-      q(fixture, '[data-testid="section-uncategorised"] .section-header__count')?.textContent,
+      q(fixture, '[data-testid="section-uncategorised"] .k-section-header__count')?.textContent,
     ).toBe('5');
   });
 
@@ -643,7 +643,7 @@ describe('HistoryCleanup', () => {
     fixture.detectChanges();
 
     expect(q(fixture, 'app-category-select')).not.toBeNull();
-    expect(q(fixture, '.bsheet__top-title')?.textContent).toBe('BOULANGERIE TEST');
+    expect(q(fixture, '.k-bsheet__top-title')?.textContent).toBe('BOULANGERIE TEST');
 
     fixture.debugElement
       .query(By.directive(CategorySelect))
@@ -663,7 +663,7 @@ describe('HistoryCleanup', () => {
 
     click(fixture, '[data-testid="choose-category"]');
     fixture.detectChanges();
-    click(fixture, '.bsheet__action-pill--cancel');
+    click(fixture, '.k-bsheet__action-pill--cancel');
     fixture.detectChanges();
 
     expect(q(fixture, 'app-category-select')).toBeNull();
@@ -751,7 +751,7 @@ describe('HistoryCleanup', () => {
       'Courant',
     ]);
     expect(
-      q(fixture, '[data-testid="section-adjustments"] .section-header__count')?.textContent,
+      q(fixture, '[data-testid="section-adjustments"] .k-section-header__count')?.textContent,
     ).toBe('1');
   });
 
@@ -779,7 +779,7 @@ describe('HistoryCleanup', () => {
       },
     });
 
-    const amounts = qa(fixture, '[data-testid="adjustment"] .list-row__amount');
+    const amounts = qa(fixture, '[data-testid="adjustment"] .k-list-row__amount');
 
     expect(amounts.map((el) => el.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
       '+5,00 €',

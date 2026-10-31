@@ -1,5 +1,5 @@
-<a class="section-back" routerLink="/settings">
-  <span class="section-back__arrow">&#9664;</span>
+<a class="k-section-back" routerLink="/settings">
+  <span class="k-section-back__arrow">&#9664;</span>
   <span>{{ 'common.nav.settings' | transloco }}</span>
 </a>
 
@@ -16,8 +16,8 @@
   </h3>
 
   @if (draftsLoading()) {
-    <div class="state-loading">
-      <div class="spinner spinner--sm"></div>
+    <div class="k-state-loading">
+      <div class="k-spinner k-spinner--sm"></div>
     </div>
   } @else if (drafts().length === 0) {
     <p class="inline-empty">{{ 'imports.empty.drafts' | transloco }}</p>
@@ -38,7 +38,7 @@
           <div class="draft-list__actions">
             <button
               type="button"
-              class="btn-outline btn-outline--sm"
+              class="k-btn-outline k-btn-outline--sm"
               (click)="resumeDraft(draft.id)"
             >
               <ng-icon name="phosphorArrowCounterClockwise" size="14" />
@@ -68,8 +68,8 @@
   </h3>
 
   @if (historyLoading()) {
-    <div class="state-loading">
-      <div class="spinner spinner--sm"></div>
+    <div class="k-state-loading">
+      <div class="k-spinner k-spinner--sm"></div>
     </div>
   } @else if (history().length === 0) {
     <p class="inline-empty">{{ 'imports.empty.history' | transloco }}</p>
@@ -175,17 +175,17 @@
         <div class="upload-error">{{ ruleFormError() }}</div>
       }
       <div class="rule-form__actions">
-        <button type="button" class="btn-outline btn-outline--sm" (click)="cancelRuleForm()">
+        <button type="button" class="k-btn-outline k-btn-outline--sm" (click)="cancelRuleForm()">
           {{ 'common.action.cancel' | transloco }}
         </button>
         <button
           type="button"
-          class="btn-primary btn-primary--sm"
+          class="k-btn-primary k-btn-primary--sm"
           [disabled]="ruleFormSaving()"
           (click)="saveRule()"
         >
           @if (ruleFormSaving()) {
-            <span class="spinner spinner--sm"></span>
+            <span class="k-spinner k-spinner--sm"></span>
           }
           {{ 'common.action.save' | transloco }}
         </button>
@@ -205,8 +205,8 @@
   </p>
 
   @if (profilesLoading()) {
-    <div class="state-loading">
-      <div class="spinner spinner--sm"></div>
+    <div class="k-state-loading">
+      <div class="k-spinner k-spinner--sm"></div>
     </div>
   } @else if (profiles().length === 0) {
     <p class="inline-empty">{{ 'imports.empty.profiles' | transloco }}</p>

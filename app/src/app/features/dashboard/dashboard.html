@@ -1,16 +1,16 @@
 <!-- Hero: patrimoine + résumé mensuel (une seule section) -->
-<section class="hero">
+<section class="k-hero">
   @if (totalBalanceLoading()) {
-    <div class="skeleton-hero">
-      <div class="skeleton-bar skeleton-bar--xs"></div>
-      <div class="skeleton-bar skeleton-bar--lg"></div>
-      <div class="skeleton-bar skeleton-bar--sm"></div>
-      <div class="skeleton-bar skeleton-bar--sm"></div>
+    <div class="k-skeleton-hero">
+      <div class="k-skeleton-bar k-skeleton-bar--xs"></div>
+      <div class="k-skeleton-bar k-skeleton-bar--lg"></div>
+      <div class="k-skeleton-bar k-skeleton-bar--sm"></div>
+      <div class="k-skeleton-bar k-skeleton-bar--sm"></div>
     </div>
   } @else if (totalBalanceError()) {
-    <div class="state-error">
+    <div class="k-state-error">
       <p>{{ 'accounts.feedback.loadError' | transloco }}</p>
-      <button class="btn-outline" (click)="loadAccounts()">{{ 'common.action.retry' | transloco }}</button>
+      <button class="k-btn-outline" (click)="loadAccounts()">{{ 'common.action.retry' | transloco }}</button>
     </div>
   } @else if (accounts().length === 0) {
     <app-empty-state
@@ -22,8 +22,8 @@
   } @else {
     @let salutation = greetingSalutation();
     @let status = greetingStatus();
-    <div class="hero__top-row">
-      <span class="hero__greeting">{{ salutation.key | transloco: salutation.params }} · {{ status.key | transloco: status.params }}</span>
+    <div class="k-hero__top-row">
+      <span class="k-hero__greeting">{{ salutation.key | transloco: salutation.params }} · {{ status.key | transloco: status.params }}</span>
       @if (currencies().length > 1) {
         <app-currency-pill-selector
           [currencies]="currencies()"
@@ -34,11 +34,11 @@
     </div>
 
     <!-- Montant principal -->
-    <div class="hero__amount">
-      <span class="hero__amount-label">{{ 'accounts.summary.netWorth' | transloco }}</span>
-      <span class="hero__amount-value-row">
+    <div class="k-hero__amount">
+      <span class="k-hero__amount-label">{{ 'accounts.summary.netWorth' | transloco }}</span>
+      <span class="k-hero__amount-value-row">
         <span
-          class="hero__amount-value"
+          class="k-hero__amount-value"
           [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
         >
           {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
@@ -72,7 +72,7 @@
       @if (secondaryCurrency() !== null) {
         @let converted = conversionService.convert(convertedTotalBalance().total, activeCurrency(), secondaryCurrency()!);
         @if (converted !== null) {
-          <span class="hero__converted">
+          <span class="k-hero__converted">
             ≈ {{ converted | amount: null : secondaryCurrency()! }}
           </span>
         }
@@ -81,9 +81,9 @@
 
     <!-- Revenus / Dépenses — meta-lines Phosphor -->
     @if (!summaryLoading() && !summaryError()) {
-      <div class="hero__meta-row">
-        <div class="hero__meta-group">
-          <div class="hero__meta-line">
+      <div class="k-hero__meta-row">
+        <div class="k-hero__meta-group">
+          <div class="k-hero__meta-line">
             <ng-icon name="phosphorTrendUp" size="14" />
             @if (convertedRecettes() > 0) {
               <span>{{ convertedRecettes() | amount: 'RECETTE' : activeCurrency() }}</span>
@@ -92,11 +92,11 @@
             }
           </div>
         </div>
-        <div class="hero__meta-group">
-          <div class="hero__meta-line">
+        <div class="k-hero__meta-group">
+          <div class="k-hero__meta-line">
             <ng-icon name="phosphorTrendDown" size="14" />
             @if (convertedDepenses() > 0) {
-              <span class="hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
+              <span class="k-hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
             } @else {
               <span>{{ 'transactions.summary.noExpense' | transloco }}</span>
             }
@@ -104,9 +104,9 @@
         </div>
       </div>
     } @else if (summaryLoading()) {
-      <div class="skeleton-hero">
-        <div class="skeleton-bar skeleton-bar--md"></div>
-        <div class="skeleton-bar skeleton-bar--md"></div>
+      <div class="k-skeleton-hero">
+        <div class="k-skeleton-bar k-skeleton-bar--md"></div>
+        <div class="k-skeleton-bar k-skeleton-bar--md"></div>
       </div>
     }
   }
@@ -135,24 +135,24 @@
   </div>
 
   @if (transactionsLoading()) {
-    <div class="list-group">
+    <div class="k-list-group">
       @for (item of skeletonItems; track $index) {
-        <div class="skeleton-item">
-          <div class="skeleton-circle"></div>
-          <div class="skeleton-lines">
-            <div class="skeleton-line skeleton-line--title"></div>
-            <div class="skeleton-line skeleton-line--subtitle"></div>
+        <div class="k-skeleton-item">
+          <div class="k-skeleton-circle"></div>
+          <div class="k-skeleton-lines">
+            <div class="k-skeleton-line k-skeleton-line--title"></div>
+            <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
           </div>
-          <div class="skeleton-lines skeleton-lines--right">
-            <div class="skeleton-line skeleton-line--value"></div>
+          <div class="k-skeleton-lines k-skeleton-lines--right">
+            <div class="k-skeleton-line k-skeleton-line--value"></div>
           </div>
         </div>
       }
     </div>
   } @else if (transactionsError()) {
-    <div class="state-error">
+    <div class="k-state-error">
       <p>{{ 'common.feedback.loadError' | transloco }}</p>
-      <button class="btn-outline" (click)="loadTransactions()">{{ 'common.action.retry' | transloco }}</button>
+      <button class="k-btn-outline" (click)="loadTransactions()">{{ 'common.action.retry' | transloco }}</button>
     </div>
   } @else if (recentTransactions().length === 0) {
     <app-empty-state

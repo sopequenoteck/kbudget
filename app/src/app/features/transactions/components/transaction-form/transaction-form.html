@@ -1,16 +1,16 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="k-bsheet">
   @if (errorMessage()) {
-    <div class="bsheet__error">{{ errorMessage() }}</div>
+    <div class="k-bsheet__error">{{ errorMessage() }}</div>
   }
 
   <!-- ROW 1: Handle + titre à gauche + toggle type à droite -->
-  <div class="bsheet__top">
-    <div class="bsheet__handle"></div>
-    <div class="bsheet__top-title">
+  <div class="k-bsheet__top">
+    <div class="k-bsheet__handle"></div>
+    <div class="k-bsheet__top-title">
       <ng-icon name="phosphorReceipt" size="16" />
       <span>{{ 'transactions.action.create' | transloco }}</span>
     </div>
-    <div class="bsheet__type-toggle" role="group" [attr.aria-label]="'transactions.form.typeAria' | transloco">
+    <div class="k-bsheet__type-toggle" role="group" [attr.aria-label]="'transactions.form.typeAria' | transloco">
       <button
         type="button"
         [class.active]="type() === TransactionType.DEPENSE"
@@ -25,12 +25,12 @@
   </div>
 
   <!-- ROW 2: Montant + Libellé -->
-  <div class="bsheet__main-row">
-    <div class="bsheet__amount-group">
+  <div class="k-bsheet__main-row">
+    <div class="k-bsheet__amount-group">
       <input
-        class="bsheet__amount input-naked"
-        [class.bsheet__amount--expense]="type() === TransactionType.DEPENSE"
-        [class.bsheet__amount--income]="type() === TransactionType.RECETTE"
+        class="k-bsheet__amount k-input-naked"
+        [class.k-bsheet__amount--expense]="type() === TransactionType.DEPENSE"
+        [class.k-bsheet__amount--income]="type() === TransactionType.RECETTE"
         [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
@@ -39,13 +39,13 @@
         autocomplete="off"
         #amountInput
       />
-      <span class="bsheet__currency"
-        [class.bsheet__currency--expense]="type() === TransactionType.DEPENSE"
-        [class.bsheet__currency--income]="type() === TransactionType.RECETTE"
+      <span class="k-bsheet__currency"
+        [class.k-bsheet__currency--expense]="type() === TransactionType.DEPENSE"
+        [class.k-bsheet__currency--income]="type() === TransactionType.RECETTE"
       >{{ currencySymbol() }}</span>
     </div>
     <app-autocomplete
-      class="bsheet__libelle"
+      class="k-bsheet__libelle"
       formControlName="libelle"
       [suggestions]="libelleSuggestions()"
       [minChars]="2"
@@ -56,32 +56,32 @@
   </div>
 
   @if (form.get('note')?.value; as noteValue) {
-    <div class="bsheet__note-preview">{{ noteValue }}</div>
+    <div class="k-bsheet__note-preview">{{ noteValue }}</div>
   }
 
   <!-- ROW 3: Note à gauche | Catégorie + Date + Compte à droite -->
-  <div class="bsheet__meta-row">
-    <div class="bsheet__icons">
-      <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'note'" [class.has-value]="!!form.get('note')?.value" (click)="toggleSection('note')" [attr.aria-label]="'transactions.form.noteAria' | transloco">
+  <div class="k-bsheet__meta-row">
+    <div class="k-bsheet__icons">
+      <button type="button" class="k-bsheet__icon-btn" [class.active]="expandedSection() === 'note'" [class.has-value]="!!form.get('note')?.value" (click)="toggleSection('note')" [attr.aria-label]="'transactions.form.noteAria' | transloco">
         <ng-icon name="phosphorNoteBlank" size="18" [style.color]="form.get('note')?.value ? 'var(--k-color-primary)' : 'var(--k-text-tertiary)'" [style.opacity]="form.get('note')?.value ? '0.7' : '1'" />
       </button>
       @if (!isEditing()) {
-        <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'recurring'" (click)="toggleSection('recurring')" [attr.aria-label]="'transactions.form.recurringAria' | transloco">
+        <button type="button" class="k-bsheet__icon-btn" [class.active]="expandedSection() === 'recurring'" (click)="toggleSection('recurring')" [attr.aria-label]="'transactions.form.recurringAria' | transloco">
           <ng-icon name="phosphorRepeat" size="18" style="color: var(--k-text-tertiary)" />
         </button>
       }
     </div>
-    <div class="bsheet__meta-pills">
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" [attr.aria-label]="'transactions.form.dateAria' | transloco">
+    <div class="k-bsheet__meta-pills">
+      <button type="button" class="k-bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" [attr.aria-label]="'transactions.form.dateAria' | transloco">
         <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--k-color-primary); opacity: 0.7" />
         <span>{{ (form.get('date')?.value ?? '') | shortDate }}</span>
       </button>
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" [attr.aria-label]="'transactions.form.category' | transloco">
+      <button type="button" class="k-bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" [attr.aria-label]="'transactions.form.category' | transloco">
         <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
         <span>{{ (selectedCategoryName() | categoryName: $safeNavigationMigration(selectedCategory()?.systemKey)) || ('transactions.form.category' | transloco) }}</span>
       </button>
       @if (hasAccounts()) {
-        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" [attr.aria-label]="'transactions.form.account' | transloco">
+        <button type="button" class="k-bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" [attr.aria-label]="'transactions.form.account' | transloco">
           <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
           <span>{{ selectedAccountName() ?? ('transactions.form.account' | transloco) }}</span>
         </button>
@@ -91,7 +91,7 @@
 
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'category') {
-    <div class="bsheet__expand" @expandCollapse>
+    <div class="k-bsheet__expand" @expandCollapse>
       <app-category-select
         formControlName="categoryId"
         [categories]="categories()"
@@ -102,14 +102,14 @@
     </div>
   }
   @if (expandedSection() === 'recurring') {
-    <div class="bsheet__expand" @expandCollapse>
-      <label class="bsheet__toggle-row">
-        <span class="bsheet__toggle-text">{{ 'transactions.form.isRecurring' | transloco }}</span>
-        <input type="checkbox" formControlName="isRecurring" class="bsheet__toggle-input" />
-        <span class="bsheet__toggle-track"></span>
+    <div class="k-bsheet__expand" @expandCollapse>
+      <label class="k-bsheet__toggle-row">
+        <span class="k-bsheet__toggle-text">{{ 'transactions.form.isRecurring' | transloco }}</span>
+        <input type="checkbox" formControlName="isRecurring" class="k-bsheet__toggle-input" />
+        <span class="k-bsheet__toggle-track"></span>
       </label>
       @if (form.get('isRecurring')?.value) {
-        <div class="bsheet__recurring-fields">
+        <div class="k-bsheet__recurring-fields">
           <app-select-picker formControlName="frequency" [items]="[
             { id: Frequency.HEBDOMADAIRE, label: ('recurring.value.weekly' | transloco), icon: null, secondaryText: null, color: null },
             { id: Frequency.MENSUEL, label: ('recurring.value.monthly' | transloco), icon: null, secondaryText: null, color: null },
@@ -121,35 +121,35 @@
     </div>
   }
   @if (expandedSection() === 'note') {
-    <div class="bsheet__expand" @expandCollapse>
-      <textarea formControlName="note" rows="3" [placeholder]="'transactions.form.notePlaceholder' | transloco" maxlength="500" class="bsheet__textarea input-naked"></textarea>
+    <div class="k-bsheet__expand" @expandCollapse>
+      <textarea formControlName="note" rows="3" [placeholder]="'transactions.form.notePlaceholder' | transloco" maxlength="500" class="k-bsheet__textarea k-input-naked"></textarea>
     </div>
   }
   @if (expandedSection() === 'date') {
-    <div class="bsheet__expand" @expandCollapse>
+    <div class="k-bsheet__expand" @expandCollapse>
       <app-inline-date-picker [value]="dateSignal()" [originalValue]="transaction()?.date ?? ''" (valueChange)="onDateSelected($event)" />
     </div>
   }
   @if (expandedSection() === 'account') {
-    <div class="bsheet__expand" @expandCollapse>
+    <div class="k-bsheet__expand" @expandCollapse>
       <app-select-picker formControlName="accountId" [items]="accountItems()" [placeholder]="'transactions.form.accountPlaceholder' | transloco" [clearable]="true" />
     </div>
   }
 
   <!-- ROW 4: Supprimer à gauche, Enregistrer/Modifier à droite -->
-  <div class="bsheet__bottom-row">
-    <div class="bsheet__bottom-left">
+  <div class="k-bsheet__bottom-row">
+    <div class="k-bsheet__bottom-left">
       @if (isEditing()) {
-        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" [disabled]="categoryCreating()" (click)="onDelete()">
+        <button type="button" class="k-bsheet__action-pill k-bsheet__action-pill--danger" [disabled]="categoryCreating()" (click)="onDelete()">
           <ng-icon name="phosphorTrash" size="16" />
         </button>
       } @else {
-        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
+        <button type="button" class="k-bsheet__action-pill k-bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
           {{ 'common.action.cancel' | transloco }}
         </button>
       }
     </div>
-    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
+    <button type="submit" class="k-bsheet__action-pill k-bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
       {{ submitting() ? '...' : (isEditing() ? ('common.action.edit' | transloco) : ('common.action.save' | transloco)) }}
     </button>
   </div>

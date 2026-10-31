@@ -1,13 +1,13 @@
-<div class="page-header">
+<div class="k-page-header">
   <button
     type="button"
-    class="page-header__back"
+    class="k-page-header__back"
     (click)="goBack()"
     [attr.aria-label]="'common.action.back' | transloco"
   >
     <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="page-header__title">{{ 'imports.page.startTitle' | transloco }}</h1>
+  <h1 class="k-page-header__title">{{ 'imports.page.startTitle' | transloco }}</h1>
 </div>
 
 <p class="start__description">{{ 'imports.page.startDescription' | transloco }}</p>
@@ -46,11 +46,11 @@
 }
 
 @if (detecting()) {
-  <div class="list-group start__skeleton" aria-busy="true">
-    <div class="skeleton-item">
-      <div class="skeleton-lines">
-        <div class="skeleton-line skeleton-line--title"></div>
-        <div class="skeleton-line skeleton-line--subtitle"></div>
+  <div class="k-list-group start__skeleton" aria-busy="true">
+    <div class="k-skeleton-item">
+      <div class="k-skeleton-lines">
+        <div class="k-skeleton-line k-skeleton-line--title"></div>
+        <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
       </div>
     </div>
   </div>
@@ -82,29 +82,29 @@
     <p class="start__hint">{{ 'imports.empty.accounts' | transloco }}</p>
   } @else {
     <div
-      class="list-group"
+      class="k-list-group"
       role="radiogroup"
       [attr.aria-label]="'imports.form.account' | transloco"
     >
       @for (account of accounts(); track account.id) {
         <label
-          class="list-row start__account"
+          class="k-list-row start__account"
           [class.start__account--selected]="accountId() === account.id"
         >
           <input
             type="radio"
-            class="sr-only"
+            class="k-sr-only"
             name="import-account"
             [value]="account.id"
             [checked]="accountId() === account.id"
             [disabled]="uploading()"
             (change)="selectAccount(account.id)"
           />
-          <span class="list-row__icon">{{ account.icone }}</span>
-          <span class="list-row__content">
-            <span class="list-row__title">{{ account.nom }}</span>
+          <span class="k-list-row__icon">{{ account.icone }}</span>
+          <span class="k-list-row__content">
+            <span class="k-list-row__title">{{ account.nom }}</span>
             @if (account.statementAccountSuffix; as suffix) {
-              <span class="list-row__subtitle">{{
+              <span class="k-list-row__subtitle">{{
                 'imports.list.accountSuffix' | transloco: { suffix: suffix }
               }}</span>
             }
@@ -138,7 +138,7 @@
     @if (recognized()) {
       <button
         type="button"
-        class="btn-primary start__submit"
+        class="k-btn-primary start__submit"
         [disabled]="!canSubmit()"
         (click)="analyse()"
       >
@@ -147,7 +147,7 @@
     } @else {
       <button
         type="button"
-        class="btn-primary start__submit"
+        class="k-btn-primary start__submit"
         [disabled]="accountId() === null"
         (click)="openMapping()"
       >

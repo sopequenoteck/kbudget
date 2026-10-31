@@ -4,24 +4,24 @@
   padding: var(--k-space-4);
 }
 
-// Header via .page-header partagé (_list-patterns.scss)
+// Header via .k-page-header partagé (k-patterns.css)
 
 // =============================================================================
 // Hero — total non budgété + conversion
 // =============================================================================
 
-.hero {
+.k-hero {
   padding-bottom: var(--k-space-6);
 }
 
-.hero__body {
+.k-hero__body {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--k-space-4);
 }
 
-.hero__text {
+.k-hero__text {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -29,7 +29,7 @@
   min-width: 0;
 }
 
-.hero__label {
+.k-hero__label {
   font-size: var(--k-font-size-xs);
   font-weight: var(--k-font-weight-medium);
   color: var(--k-text-secondary);
@@ -37,26 +37,26 @@
   letter-spacing: 0.05em;
 }
 
-.hero__value {
+.k-hero__value {
   font-size: var(--k-font-size-3xl);
   font-weight: var(--k-font-weight-bold);
   color: var(--k-color-expense);
   letter-spacing: -0.02em;
 }
 
-.hero__converted {
+.k-hero__converted {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
 }
 
-.hero__meta {
+.k-hero__meta {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-top: var(--k-space-1);
 }
 
-.hero__meta-line {
+.k-hero__meta-line {
   display: flex;
   align-items: center;
   gap: var(--k-space-1);
@@ -79,7 +79,7 @@
   }
 }
 
-.hero__meta-dot {
+.k-hero__meta-dot {
   margin: 0 2px;
 }
 
@@ -87,12 +87,12 @@
 // Section header — sticky
 // =============================================================================
 
-.sticky-sentinel {
+.k-sticky-sentinel {
   height: 1px;
   margin: 0;
 }
 
-.section-header {
+.k-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -261,7 +261,7 @@
 // States
 // =============================================================================
 
-.state-loading {
+.k-state-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -275,7 +275,7 @@
   }
 }
 
-.spinner {
+.k-spinner {
   width: 32px;
   height: 32px;
   border: 3px solid var(--k-border-default);
