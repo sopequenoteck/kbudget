@@ -1,4 +1,4 @@
-// K Design v0.7.0 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer.
+// K Design v0.7.1 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer.
 // Contrôle du socle PWA d'une app K : version d'Angular, coquille index.html, manifeste, ngsw-config, nginx.
 // Aucune dépendance. Usage, depuis la racine de l'app : node <chemin>/k-pwa-check.mjs
 //

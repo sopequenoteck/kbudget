@@ -1,4 +1,4 @@
-/* K Design v0.7.0 — généré par scripts/build.mjs depuis patterns/. Ne pas éditer. */
+/* K Design v0.7.1 — généré par scripts/build.mjs depuis patterns/. Ne pas éditer. */
 /* Styles de base : reset, corps, titres, champs natifs (input, textarea, select) et leurs états.
    Voir docs/patterns.md, section « Styles de base ». */
 *,
@@ -104,7 +104,7 @@ h4 {
   font-size: var(--k-font-size-lg);
 }
 
-input:not([type=checkbox]):not([type=radio]):not(.k-input-naked),
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.k-input-naked),
 textarea,
 select {
   width: 100%;
@@ -119,13 +119,13 @@ select {
   transition: border-color var(--k-duration-normal) var(--k-easing-default), box-shadow var(--k-duration-normal) var(--k-easing-default);
 }
 
-input:not([type=checkbox]):not([type=radio]):not(.k-input-naked)::placeholder,
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.k-input-naked)::placeholder,
 textarea::placeholder,
 select::placeholder {
   color: var(--k-text-tertiary);
 }
 
-input:not([type=checkbox]):not([type=radio]):not(.k-input-naked):focus,
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.k-input-naked):focus,
 textarea:focus,
 select:focus {
   outline: none;
@@ -133,26 +133,26 @@ select:focus {
   box-shadow: 0 0 0 4px var(--k-color-primary-light);
 }
 
-input:not([type=checkbox]):not([type=radio]):not(.k-input-naked):disabled,
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.k-input-naked):disabled,
 textarea:disabled,
 select:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-input:not([type=checkbox]):not([type=radio]):not(.k-input-naked).k-input-error,
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.k-input-naked).k-input-error,
 textarea.k-input-error,
 select.k-input-error {
   border-color: var(--k-text-error);
 }
 
-input:not([type=checkbox]):not([type=radio]):not(.k-input-naked).k-input-error:focus,
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.k-input-naked).k-input-error:focus,
 textarea.k-input-error:focus,
 select.k-input-error:focus {
   box-shadow: 0 0 0 4px var(--k-bg-error);
 }
 
-input:not([type=checkbox]):not([type=radio]):not([type=color]):not(.k-input-naked),
+input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not(.k-input-naked),
 textarea {
   appearance: none;
 }

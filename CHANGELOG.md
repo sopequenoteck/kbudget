@@ -7,6 +7,10 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Design tokens updated to k-design v0.7.1.
+
 ## [6.14.0] - 2026-10-30
 
 ### Added

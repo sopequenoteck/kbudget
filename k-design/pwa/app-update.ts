@@ -1,4 +1,4 @@
-// K Design v0.7.0 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer.
+// K Design v0.7.1 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer.
 import { DOCUMENT, Injectable, InjectionToken, Injector, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SwUpdate } from '@angular/service-worker';
