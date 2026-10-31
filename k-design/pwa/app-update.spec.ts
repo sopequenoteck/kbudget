@@ -1,4 +1,4 @@
-// K Design v0.7.0 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer.
+// K Design v0.7.1 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer.
 import { DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { SwUpdate } from '@angular/service-worker';

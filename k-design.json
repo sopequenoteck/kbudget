@@ -1,6 +1,6 @@
 {
   "app": "kbudget",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "base": "develop",
   "files": {
     "css/kbudget/k-tokens.css": "app/src/styles/k/k-tokens.css",

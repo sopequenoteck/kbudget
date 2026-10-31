@@ -1,4 +1,4 @@
-<!-- K Design v0.7.0 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer. -->
+<!-- K Design v0.7.1 — copié par scripts/build.mjs depuis pwa/. Ne pas éditer. -->
 # Socle PWA des apps K
 
 Livré par k-design (D24) pour K·Budget, K-Review et KPanel, par copie comme les tokens. Sans dépendance.
