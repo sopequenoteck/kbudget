@@ -484,7 +484,7 @@ describe('NotificationPanel', () => {
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();
 
-    const groupLabel: HTMLElement = fixture.nativeElement.querySelector('.group-label');
+    const groupLabel: HTMLElement = fixture.nativeElement.querySelector('.k-group-label');
     expect(groupLabel.textContent?.trim()).toBe("Aujourd'hui");
   });
 

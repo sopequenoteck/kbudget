@@ -1,29 +1,29 @@
-<div class="hero">
+<div class="k-hero">
   @if (hasDebts()) {
-    <div class="hero__amount">
-      <div class="hero__amount-top">
-        <span class="hero__amount-label">{{ 'debts.summary.net' | transloco }}</span>
+    <div class="k-hero__amount">
+      <div class="k-hero__amount-top">
+        <span class="k-hero__amount-label">{{ 'debts.summary.net' | transloco }}</span>
         <app-currency-pill-selector
           [currencies]="preferenceService.currencies()"
           [activeCurrency]="activeCurrency()"
           (currencyChange)="setActiveCurrency($event)"
         />
       </div>
-      <span class="hero__amount-value" [class]="activeCurrencyNet() >= 0 ? 'hero__amount-value--positive' : 'hero__amount-value--negative'">
+      <span class="k-hero__amount-value" [class]="activeCurrencyNet() >= 0 ? 'k-hero__amount-value--positive' : 'k-hero__amount-value--negative'">
         {{ activeCurrencyNet() | amount: null : activeCurrency() }}
       </span>
       @if (heroConverted(); as converted) {
-        <span class="hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
+        <span class="k-hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
       }
-      <div class="hero__meta">
-        <div class="hero__meta-line">
+      <div class="k-hero__meta">
+        <div class="k-hero__meta-line">
           <ng-icon name="phosphorHandCoins" size="14" />
           <span>{{ 'debts.summary.lentCount' | transloco: { count: pretsCount() } }}</span>
-          <span class="hero__meta-dot">&middot;</span>
+          <span class="k-hero__meta-dot">&middot;</span>
           <ng-icon name="phosphorHandshake" size="14" />
           <span>{{ 'debts.summary.borrowedCount' | transloco: { count: empruntsCount() } }}</span>
         </div>
-        <div class="hero__meta-line">
+        <div class="k-hero__meta-line">
           <ng-icon name="phosphorClock" size="14" />
           <span>{{ 'debts.summary.outstandingCount' | transloco: { count: activeCount() } }}</span>
         </div>
@@ -32,32 +32,32 @@
   }
 </div>
 
-<div class="sticky-sentinel" #stickySentinel></div>
-<div class="section-header" [class.stuck]="isStuck()">
-  <h2 class="section-header__title">{{ 'common.nav.debts' | transloco }}</h2>
-  <span class="section-header__count">{{ 'debts.summary.outstandingCount' | transloco: { count: activeCount() } }}</span>
+<div class="k-sticky-sentinel" #stickySentinel></div>
+<div class="k-section-header" [class.stuck]="isStuck()">
+  <h2 class="k-section-header__title">{{ 'common.nav.debts' | transloco }}</h2>
+  <span class="k-section-header__count">{{ 'debts.summary.outstandingCount' | transloco: { count: activeCount() } }}</span>
 </div>
 
 @if (loading()) {
-  <div class="list-group">
+  <div class="k-list-group">
     @for (item of skeletonItems; track $index) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
+      <div class="k-skeleton-item">
+        <div class="k-skeleton-circle"></div>
+        <div class="k-skeleton-lines">
+          <div class="k-skeleton-line k-skeleton-line--title"></div>
+          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
         </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
-          <div class="skeleton-line skeleton-line--small"></div>
+        <div class="k-skeleton-lines k-skeleton-lines--right">
+          <div class="k-skeleton-line k-skeleton-line--value"></div>
+          <div class="k-skeleton-line k-skeleton-line--small"></div>
         </div>
       </div>
     }
   </div>
 } @else if (error()) {
-  <div class="state-error">
+  <div class="k-state-error">
     <p>{{ 'common.feedback.loadError' | transloco }}</p>
-    <button class="btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
+    <button class="k-btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (groupedDebts().length === 0) {
   <app-empty-state
@@ -68,17 +68,17 @@
   />
 } @else {
   @for (group of groupedDebts(); track group.labelKey) {
-    <div class="date-label" [class]="'date-label--' + group.status">{{ group.labelKey | transloco }}</div>
-    <div class="list-group">
+    <div class="k-date-label" [class]="'k-date-label--' + group.status">{{ group.labelKey | transloco }}</div>
+    <div class="k-list-group">
       @for (debt of group.items; track debt.id) {
-        <button type="button" class="list-row" [class.repaid]="debt.rembourse" (click)="onDebtPressed(debt)">
+        <button type="button" class="k-list-row" [class.repaid]="debt.rembourse" (click)="onDebtPressed(debt)">
           <span
-            class="list-row__icon"
+            class="k-list-row__icon"
             [style.background-color]="getIconBg(debt)"
           >{{ getIcon(debt) }}</span>
-          <div class="list-row__content">
-            <span class="list-row__title">{{ debt.personne }}</span>
-            <span class="list-row__subtitle">
+          <div class="k-list-row__content">
+            <span class="k-list-row__title">{{ debt.personne }}</span>
+            <span class="k-list-row__subtitle">
               @if (debt.category?.nom) {
                 {{ debt.category!.nom | categoryName: debt.category!.systemKey }} · {{ DEBT_TYPE_LABEL_KEYS[debt.sens] | transloco }}
               } @else {
@@ -86,17 +86,17 @@
               }
             </span>
           </div>
-          <div class="list-row__right">
-            <span class="list-row__amount" [class]="getAmountClass(debt)">
+          <div class="k-list-row__right">
+            <span class="k-list-row__amount" [class]="getAmountClass(debt)">
               {{ debt.montantRestant | amount: null : (debt.currency || 'EUR') }}
             </span>
             @if (!debt.rembourse && (debt.currency || 'EUR') !== preferenceService.primaryCurrency()) {
-              <span class="list-row__converted">
+              <span class="k-list-row__converted">
                 {{ debt.montantRestant | convertAmount: (debt.currency || 'EUR') : preferenceService.primaryCurrency() }}
               </span>
             }
             @if (getRelativeDateInfo(debt); as relDate) {
-              <span class="list-row__due" [class.list-row__due--overdue]="isOverdue(debt)">{{ relDate.key ? (relDate.key | transloco: relDate.params) : relDate.formatted }}</span>
+              <span class="k-list-row__due" [class.k-list-row__due--overdue]="isOverdue(debt)">{{ relDate.key ? (relDate.key | transloco: relDate.params) : relDate.formatted }}</span>
             }
           </div>
         </button>

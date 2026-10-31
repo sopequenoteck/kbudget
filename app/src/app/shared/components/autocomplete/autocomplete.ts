@@ -26,7 +26,7 @@ import { normalize } from '../../utils/string.utils';
   styleUrl: './autocomplete.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   // None : les styles BEM .autocomplete__* sont globalisés pour permettre
-  // au contexte parent (ex: .bsheet__libelle input) de theme-r l'input interne.
+  // au contexte parent (ex: .k-bsheet__libelle input) de theme-r l'input interne.
   // Aucun risque de fuite : toutes les classes sont préfixées .autocomplete__*.
   encapsulation: ViewEncapsulation.None,
   animations: [expandCollapse],

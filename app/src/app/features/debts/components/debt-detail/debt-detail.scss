@@ -35,13 +35,13 @@
 // Hero — condensé
 // =============================================================================
 
-.hero {
+.k-hero {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.hero__top {
+.k-hero__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -49,25 +49,25 @@
   margin-bottom: var(--k-space-1);
 }
 
-.hero__tags {
+.k-hero__tags {
   display: flex;
   align-items: center;
   gap: var(--k-space-2);
   flex-wrap: wrap;
 }
 
-.hero__category {
+.k-hero__category {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
 }
 
-.hero__date {
+.k-hero__date {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
   flex-shrink: 0;
 }
 
-.hero__amount {
+.k-hero__amount {
   font-size: var(--k-font-size-3xl);
   font-weight: var(--k-font-weight-bold);
   letter-spacing: -0.02em;
@@ -81,18 +81,18 @@
   }
 }
 
-.hero__converted {
+.k-hero__converted {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
 }
 
-.hero__secondary {
+.k-hero__secondary {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
   margin-top: var(--k-space-1);
 }
 
-.hero__due {
+.k-hero__due {
   display: flex;
   align-items: center;
   gap: var(--k-space-1);
@@ -105,7 +105,7 @@
   }
 }
 
-.hero__account {
+.k-hero__account {
   display: flex;
   align-items: center;
   gap: var(--k-space-2);
@@ -114,7 +114,7 @@
   color: var(--k-text-secondary);
 }
 
-.hero__reminder {
+.k-hero__reminder {
   display: flex;
   align-items: center;
   gap: var(--k-space-1);
@@ -340,8 +340,8 @@
 // États
 // =============================================================================
 
-.state-loading,
-.state-error {
+.k-state-loading,
+.k-state-error {
   display: flex;
   flex-direction: column;
   align-items: center;

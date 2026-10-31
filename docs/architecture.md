@@ -536,7 +536,7 @@ entite, elle peut vivre des deux cotes.
 | Configuration du serveur (premier lancement, puis ecran « Serveur ») | **Propre a Flutter** | — | `/onboarding`, `/settings/data` |
 | Verrouillage par PIN et biometrie | **Propre a Flutter** | — | barriere applicative (pas de route), reglage `/settings/lock` |
 | Notification systeme a la reception | **Propre a Flutter** | — | `LocalNotificationService` |
-| Mise a jour de la PWA | **Propre au web** | `AppUpdateService` | — |
+| Mise a jour de la PWA | **Propre au web** | `AppUpdateService` (`core/pwa/app-update.ts`, copie de k-design ; critere de K-Budget dans `core/pwa/app-update-can-apply.ts`, KKS-619) | — |
 
 Deux surfaces sont classees Suivi parce que l'application mobile est
 inutilisable sans elles. La detection d'incompatibilite : c'est le client

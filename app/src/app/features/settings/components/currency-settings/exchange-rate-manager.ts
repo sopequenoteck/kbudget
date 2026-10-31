@@ -144,7 +144,7 @@ const FIXED_PARITY_RATES: Record<string, number> = {
             <p class="form-error">{{ formError() }}</p>
           }
 
-          <div class="form-actions">
+          <div class="k-form-actions">
             <button class="btn btn--ghost" (click)="cancelForm()">
               <ng-icon name="phosphorX" size="16" />
               {{ 'common.action.cancel' | transloco }}
@@ -333,7 +333,7 @@ const FIXED_PARITY_RATES: Record<string, number> = {
         margin-bottom: var(--k-space-3);
       }
 
-      .form-actions {
+      .k-form-actions {
         display: flex;
         justify-content: flex-end;
         gap: var(--k-space-2);

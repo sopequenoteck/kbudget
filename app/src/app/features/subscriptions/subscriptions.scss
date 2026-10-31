@@ -4,9 +4,9 @@
   padding: var(--k-space-4);
 }
 
-// Styles specifiques a cette page — le reste est dans _list-patterns.scss
+// Styles specifiques a cette page — le reste est dans k-patterns.css (k-design)
 
 // Hero amount toujours expense sur cette page
-.hero__amount-value {
+.k-hero__amount-value {
   color: var(--k-color-expense);
 }

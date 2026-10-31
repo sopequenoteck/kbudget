@@ -32,5 +32,5 @@ Approche **signals-first** obligatoire :
 Source de verite : [`DESIGN.md`](../DESIGN.md). Quiet utility dark-first. 4 canaux couleur : amber (action), vert (revenu), rouge (depense), gris (structure). Police : Inter.
 
 - `var(--token-name)` uniquement, jamais de hex/rgba hardcode dans les composants
-- Patterns partages dans `_list-patterns.scss` et `_bottom-sheet.scss` — les reutiliser, pas les reinventer
+- Patterns partages dans `styles/k/k-patterns.css` (k-design, classes `.k-`, copie a ne pas editer) — les reutiliser, pas les reinventer. Part metier de K-Budget dans `_bottom-sheet.scss` et `_list-patterns.scss`, sous le nom du bloc en `.k-` (KKS-619)
 - Avant modification frontend : lire `DESIGN.md` et verifier la conformite

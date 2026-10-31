@@ -1,7 +1,7 @@
 // Transaction form — styles specifiques uniquement
-// Le reste est dans _bottom-sheet.scss (classes .bsheet__*)
+// Le reste est dans k-patterns.css (classes .k-bsheet__*) et la part metier dans _bottom-sheet.scss
 
-.bsheet__recurring-fields {
+.k-bsheet__recurring-fields {
   display: flex;
   flex-direction: column;
   gap: var(--k-space-3);

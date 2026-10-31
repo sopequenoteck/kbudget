@@ -1,9 +1,9 @@
-<div class="hero">
-  <div class="hero__top-row">
-    <div class="hero__nav">
-      <span class="hero__nav-label">{{ selectedMonthLabel() }}</span>
-      <button class="hero__nav-btn" (click)="prevMonth()" [attr.aria-label]="'common.action.previousMonthAria' | transloco">&#9664;</button>
-      <button class="hero__nav-btn" (click)="nextMonth()" [attr.aria-label]="'common.action.nextMonthAria' | transloco">&#9654;</button>
+<div class="k-hero">
+  <div class="k-hero__top-row">
+    <div class="k-hero__nav">
+      <span class="k-hero__nav-label">{{ selectedMonthLabel() }}</span>
+      <button class="k-hero__nav-btn" (click)="prevMonth()" [attr.aria-label]="'common.action.previousMonthAria' | transloco">&#9664;</button>
+      <button class="k-hero__nav-btn" (click)="nextMonth()" [attr.aria-label]="'common.action.nextMonthAria' | transloco">&#9654;</button>
     </div>
     <app-currency-pill-selector
       [currencies]="preferenceService.currencies()"
@@ -12,27 +12,27 @@
     />
   </div>
   @if (monthData()) {
-    <div class="hero__body">
-      <div class="hero__amount">
-        <span class="hero__amount-label">{{ 'budgets.summary.spent' | transloco }}</span>
-        <span class="hero__amount-value" [class.over-budget]="monthData()!.percentage > 100">
+    <div class="k-hero__body">
+      <div class="k-hero__amount">
+        <span class="k-hero__amount-label">{{ 'budgets.summary.spent' | transloco }}</span>
+        <span class="k-hero__amount-value" [class.over-budget]="monthData()!.percentage > 100">
           {{ budgetedSpent() | amount: null : activeCurrency() }}
         </span>
         @if (heroConverted(); as converted) {
-          <span class="hero__converted">&asymp; {{ converted.amount | amount: null : converted.currency }}</span>
+          <span class="k-hero__converted">&asymp; {{ converted.amount | amount: null : converted.currency }}</span>
         }
-        <div class="hero__meta">
-          <div class="hero__meta-line">
+        <div class="k-hero__meta">
+          <div class="k-hero__meta-line">
             @if (overBudgetCount() > 0) {
               <ng-icon name="phosphorWarning" size="14" />
               <span>{{ 'budgets.summary.overBudgetCount' | transloco: { count: overBudgetCount() } }}</span>
-              <span class="hero__meta-dot">&middot;</span>
+              <span class="k-hero__meta-dot">&middot;</span>
             }
             <ng-icon name="phosphorChartPie" size="14" />
             <span>{{ 'budgets.summary.activeCount' | transloco: { count: activeCount() } }}</span>
           </div>
           @if (unbudgetedTotal() > 0) {
-            <div class="hero__meta-line hero__meta-line--clickable" (click)="onShowUnbudgeted()" (keydown.enter)="onShowUnbudgeted()" tabindex="0" role="button">
+            <div class="k-hero__meta-line k-hero__meta-line--clickable" (click)="onShowUnbudgeted()" (keydown.enter)="onShowUnbudgeted()" tabindex="0" role="button">
               <ng-icon name="phosphorTray" size="14" />
               <span>
                 {{
@@ -51,23 +51,23 @@
   }
 </div>
 
-<div class="sticky-sentinel" #stickySentinel></div>
-<div class="section-header" [class.stuck]="isStuck()">
-  <h2 class="section-header__title">{{ 'budgets.page.title' | transloco }}</h2>
-  <div class="section-header__right">
-    <span class="section-header__count">{{ 'budgets.list.activeCount' | transloco: { count: activeCount() } }}</span>
+<div class="k-sticky-sentinel" #stickySentinel></div>
+<div class="k-section-header" [class.stuck]="isStuck()">
+  <h2 class="k-section-header__title">{{ 'budgets.page.title' | transloco }}</h2>
+  <div class="k-section-header__right">
+    <span class="k-section-header__count">{{ 'budgets.list.activeCount' | transloco: { count: activeCount() } }}</span>
     @if (isCurrentMonth()) {
       <button
-        class="section-header__add-btn"
+        class="k-section-header__add-btn"
         (click)="onCreate()"
         [disabled]="allCategoriesHaveBudget()"
         [attr.aria-label]="'budgets.dialog.createTitle' | transloco"
       >+</button>
     }
     @if (unbudgetedTotal() > 0) {
-      <span class="section-header__separator"></span>
+      <span class="k-section-header__separator"></span>
       <button
-        class="section-header__action-btn"
+        class="k-section-header__action-btn"
         (click)="onShowUnbudgeted()"
         [attr.aria-label]="'budgets.page.unbudgetedTitle' | transloco"
         type="button"
@@ -79,25 +79,25 @@
 </div>
 
 @if (loading()) {
-  <div class="list-group">
+  <div class="k-list-group">
     @for (item of skeletonItems; track $index) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
+      <div class="k-skeleton-item">
+        <div class="k-skeleton-circle"></div>
+        <div class="k-skeleton-lines">
+          <div class="k-skeleton-line k-skeleton-line--title"></div>
+          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
         </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
-          <div class="skeleton-line skeleton-line--small"></div>
+        <div class="k-skeleton-lines k-skeleton-lines--right">
+          <div class="k-skeleton-line k-skeleton-line--value"></div>
+          <div class="k-skeleton-line k-skeleton-line--small"></div>
         </div>
       </div>
     }
   </div>
 } @else if (error()) {
-  <div class="state-error">
+  <div class="k-state-error">
     <p>{{ 'common.feedback.loadError' | transloco }}</p>
-    <button class="btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
+    <button class="k-btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (convertedItems().length === 0 && unbudgetedTotal() === 0) {
   <app-empty-state
@@ -146,7 +146,7 @@
   }
 
   @if (inactiveItems().length > 0) {
-    <div class="date-label">{{ 'budgets.list.inactive' | transloco }}</div>
+    <div class="k-date-label">{{ 'budgets.list.inactive' | transloco }}</div>
     <div class="budget-group">
       @for (item of inactiveItems(); track item.categoryId) {
         <button type="button" class="budget-row inactive clickable" (click)="onBudgetPressed(item)">

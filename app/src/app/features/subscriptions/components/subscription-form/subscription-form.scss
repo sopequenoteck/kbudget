@@ -1,7 +1,7 @@
 // Subscription form — styles specifiques uniquement
-// Le reste est dans _bottom-sheet.scss (classes .bsheet__*)
+// Le reste est dans k-patterns.css (classes .k-bsheet__*) et la part metier dans _bottom-sheet.scss
 
 // Focus du libelle en couleur expense (specifique abonnement)
-.bsheet__libelle:focus {
+.k-bsheet__libelle:focus {
   border-bottom-color: var(--k-color-expense);
 }

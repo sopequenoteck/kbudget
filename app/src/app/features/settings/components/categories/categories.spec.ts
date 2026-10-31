@@ -133,7 +133,7 @@ describe('Categories', () => {
     const fixture = await createFixture([]);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.page-header__title')?.textContent?.trim()).toBe('Catégories');
+    expect(el.querySelector('.k-page-header__title')?.textContent?.trim()).toBe('Catégories');
   });
 
   it('should_render_french_error_state_labels_when_load_fails', async () => {

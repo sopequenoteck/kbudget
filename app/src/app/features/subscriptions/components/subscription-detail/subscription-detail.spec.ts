@@ -158,7 +158,7 @@ describe('SubscriptionDetail', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Netflix');
     expect(compiled.querySelector('.badge-status')?.textContent?.trim()).toBe('Actif');
-    expect(compiled.querySelector('.hero__amount')?.textContent).toContain('13,99');
+    expect(compiled.querySelector('.k-hero__amount')?.textContent).toContain('13,99');
   });
 
   it('should_display_total_paid', async () => {
@@ -171,7 +171,7 @@ describe('SubscriptionDetail', () => {
 
     // Assert
     const compiled = fixture.nativeElement as HTMLElement;
-    const heroTotal = compiled.querySelector('.hero__total')?.textContent ?? '';
+    const heroTotal = compiled.querySelector('.k-hero__total')?.textContent ?? '';
     expect(heroTotal).toContain('2 paiement');
     expect(heroTotal).toContain('27,98');
   });

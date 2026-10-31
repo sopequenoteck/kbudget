@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 
 import { Incompatible } from './incompatible';
-import { AppUpdateService } from '../../core/services/app-update';
+import { AppUpdateService } from '../../core/pwa/app-update';
 import { CompatibilityService } from '../../core/services/compatibility';
 import { type CompatibilityStatus } from '../../core/models/meta.model';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';

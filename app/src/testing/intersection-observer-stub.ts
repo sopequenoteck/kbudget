@@ -1,5 +1,5 @@
 // jsdom ne fournit pas IntersectionObserver, dont les ecrans de liste se
-// servent pour leur en-tete collant (sticky-sentinel). Aucun test n'observe
+// servent pour leur en-tete collant (k-sticky-sentinel). Aucun test n'observe
 // d'intersection : le bouchon ne fait rien.
 class IntersectionObserverStub {
   observe(): void {

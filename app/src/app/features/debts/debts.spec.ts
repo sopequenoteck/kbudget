@@ -24,7 +24,7 @@ import { stubIntersectionObserver } from '../../../testing/intersection-observer
 const NOW = new Date(2026, 2, 13, 10, 0, 0);
 
 // jsdom ne fournit pas IntersectionObserver (utilise par ngAfterViewInit pour
-// le sticky-sentinel).
+// le k-sticky-sentinel).
 beforeAll(() => stubIntersectionObserver());
 
 const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({
@@ -206,8 +206,8 @@ describe('Debts', () => {
     await flushAsyncLoad(fixture);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.state-error p')?.textContent).toBe('Erreur de chargement');
-    expect(el.querySelector('.state-error .btn-outline')?.textContent).toBe('Réessayer');
+    expect(el.querySelector('.k-state-error p')?.textContent).toBe('Erreur de chargement');
+    expect(el.querySelector('.k-state-error .k-btn-outline')?.textContent).toBe('Réessayer');
   });
 
   it('should_render_french_empty_state_when_no_debts', async () => {
@@ -232,7 +232,7 @@ describe('Debts', () => {
     const fixture = await createFixture([makeDebt()]);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.section-header__title')?.textContent).toBe('Dettes');
+    expect(el.querySelector('.k-section-header__title')?.textContent).toBe('Dettes');
   });
 
   it('should_render_french_hero_labels_when_active_debts_exist', async () => {
@@ -241,8 +241,8 @@ describe('Debts', () => {
     const fixture = await createFixture([emprunt, pret]);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.hero__amount-label')?.textContent).toBe('Solde net');
-    const metaLines = Array.from(el.querySelectorAll('.hero__meta-line')).map((n) =>
+    expect(el.querySelector('.k-hero__amount-label')?.textContent).toBe('Solde net');
+    const metaLines = Array.from(el.querySelectorAll('.k-hero__meta-line')).map((n) =>
       n.textContent?.trim(),
     );
     expect(metaLines).toEqual(['1 prêt·1 emprunt', '2 en cours']);
@@ -256,7 +256,7 @@ describe('Debts', () => {
     const fixture = await createFixture([makeDebt({ sens: DebtType.EMPRUNT, category: null })]);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.list-row__subtitle')?.textContent?.trim()).toBe('Emprunt');
+    expect(el.querySelector('.k-list-row__subtitle')?.textContent?.trim()).toBe('Emprunt');
   });
 
   it('should_render_category_and_type_subtitle_when_category_present', async () => {
@@ -268,7 +268,7 @@ describe('Debts', () => {
     ]);
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.list-row__subtitle')?.textContent?.trim()).toBe('Ami · Prêt');
+    expect(el.querySelector('.k-list-row__subtitle')?.textContent?.trim()).toBe('Ami · Prêt');
   });
 
   // ---------------------------------------------------------------------
@@ -366,8 +366,8 @@ describe('Debts', () => {
     const fixture = await createFixture([makeDebt({ dueDate: '2026-03-01', rembourse: false })]);
     const el: HTMLElement = fixture.nativeElement;
 
-    const due = el.querySelector('.list-row__due');
-    expect(due?.classList.contains('list-row__due--overdue')).toBe(true);
+    const due = el.querySelector('.k-list-row__due');
+    expect(due?.classList.contains('k-list-row__due--overdue')).toBe(true);
     expect(due?.textContent?.trim()).toBe('12 j. en retard');
   });
 
@@ -416,7 +416,7 @@ describe('Debts', () => {
     const fixture = await createFixture([overdue, today, noDue, repaid]);
     const el: HTMLElement = fixture.nativeElement;
 
-    const headers = Array.from(el.querySelectorAll('.date-label')).map((n) => n.textContent?.trim());
+    const headers = Array.from(el.querySelectorAll('.k-date-label')).map((n) => n.textContent?.trim());
     expect(headers).toEqual(["En retard", "Aujourd'hui", 'Sans échéance', 'Remboursées']);
   });
 

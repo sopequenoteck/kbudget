@@ -5,15 +5,15 @@
 }
 
 // Budget list — styles specifiques uniquement
-// Hero, currency-toggle, section-header, date-label, states sont dans _list-patterns.scss
+// k-hero, currency-toggle, k-section-header, k-date-label, etats sont dans k-patterns.css (k-design)
 
 // Hero: gap plus grand pour le doughnut
-.hero {
+.k-hero {
   gap: var(--k-space-4);
 }
 
 // Hero body: layout horizontal avec doughnut
-.hero__body {
+.k-hero__body {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -21,13 +21,13 @@
 }
 
 // Hero amount: prend l'espace restant (doughnut a droite)
-.hero__amount {
+.k-hero__amount {
   flex: 1;
   min-width: 0;
 }
 
 // Hero amount toujours expense
-.hero__amount-value {
+.k-hero__amount-value {
   color: var(--k-color-expense);
 }
 

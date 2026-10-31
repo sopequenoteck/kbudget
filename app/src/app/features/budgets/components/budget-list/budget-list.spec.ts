@@ -175,8 +175,8 @@ describe('BudgetList', () => {
   it('should_render_the_translated_section_title_and_active_count', async () => {
     const fixture = await createFixture();
 
-    const title: HTMLElement = fixture.nativeElement.querySelector('.section-header__title');
-    const count: HTMLElement = fixture.nativeElement.querySelector('.section-header__count');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.k-section-header__title');
+    const count: HTMLElement = fixture.nativeElement.querySelector('.k-section-header__count');
     expect(title.textContent?.trim()).toBe('Budgets');
     expect(count.textContent?.trim()).toBe('1 actif');
   });
@@ -188,7 +188,7 @@ describe('BudgetList', () => {
       );
     });
 
-    const count: HTMLElement = fixture.nativeElement.querySelector('.section-header__count');
+    const count: HTMLElement = fixture.nativeElement.querySelector('.k-section-header__count');
     expect(count.textContent?.trim()).toBe('2 actifs');
   });
 
@@ -197,7 +197,7 @@ describe('BudgetList', () => {
       budgetServiceMock.getOverview.mockReturnValue(of(overview([overviewItem({ percentage: 120 })])));
     });
 
-    const label: HTMLElement = fixture.nativeElement.querySelector('.hero__amount-label');
+    const label: HTMLElement = fixture.nativeElement.querySelector('.k-hero__amount-label');
     expect(label.textContent?.trim()).toBe('Dépensé');
     expect(fixture.nativeElement.textContent).toContain('1 en dépassement');
   });
@@ -215,8 +215,8 @@ describe('BudgetList', () => {
       budgetServiceMock.getOverview.mockReturnValue(throwError(() => new Error('boom')));
     });
 
-    const message: HTMLElement = fixture.nativeElement.querySelector('.state-error p');
-    const retry: HTMLElement = fixture.nativeElement.querySelector('.state-error button');
+    const message: HTMLElement = fixture.nativeElement.querySelector('.k-state-error p');
+    const retry: HTMLElement = fixture.nativeElement.querySelector('.k-state-error button');
     expect(message.textContent?.trim()).toBe('Erreur de chargement');
     expect(retry.textContent?.trim()).toBe('Réessayer');
   });
@@ -237,7 +237,7 @@ describe('BudgetList', () => {
       budgetServiceMock.getOverview.mockReturnValue(of(overview([overviewItem({ actif: false })])));
     });
 
-    const label: HTMLElement = fixture.nativeElement.querySelector('.date-label');
+    const label: HTMLElement = fixture.nativeElement.querySelector('.k-date-label');
     expect(label.textContent?.trim()).toBe('Inactifs');
   });
 

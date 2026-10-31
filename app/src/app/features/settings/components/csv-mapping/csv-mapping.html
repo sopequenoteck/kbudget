@@ -1,5 +1,5 @@
-<a class="section-back" routerLink="/transactions/import">
-  <span class="section-back__arrow">&#9664;</span>
+<a class="k-section-back" routerLink="/transactions/import">
+  <span class="k-section-back__arrow">&#9664;</span>
   <span>{{ 'imports.page.title' | transloco }}</span>
 </a>
 
@@ -22,8 +22,8 @@
     <h3 class="mapping-section__title">{{ 'imports.page.previewTitle' | transloco }}</h3>
 
     @if (previewLoading()) {
-      <div class="state-loading">
-        <div class="spinner spinner--sm"></div>
+      <div class="k-state-loading">
+        <div class="k-spinner k-spinner--sm"></div>
       </div>
     } @else if (previewError()) {
       <div class="mapping-error">{{ previewError() }}</div>
@@ -262,7 +262,7 @@
         ></textarea>
         <p class="mapping-section__hint">{{ 'imports.form.cleanupPatternsHint' | transloco }}</p>
         <div>
-          <button type="button" class="btn-outline" (click)="addCardPattern()">
+          <button type="button" class="k-btn-outline" (click)="addCardPattern()">
             {{ 'imports.action.addCardPattern' | transloco }}
           </button>
         </div>
@@ -307,15 +307,15 @@
 
   <!-- Actions -->
   <div class="mapping-actions">
-    <a class="btn-outline" routerLink="/settings/import">{{ 'common.action.cancel' | transloco }}</a>
+    <a class="k-btn-outline" routerLink="/settings/import">{{ 'common.action.cancel' | transloco }}</a>
     <button
       type="button"
-      class="btn-primary"
+      class="k-btn-primary"
       [disabled]="importing() || !isValid()"
       (click)="import()"
     >
       @if (importing()) {
-        <span class="spinner spinner--sm"></span>
+        <span class="k-spinner k-spinner--sm"></span>
       }
       {{ 'imports.action.import' | transloco }}
     </button>

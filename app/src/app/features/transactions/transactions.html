@@ -1,9 +1,9 @@
-<div class="hero">
-  <div class="hero__top-row">
-    <div class="hero__nav">
-      <span class="hero__nav-label">{{ selectedMonthLabel() }}</span>
-      <button class="hero__nav-btn" (click)="prevMonth()" [attr.aria-label]="'common.action.previousMonthAria' | transloco">◀</button>
-      <button class="hero__nav-btn" (click)="nextMonth()" [attr.aria-label]="'common.action.nextMonthAria' | transloco">▶</button>
+<div class="k-hero">
+  <div class="k-hero__top-row">
+    <div class="k-hero__nav">
+      <span class="k-hero__nav-label">{{ selectedMonthLabel() }}</span>
+      <button class="k-hero__nav-btn" (click)="prevMonth()" [attr.aria-label]="'common.action.previousMonthAria' | transloco">◀</button>
+      <button class="k-hero__nav-btn" (click)="nextMonth()" [attr.aria-label]="'common.action.nextMonthAria' | transloco">▶</button>
     </div>
     <app-currency-pill-selector
       [currencies]="preferenceService.currencies()"
@@ -11,15 +11,15 @@
       (currencyChange)="setActiveCurrency($event)"
     />
   </div>
-  <div class="hero__amount">
-    <span class="hero__amount-label">{{ 'transactions.summary.balance' | transloco }}</span>
-    <span class="hero__amount-value" [class.hero__amount-value--positive]="convertedSolde() > 0" [class.hero__amount-value--negative]="convertedSolde() < 0">
+  <div class="k-hero__amount">
+    <span class="k-hero__amount-label">{{ 'transactions.summary.balance' | transloco }}</span>
+    <span class="k-hero__amount-value" [class.k-hero__amount-value--positive]="convertedSolde() > 0" [class.k-hero__amount-value--negative]="convertedSolde() < 0">
       {{ convertedSolde() | amount: null : activeCurrency() }}
     </span>
   </div>
-  <div class="hero__meta-row">
-    <div class="hero__meta-group">
-      <div class="hero__meta-line">
+  <div class="k-hero__meta-row">
+    <div class="k-hero__meta-group">
+      <div class="k-hero__meta-line">
         <ng-icon name="phosphorTrendUp" size="14" />
         @if (convertedRecettes() > 0) {
           <span>{{ convertedRecettes() | amount: 'RECETTE' : activeCurrency() }}</span>
@@ -28,65 +28,65 @@
         }
       </div>
       @if (secondaryRecettes() !== null && secondaryCurrency(); as sec) {
-        <span class="hero__meta-converted">≈ {{ secondaryRecettes()! | amount: 'RECETTE' : sec }}</span>
+        <span class="k-hero__meta-converted">≈ {{ secondaryRecettes()! | amount: 'RECETTE' : sec }}</span>
       }
     </div>
-    <div class="hero__meta-group">
-      <div class="hero__meta-line">
+    <div class="k-hero__meta-group">
+      <div class="k-hero__meta-line">
         <ng-icon name="phosphorTrendDown" size="14" />
         @if (convertedDepenses() > 0) {
-          <span class="hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
+          <span class="k-hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
         } @else {
           <span>{{ 'transactions.summary.noExpense' | transloco }}</span>
         }
       </div>
       @if (secondaryDepenses() !== null && secondaryCurrency(); as sec) {
-        <span class="hero__meta-converted">≈ {{ secondaryDepenses()! | amount: 'DEPENSE' : sec }}</span>
+        <span class="k-hero__meta-converted">≈ {{ secondaryDepenses()! | amount: 'DEPENSE' : sec }}</span>
       }
     </div>
   </div>
 </div>
 
-<div class="sticky-sentinel" #stickySentinel></div>
-<div class="section-header" [class.stuck]="isStuck()">
+<div class="k-sticky-sentinel" #stickySentinel></div>
+<div class="k-section-header" [class.stuck]="isStuck()">
   @if (searchOpen()) {
-    <div class="section-header__search-wrapper">
-      <input class="section-header__search-input input-naked"
+    <div class="k-section-header__search-wrapper">
+      <input class="k-section-header__search-input k-input-naked"
         type="text"
         [placeholder]="'common.form.searchPlaceholder' | transloco"
         [value]="searchQuery()"
         (input)="searchQuery.set($any($event.target).value)"
         (keydown.escape)="toggleSearch()"
         #searchInput />
-      <button class="section-header__search-clear" (click)="toggleSearch()" [attr.aria-label]="'common.action.close' | transloco">
+      <button class="k-section-header__search-clear" (click)="toggleSearch()" [attr.aria-label]="'common.action.close' | transloco">
         <ng-icon name="phosphorX" size="16" />
       </button>
     </div>
   } @else {
-    <h2 class="section-header__title">{{ 'transactions.page.title' | transloco }}</h2>
+    <h2 class="k-section-header__title">{{ 'transactions.page.title' | transloco }}</h2>
   }
-  <div class="section-header__actions">
+  <div class="k-section-header__actions">
     @if (!searchOpen()) {
-      <button class="section-header__action-btn"
+      <button class="k-section-header__action-btn"
         (click)="toggleSearch()"
         [attr.aria-label]="'common.filter.searchAria' | transloco">
         <ng-icon name="phosphorMagnifyingGlass" size="20" />
       </button>
     }
-    <button class="section-header__action-btn"
+    <button class="k-section-header__action-btn"
       [class.active]="filterOpen() || hasActiveFilters()"
       (click)="toggleFilter()"
       [attr.aria-label]="'common.filter.filterAria' | transloco">
       <ng-icon name="phosphorFunnel" size="20" />
       @if (hasActiveFilters()) {
-        <span class="section-header__filter-dot"></span>
+        <span class="k-section-header__filter-dot"></span>
       }
     </button>
-    <span class="section-header__separator"></span>
-    <a class="section-header__action-btn" routerLink="/transactions/import" [attr.aria-label]="'imports.action.importStatement' | transloco">
+    <span class="k-section-header__separator"></span>
+    <a class="k-section-header__action-btn" routerLink="/transactions/import" [attr.aria-label]="'imports.action.importStatement' | transloco">
       <ng-icon name="phosphorUploadSimple" size="20" />
     </a>
-    <a class="section-header__action-btn" routerLink="/transactions/recurring" [attr.aria-label]="'recurring.page.title' | transloco">
+    <a class="k-section-header__action-btn" routerLink="/transactions/recurring" [attr.aria-label]="'recurring.page.title' | transloco">
       <ng-icon name="phosphorArrowsClockwise" size="20" />
     </a>
   </div>
@@ -127,25 +127,25 @@
 }
 
 @if (loading()) {
-  <div class="list-group">
+  <div class="k-list-group">
     @for (item of skeletonItems; track $index) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
+      <div class="k-skeleton-item">
+        <div class="k-skeleton-circle"></div>
+        <div class="k-skeleton-lines">
+          <div class="k-skeleton-line k-skeleton-line--title"></div>
+          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
         </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
-          <div class="skeleton-line skeleton-line--small"></div>
+        <div class="k-skeleton-lines k-skeleton-lines--right">
+          <div class="k-skeleton-line k-skeleton-line--value"></div>
+          <div class="k-skeleton-line k-skeleton-line--small"></div>
         </div>
       </div>
     }
   </div>
 } @else if (error()) {
-  <div class="state-error">
+  <div class="k-state-error">
     <p>{{ 'common.feedback.loadError' | transloco }}</p>
-    <button class="btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
+    <button class="k-btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (groupedTransactions().length === 0) {
   <app-empty-state
@@ -156,24 +156,24 @@
   />
 } @else {
   @for (group of groupedTransactions(); track group.key) {
-    <div class="date-label">{{ dateGroupLabelKeys[group.key] | transloco }}</div>
-    <div class="list-group">
+    <div class="k-date-label">{{ dateGroupLabelKeys[group.key] | transloco }}</div>
+    <div class="k-list-group">
       @for (transaction of group.transactions; track transaction.id) {
-        <button type="button" class="list-row" (click)="onTransactionPressed(transaction)">
+        <button type="button" class="k-list-row" (click)="onTransactionPressed(transaction)">
           <span
-            class="list-row__icon"
+            class="k-list-row__icon"
             [style.background-color]="transaction.category?.couleur ? transaction.category!.couleur + '26' : null"
           >{{ getIcon(transaction) }}</span>
-          <div class="list-row__content">
-            <span class="list-row__title">{{ transaction.libelle }}</span>
-            <span class="list-row__subtitle">{{ (transaction.category?.nom ?? '') | categoryName: $safeNavigationMigration(transaction.category?.systemKey) }}</span>
+          <div class="k-list-row__content">
+            <span class="k-list-row__title">{{ transaction.libelle }}</span>
+            <span class="k-list-row__subtitle">{{ (transaction.category?.nom ?? '') | categoryName: $safeNavigationMigration(transaction.category?.systemKey) }}</span>
           </div>
-          <div class="list-row__right">
-            <span class="list-row__amount" [class]="getValueClass(transaction)">
+          <div class="k-list-row__right">
+            <span class="k-list-row__amount" [class]="getValueClass(transaction)">
               {{ transaction.montant | amount: transaction.type : $safeNavigationMigration(transaction.account?.currency) }}
             </span>
             @if (transaction.account?.currency && transaction.account!.currency !== preferenceService.primaryCurrency()) {
-              <span class="list-row__converted">
+              <span class="k-list-row__converted">
                 {{ transaction.montant | convertAmount: transaction.account!.currency! : preferenceService.primaryCurrency() }}
               </span>
             }

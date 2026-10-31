@@ -25,7 +25,7 @@
         formControlName="email"
         autocomplete="email"
         [placeholder]="'auth.form.emailPlaceholder' | transloco"
-        [class.input-error]="form.controls.email.touched && form.controls.email.invalid"
+        [class.k-input-error]="form.controls.email.touched && form.controls.email.invalid"
       />
     </app-form-field>
 
@@ -42,7 +42,7 @@
         formControlName="displayName"
         autocomplete="name"
         [placeholder]="'auth.form.displayNamePlaceholder' | transloco"
-        [class.input-error]="
+        [class.k-input-error]="
           form.controls.displayName.touched && form.controls.displayName.invalid
         "
       />
@@ -62,7 +62,7 @@
         formControlName="password"
         autocomplete="new-password"
         [placeholder]="'auth.form.passwordPlaceholder' | transloco: { min: passwordMinLength }"
-        [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
+        [class.k-input-error]="form.controls.password.touched && form.controls.password.invalid"
       />
     </app-form-field>
 
@@ -81,14 +81,14 @@
         formControlName="passwordConfirm"
         autocomplete="new-password"
         [placeholder]="'auth.form.confirmPasswordPlaceholder' | transloco"
-        [class.input-error]="
+        [class.k-input-error]="
           form.controls.passwordConfirm.touched && form.controls.passwordConfirm.invalid
         "
       />
     </app-form-field>
 
-    <div class="form-actions">
-      <button type="submit" class="btn-primary" [disabled]="isSubmitting()">
+    <div class="k-form-actions">
+      <button type="submit" class="k-btn-primary" [disabled]="isSubmitting()">
         @if (isSubmitting()) {
           {{ 'common.feedback.saving' | transloco }}
         } @else {

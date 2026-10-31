@@ -32,8 +32,8 @@
     </app-form-field>
 
     <div class="dialog-actions">
-      <button type="button" class="btn-outline" (click)="onCancel()">{{ 'common.action.cancel' | transloco }}</button>
-      <button type="submit" class="btn-primary" [disabled]="submitting() || form.invalid">
+      <button type="button" class="k-btn-outline" (click)="onCancel()">{{ 'common.action.cancel' | transloco }}</button>
+      <button type="submit" class="k-btn-primary" [disabled]="submitting() || form.invalid">
         {{ submitting() ? ('debts.dialog.snoozing' | transloco) : ('debts.action.snooze' | transloco) }}
       </button>
     </div>

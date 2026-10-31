@@ -5,21 +5,21 @@
 }
 
 // =============================================================================
-// Header — page-header étendu avec icône catégorie
+// Header — k-page-header étendu avec icône catégorie
 // =============================================================================
 
 // =============================================================================
 // Hero — montant dépensé dominant + reste
 // =============================================================================
 
-.hero {
+.k-hero {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding-bottom: var(--k-space-6);
 }
 
-.hero__label {
+.k-hero__label {
   font-size: var(--k-font-size-xs);
   font-weight: var(--k-font-weight-medium);
   color: var(--k-text-secondary);
@@ -27,7 +27,7 @@
   letter-spacing: 0.05em;
 }
 
-.hero__value {
+.k-hero__value {
   font-size: var(--k-font-size-3xl);
   font-weight: var(--k-font-weight-bold);
   color: var(--k-text-primary);
@@ -38,19 +38,19 @@
   }
 }
 
-.hero__converted {
+.k-hero__converted {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
 }
 
-.hero__meta {
+.k-hero__meta {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-top: var(--k-space-1);
 }
 
-.hero__meta-line {
+.k-hero__meta-line {
   display: flex;
   align-items: center;
   gap: var(--k-space-1);
@@ -73,7 +73,7 @@
   }
 }
 
-.hero__meta-dot {
+.k-hero__meta-dot {
   margin: 0 2px;
 }
 
@@ -132,12 +132,12 @@
 // Section header — sticky
 // =============================================================================
 
-.sticky-sentinel {
+.k-sticky-sentinel {
   height: 1px;
   margin: 0;
 }
 
-.section-header {
+.k-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -179,7 +179,7 @@
 // Date labels — groupement par date
 // =============================================================================
 
-.date-label {
+.k-date-label {
   font-size: var(--k-font-size-xs);
   font-weight: var(--k-font-weight-medium);
   color: var(--k-text-tertiary);
@@ -312,7 +312,7 @@
 // States
 // =============================================================================
 
-.state-loading {
+.k-state-loading {
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -1,13 +1,13 @@
-<div class="page-header">
-  <button class="page-header__back" (click)="goBack()">
+<div class="k-page-header">
+  <button class="k-page-header__back" (click)="goBack()">
     <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="page-header__title">{{ 'budgets.page.unbudgetedTitle' | transloco }}</h1>
+  <h1 class="k-page-header__title">{{ 'budgets.page.unbudgetedTitle' | transloco }}</h1>
 </div>
 
 @if (loading()) {
-  <div class="state-loading">
-    <div class="spinner"></div>
+  <div class="k-state-loading">
+    <div class="k-spinner"></div>
   </div>
 } @else if (unbudgetedItems().length === 0) {
   <app-empty-state
@@ -15,18 +15,18 @@
     [message]="'budgets.empty.noUnbudgeted' | transloco"
   />
 } @else {
-  <div class="hero">
-    <div class="hero__body">
-      <div class="hero__text">
-        <span class="hero__label">{{ 'budgets.summary.spent' | transloco }}</span>
-        <span class="hero__value">
+  <div class="k-hero">
+    <div class="k-hero__body">
+      <div class="k-hero__text">
+        <span class="k-hero__label">{{ 'budgets.summary.spent' | transloco }}</span>
+        <span class="k-hero__value">
           {{ unbudgetedTotal() | amount: null : currency() }}
         </span>
         @if (heroConverted(); as converted) {
-          <span class="hero__converted">&asymp; {{ converted.amount | amount: null : converted.currency }}</span>
+          <span class="k-hero__converted">&asymp; {{ converted.amount | amount: null : converted.currency }}</span>
         }
-        <div class="hero__meta">
-          <div class="hero__meta-line">
+        <div class="k-hero__meta">
+          <div class="k-hero__meta-line">
             <ng-icon name="phosphorSquaresFour" size="14" />
             <span>{{ 'budgets.summary.unbudgetedCategoryCount' | transloco: { count: unbudgetedItems().length } }}</span>
           </div>
@@ -38,15 +38,15 @@
     </div>
   </div>
 
-  <div class="sticky-sentinel" #stickySentinel></div>
-  <div class="section-header" [class.stuck]="isStuck()">
-    <h2 class="section-header__title">{{ 'budgets.page.byCategoryTitle' | transloco }}</h2>
-    <span class="section-header__count">{{ 'budgets.list.transactionCount' | transloco: { count: totalTransactions() } }}</span>
+  <div class="k-sticky-sentinel" #stickySentinel></div>
+  <div class="k-section-header" [class.stuck]="isStuck()">
+    <h2 class="k-section-header__title">{{ 'budgets.page.byCategoryTitle' | transloco }}</h2>
+    <span class="k-section-header__count">{{ 'budgets.list.transactionCount' | transloco: { count: totalTransactions() } }}</span>
   </div>
 
   @if (transactionsLoading()) {
-    <div class="state-loading state-loading--small">
-      <div class="spinner"></div>
+    <div class="k-state-loading k-state-loading--small">
+      <div class="k-spinner"></div>
     </div>
   } @else {
     @for (group of categoryGroups(); track group.categoryId) {

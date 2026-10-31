@@ -21,14 +21,14 @@ import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
     @if (isLoading()) {
       <div class="budget-summary__state">
         @for (item of skeletonItems; track $index) {
-          <div class="skeleton-item">
-            <div class="skeleton-circle"></div>
-            <div class="skeleton-lines">
-              <div class="skeleton-line skeleton-line--title"></div>
-              <div class="skeleton-line skeleton-line--subtitle"></div>
+          <div class="k-skeleton-item">
+            <div class="k-skeleton-circle"></div>
+            <div class="k-skeleton-lines">
+              <div class="k-skeleton-line k-skeleton-line--title"></div>
+              <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
             </div>
-            <div class="skeleton-lines skeleton-lines--right">
-              <div class="skeleton-line skeleton-line--value"></div>
+            <div class="k-skeleton-lines k-skeleton-lines--right">
+              <div class="k-skeleton-line k-skeleton-line--value"></div>
             </div>
           </div>
         }

@@ -1,47 +1,47 @@
-<div class="page-header">
+<div class="k-page-header">
   <button
     type="button"
-    class="page-header__back"
+    class="k-page-header__back"
     (click)="goToTransactions()"
     [attr.aria-label]="'common.action.back' | transloco"
   >
     <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="page-header__title">{{ 'imports.page.reviewTitle' | transloco }}</h1>
+  <h1 class="k-page-header__title">{{ 'imports.page.reviewTitle' | transloco }}</h1>
 </div>
 
 <!-- En-tete repliable d'un groupe d'operations deja decidees -->
 <ng-template #groupHeader let-id="id" let-titleKey="titleKey" let-count="count">
   <button
     type="button"
-    class="group-label"
+    class="k-group-label"
     [attr.aria-expanded]="isExpanded(id)"
     (click)="toggleGroup(id)"
   >
     <span>{{ titleKey | transloco }}</span>
-    <span class="group-label__count">{{ count }}</span>
-    <span class="group-label__chevron" [class.group-label__chevron--collapsed]="!isExpanded(id)">
+    <span class="k-group-label__count">{{ count }}</span>
+    <span class="k-group-label__chevron" [class.k-group-label__chevron--collapsed]="!isExpanded(id)">
       <ng-icon name="phosphorCaretDown" size="14" />
     </span>
   </button>
 </ng-template>
 
 @if (loading()) {
-  <div class="skeleton-hero" aria-busy="true">
-    <div class="skeleton-bar skeleton-bar--xs"></div>
-    <div class="skeleton-bar skeleton-bar--lg"></div>
-    <div class="skeleton-bar skeleton-bar--sm"></div>
+  <div class="k-skeleton-hero" aria-busy="true">
+    <div class="k-skeleton-bar k-skeleton-bar--xs"></div>
+    <div class="k-skeleton-bar k-skeleton-bar--lg"></div>
+    <div class="k-skeleton-bar k-skeleton-bar--sm"></div>
   </div>
-  <div class="list-group" aria-busy="true">
+  <div class="k-list-group" aria-busy="true">
     @for (placeholder of [1, 2, 3]; track placeholder) {
-      <div class="skeleton-item">
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line skeleton-line--title"></div>
-          <div class="skeleton-line skeleton-line--subtitle"></div>
+      <div class="k-skeleton-item">
+        <div class="k-skeleton-circle"></div>
+        <div class="k-skeleton-lines">
+          <div class="k-skeleton-line k-skeleton-line--title"></div>
+          <div class="k-skeleton-line k-skeleton-line--subtitle"></div>
         </div>
-        <div class="skeleton-lines skeleton-lines--right">
-          <div class="skeleton-line skeleton-line--value"></div>
+        <div class="k-skeleton-lines k-skeleton-lines--right">
+          <div class="k-skeleton-line k-skeleton-line--value"></div>
         </div>
       </div>
     }
@@ -56,8 +56,8 @@
 } @else {
   @let current = draft()!;
 
-  <div class="hero">
-    <span class="hero__amount-label">
+  <div class="k-hero">
+    <span class="k-hero__amount-label">
       @if (accountSuffix(); as suffix) {
         {{
           'imports.summary.accountWithSuffix'
@@ -68,11 +68,11 @@
       }
     </span>
     @if (current.statementBalance !== null && current.statementBalanceDate) {
-      <div class="hero__amount">
-        <span class="hero__amount-value" data-testid="bank-balance">
+      <div class="k-hero__amount">
+        <span class="k-hero__amount-value" data-testid="bank-balance">
           {{ current.statementBalance | amount: null : currency() }}
         </span>
-        <span class="hero__converted">
+        <span class="k-hero__converted">
           {{
             'imports.summary.bankBalanceAt'
               | transloco: { date: fullDate(current.statementBalanceDate) }
@@ -81,15 +81,15 @@
       </div>
     }
     @if (!result()) {
-      <div class="hero__meta">
-        <div class="hero__meta-line" data-testid="meta-new">
+      <div class="k-hero__meta">
+        <div class="k-hero__meta-line" data-testid="meta-new">
           <ng-icon name="phosphorReceipt" size="14" />
           <span>{{
             'imports.summary.newTransactions' | transloco: { count: model().newCount }
           }}</span>
         </div>
         @if (model().alreadyImported.length > 0) {
-          <div class="hero__meta-line" data-testid="meta-already-imported">
+          <div class="k-hero__meta-line" data-testid="meta-already-imported">
             <ng-icon name="phosphorCheckCircle" size="14" />
             <span>{{
               'imports.summary.alreadyImported'
@@ -98,7 +98,7 @@
           </div>
         }
         @if (model().matched.length > 0) {
-          <div class="hero__meta-line" data-testid="meta-matched">
+          <div class="k-hero__meta-line" data-testid="meta-matched">
             <ng-icon name="phosphorLinkSimple" size="14" />
             <span>{{
               'imports.summary.matched' | transloco: { count: model().matched.length }
@@ -106,7 +106,7 @@
           </div>
         }
         @if (autoCategorisedCount() > 0) {
-          <div class="hero__meta-line" data-testid="meta-auto">
+          <div class="k-hero__meta-line" data-testid="meta-auto">
             <ng-icon name="phosphorTag" size="14" />
             <span>{{
               'imports.summary.autoCategorised' | transloco: { count: autoCategorisedCount() }
@@ -121,9 +121,9 @@
     <app-import-result [result]="summary" [currency]="currency()" (done)="goToTransactions()" />
   } @else {
     @if (current.proposedOpeningBalance !== null) {
-      <label class="bsheet__toggle-row review__opening">
+      <label class="k-bsheet__toggle-row review__opening">
         <span class="review__opening-text">
-          <span class="bsheet__toggle-text">
+          <span class="k-bsheet__toggle-text">
             {{
               'imports.form.alignOpeningBalance'
                 | transloco
@@ -134,32 +134,32 @@
         </span>
         <input
           type="checkbox"
-          class="bsheet__toggle-input"
+          class="k-bsheet__toggle-input"
           data-testid="align-opening-balance"
           [checked]="alignOpeningBalance()"
           (change)="alignOpeningBalance.set($any($event.target).checked)"
         />
-        <span class="bsheet__toggle-track"></span>
+        <span class="k-bsheet__toggle-track"></span>
       </label>
     }
 
     <!-- a. A trancher -->
     @if (toDecideCount() > 0) {
       <section class="review__section" data-testid="section-to-decide">
-        <div class="section-header">
-          <h2 class="section-header__title">{{ 'imports.list.toDecideTitle' | transloco }}</h2>
-          <span class="section-header__count">{{ toDecideCount() }}</span>
+        <div class="k-section-header">
+          <h2 class="k-section-header__title">{{ 'imports.list.toDecideTitle' | transloco }}</h2>
+          <span class="k-section-header__count">{{ toDecideCount() }}</span>
         </div>
-        <div class="list-group">
+        <div class="k-list-group">
           @for (line of model().toDecide; track line.id) {
             <div class="review__item" data-testid="to-decide-line">
               <div class="review__line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">{{ shortDate(line.date) }}</span>
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="k-list-row__subtitle">{{ shortDate(line.date) }}</span>
                 </span>
                 <span
-                  class="list-row__amount"
+                  class="k-list-row__amount"
                   [class.review__amount--income]="line.transactionType === 'RECETTE'"
                   [class.review__amount--expense]="line.transactionType === 'DEPENSE'"
                 >
@@ -211,12 +211,12 @@
           @for (line of model().probableDuplicates; track line.id) {
             <div class="review__item" data-testid="probable-duplicate-line">
               <div class="review__line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">{{ shortDate(line.date) }}</span>
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="k-list-row__subtitle">{{ shortDate(line.date) }}</span>
                 </span>
                 <span
-                  class="list-row__amount"
+                  class="k-list-row__amount"
                   [class.review__amount--income]="line.transactionType === 'RECETTE'"
                   [class.review__amount--expense]="line.transactionType === 'DEPENSE'"
                 >
@@ -253,17 +253,17 @@
     <!-- b. Erreurs de lecture -->
     @if (unreadableCount() > 0) {
       <section class="review__section" data-testid="section-unreadable">
-        <div class="section-header">
-          <h2 class="section-header__title">{{ 'imports.list.unreadableTitle' | transloco }}</h2>
-          <span class="section-header__count">{{ unreadableCount() }}</span>
+        <div class="k-section-header">
+          <h2 class="k-section-header__title">{{ 'imports.list.unreadableTitle' | transloco }}</h2>
+          <span class="k-section-header__count">{{ unreadableCount() }}</span>
         </div>
-        <div class="list-group">
+        <div class="k-list-group">
           @for (line of model().unreadable; track line.id) {
             <div class="review__item" data-testid="unreadable-line">
               <div class="review__line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.rawLabel }}</span>
-                  <span class="list-row__subtitle">
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.rawLabel }}</span>
+                  <span class="k-list-row__subtitle">
                     @if (readErrorOf(line); as readError) {
                       {{ readError.key | transloco: readError.params }}
                     } @else {
@@ -292,30 +292,30 @@
     <!-- c. Sans categorie, regroupees par commercant -->
     @if (model().uncategorised.length > 0) {
       <section class="review__section" data-testid="section-uncategorised">
-        <div class="section-header">
-          <h2 class="section-header__title">{{ 'imports.list.uncategorisedTitle' | transloco }}</h2>
-          <span class="section-header__count">{{ uncategorisedLineCount() }}</span>
+        <div class="k-section-header">
+          <h2 class="k-section-header__title">{{ 'imports.list.uncategorisedTitle' | transloco }}</h2>
+          <span class="k-section-header__count">{{ uncategorisedLineCount() }}</span>
         </div>
         <p class="review__hint">{{ 'imports.list.uncategorisedHint' | transloco }}</p>
-        <div class="list-group">
+        <div class="k-list-group">
           @for (group of model().uncategorised; track group.key) {
             <button
               type="button"
-              class="list-row"
+              class="k-list-row"
               data-testid="uncategorised-group"
               [disabled]="busy()"
               (click)="openCategoryForGroup(group)"
             >
-              <span class="list-row__icon"><ng-icon name="phosphorTag" size="18" /></span>
-              <span class="list-row__content">
-                <span class="list-row__title">{{ group.label }}</span>
-                <span class="list-row__subtitle">{{
+              <span class="k-list-row__icon"><ng-icon name="phosphorTag" size="18" /></span>
+              <span class="k-list-row__content">
+                <span class="k-list-row__title">{{ group.label }}</span>
+                <span class="k-list-row__subtitle">{{
                   'imports.list.groupCount' | transloco: { count: group.lines.length }
                 }}</span>
               </span>
-              <span class="list-row__right">
+              <span class="k-list-row__right">
                 <span
-                  class="list-row__amount"
+                  class="k-list-row__amount"
                   [class.review__amount--income]="group.transactionType === 'RECETTE'"
                   [class.review__amount--expense]="group.transactionType === 'DEPENSE'"
                 >
@@ -353,12 +353,12 @@
           "
         />
         @if (isExpanded('matched')) {
-          <div class="list-group">
+          <div class="k-list-group">
             @for (line of model().matched; track line.id) {
-              <div class="list-row review__row" data-testid="matched-line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">
+              <div class="k-list-row review__row" data-testid="matched-line">
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="k-list-row__subtitle">
                     @if (line.matchedTransaction; as existing) {
                       {{
                         'imports.list.matchedWith'
@@ -369,8 +369,8 @@
                     }
                   </span>
                 </span>
-                <span class="list-row__right">
-                  <span class="list-row__amount">{{
+                <span class="k-list-row__right">
+                  <span class="k-list-row__amount">{{
                     line.amount | amount: line.transactionType : currency()
                   }}</span>
                   <button
@@ -403,25 +403,25 @@
           "
         />
         @if (isExpanded('auto')) {
-          <div class="list-group">
+          <div class="k-list-group">
             @for (line of model().autoCategorised; track line.id) {
               <button
                 type="button"
-                class="list-row"
+                class="k-list-row"
                 data-testid="auto-line"
                 [disabled]="busy()"
                 (click)="openCategoryForLine(line)"
               >
                 <span
-                  class="list-row__icon"
+                  class="k-list-row__icon"
                   [style.background-color]="
                     categoryOf(line) ? categoryOf(line)!.couleur + '26' : null
                   "
                   >{{ categoryOf(line)?.icone }}</span
                 >
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="k-list-row__subtitle">
                     {{ line.categoryName | categoryName: line.categorySystemKey }}
                     ·
                     {{
@@ -432,11 +432,11 @@
                     }}
                   </span>
                 </span>
-                <span class="list-row__right">
-                  <span class="list-row__amount">{{
+                <span class="k-list-row__right">
+                  <span class="k-list-row__amount">{{
                     line.amount | amount: line.transactionType : currency()
                   }}</span>
-                  <span class="list-row__converted">{{ shortDate(line.date) }}</span>
+                  <span class="k-list-row__converted">{{ shortDate(line.date) }}</span>
                 </span>
               </button>
             }
@@ -458,33 +458,33 @@
           "
         />
         @if (isExpanded('user')) {
-          <div class="list-group">
+          <div class="k-list-group">
             @for (line of model().userCategorised; track line.id) {
               <button
                 type="button"
-                class="list-row"
+                class="k-list-row"
                 data-testid="user-line"
                 [disabled]="busy()"
                 (click)="openCategoryForLine(line)"
               >
                 <span
-                  class="list-row__icon"
+                  class="k-list-row__icon"
                   [style.background-color]="
                     categoryOf(line) ? categoryOf(line)!.couleur + '26' : null
                   "
                   >{{ categoryOf(line)?.icone }}</span
                 >
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">{{
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="k-list-row__subtitle">{{
                     line.categoryName | categoryName: line.categorySystemKey
                   }}</span>
                 </span>
-                <span class="list-row__right">
-                  <span class="list-row__amount">{{
+                <span class="k-list-row__right">
+                  <span class="k-list-row__amount">{{
                     line.amount | amount: line.transactionType : currency()
                   }}</span>
-                  <span class="list-row__converted">{{ shortDate(line.date) }}</span>
+                  <span class="k-list-row__converted">{{ shortDate(line.date) }}</span>
                 </span>
               </button>
             }
@@ -506,15 +506,15 @@
           "
         />
         @if (isExpanded('imported')) {
-          <div class="list-group">
+          <div class="k-list-group">
             @for (line of model().alreadyImported; track line.id) {
-              <div class="list-row review__row" data-testid="imported-line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">{{ shortDate(line.date) }}</span>
+              <div class="k-list-row review__row" data-testid="imported-line">
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="k-list-row__subtitle">{{ shortDate(line.date) }}</span>
                 </span>
-                <span class="list-row__right">
-                  <span class="list-row__amount">{{
+                <span class="k-list-row__right">
+                  <span class="k-list-row__amount">{{
                     line.amount | amount: line.transactionType : currency()
                   }}</span>
                 </span>
@@ -538,12 +538,12 @@
           "
         />
         @if (isExpanded('skipped')) {
-          <div class="list-group">
+          <div class="k-list-group">
             @for (line of model().skipped; track line.id) {
-              <div class="list-row review__row" data-testid="skipped-line">
-                <span class="list-row__content">
-                  <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">
+              <div class="k-list-row review__row" data-testid="skipped-line">
+                <span class="k-list-row__content">
+                  <span class="k-list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="k-list-row__subtitle">
                     @if (readErrorOf(line); as readError) {
                       {{ readError.key | transloco: readError.params }}
                     } @else {
@@ -551,9 +551,9 @@
                     }
                   </span>
                 </span>
-                <span class="list-row__right">
+                <span class="k-list-row__right">
                   @if (canRestore(line)) {
-                    <span class="list-row__amount">{{
+                    <span class="k-list-row__amount">{{
                       line.amount | amount: line.transactionType : currency()
                     }}</span>
                     <button
@@ -587,7 +587,7 @@
       }
       <button
         type="button"
-        class="btn-primary review__confirm"
+        class="k-btn-primary review__confirm"
         data-testid="confirm-import"
         [disabled]="!canConfirm()"
         (click)="confirm()"
@@ -606,12 +606,12 @@
   (closed)="closeCategorySheet()"
 >
   @if (categoryTarget(); as target) {
-    <div class="bsheet">
-      <div class="bsheet__top">
-        <span class="bsheet__handle"></span>
-        <span class="bsheet__top-title">{{ target.title }}</span>
+    <div class="k-bsheet">
+      <div class="k-bsheet__top">
+        <span class="k-bsheet__handle"></span>
+        <span class="k-bsheet__top-title">{{ target.title }}</span>
       </div>
-      <div class="bsheet__expand">
+      <div class="k-bsheet__expand">
         <app-category-select
           [categories]="categories()"
           (selected)="onCategorySelected($event)"
@@ -619,11 +619,11 @@
           (isCreating)="categoryCreating.set($event)"
         />
       </div>
-      <div class="bsheet__bottom-row">
-        <div class="bsheet__bottom-left">
+      <div class="k-bsheet__bottom-row">
+        <div class="k-bsheet__bottom-left">
           <button
             type="button"
-            class="bsheet__action-pill bsheet__action-pill--cancel"
+            class="k-bsheet__action-pill k-bsheet__action-pill--cancel"
             [disabled]="categoryCreating()"
             (click)="closeCategorySheet()"
           >

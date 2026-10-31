@@ -16,7 +16,7 @@
         formControlName="email"
         autocomplete="email"
         [placeholder]="'auth.form.emailPlaceholder' | transloco"
-        [class.input-error]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
+        [class.k-input-error]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
       />
     </app-form-field>
 
@@ -33,14 +33,14 @@
         formControlName="password"
         autocomplete="current-password"
         [placeholder]="'auth.form.loginPasswordPlaceholder' | transloco"
-        [class.input-error]="
+        [class.k-input-error]="
           loginForm.controls.password.touched && loginForm.controls.password.invalid
         "
       />
     </app-form-field>
 
-    <div class="form-actions">
-      <button type="submit" class="btn-primary" [disabled]="loading()">
+    <div class="k-form-actions">
+      <button type="submit" class="k-btn-primary" [disabled]="loading()">
         @if (loading()) {
           {{ 'auth.feedback.signingIn' | transloco }}
         } @else {

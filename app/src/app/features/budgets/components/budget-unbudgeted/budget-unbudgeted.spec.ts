@@ -157,7 +157,7 @@ describe('BudgetUnbudgeted', () => {
   it('should_render_the_translated_page_title', async () => {
     const fixture = await createFixture();
 
-    const title: HTMLElement = fixture.nativeElement.querySelector('.page-header__title');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.k-page-header__title');
     expect(title.textContent?.trim()).toBe('Non budgété');
   });
 
@@ -175,7 +175,7 @@ describe('BudgetUnbudgeted', () => {
       );
     });
 
-    const label: HTMLElement = fixture.nativeElement.querySelector('.hero__label');
+    const label: HTMLElement = fixture.nativeElement.querySelector('.k-hero__label');
     expect(label.textContent?.trim()).toBe('Dépensé');
     expect(fixture.nativeElement.textContent).toContain('1 catégorie sans budget');
   });
@@ -203,8 +203,8 @@ describe('BudgetUnbudgeted', () => {
       );
     });
 
-    const title: HTMLElement = fixture.nativeElement.querySelector('.section-header__title');
-    const count: HTMLElement = fixture.nativeElement.querySelector('.section-header__count');
+    const title: HTMLElement = fixture.nativeElement.querySelector('.k-section-header__title');
+    const count: HTMLElement = fixture.nativeElement.querySelector('.k-section-header__count');
     expect(title.textContent?.trim()).toBe('Par catégorie');
     expect(count.textContent?.trim()).toBe('1 transaction');
   });

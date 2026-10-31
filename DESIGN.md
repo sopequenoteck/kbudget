@@ -69,13 +69,13 @@ Bloc financier dominant en haut de chaque page. Structure :
 - Meta-lines avec icones Phosphor 14px/text-tertiary (ex: revenus, depenses, compteurs)
 - Toggle devise ancre a un element existant (label ou nav mois)
 
-Classes : `.hero`, `.hero__amount-value`, `.hero__meta`, `.hero__meta-line`
+Classes : `.k-hero`, `.k-hero__amount-value`, `.k-hero__meta`, `.k-hero__meta-line`
 
 ### Page header (sous-pages)
 
 Fleche retour ronde 36px + titre aligne a droite. Utilise sur les pages detail et les sous-pages.
 
-Classe : `.page-header`, `.page-header__back`, `.page-header__title`
+Classe : `.k-page-header`, `.k-page-header__back`, `.k-page-header__title`
 
 ### Auth identity
 
@@ -95,7 +95,7 @@ Exception input prefix icon : les inputs des pages auth (login, accept-invite, f
 
 Titre + compteur + icones action. Sticky sous le header app. Fond dynamique quand colle (surface-raised).
 
-Classes : `.section-header`, `.section-header.stuck`, `.section-header__title`, `.section-header__count`, `.section-header__action-btn`
+Classes : `.k-section-header`, `.k-section-header.stuck`, `.k-section-header__title`, `.k-section-header__count`, `.k-section-header__action-btn`
 
 ### Liste groupee
 
@@ -107,7 +107,7 @@ Conteneur arrondi `surface-default` + `radius-xl`. Items separes par `border-def
 - Date labels (tertiary, amber si aujourd'hui, rouge si en retard)
 - Groupes collapsibles avec chevron + compteur
 
-Classes : `.list-group`, `.list-row`, `.list-row__icon`, `.list-row__title`, `.list-row__amount`, `.date-label`, `.group-label`
+Classes : `.k-list-group`, `.k-list-row`, `.k-list-row__icon`, `.k-list-row__title`, `.k-list-row__amount`, `.k-date-label`, `.k-group-label`
 
 ### Bottom sheet (formulaires)
 
@@ -122,7 +122,7 @@ Sections expandables : une seule active a la fois. InlineDatePicker pour les dat
 
 Retour arriere (geste Android, bouton precedent, KKS-447) : replie d'abord la section depliee (saisie intacte), puis ferme la feuille. Toute surface modale s'enregistre aupres de `HistoryLayerService` (`bindHistoryLayer`, `bindExpandedSectionLayer`) ; une surface ouverte au-dessus d'une feuille (confirm, select-picker) est fermee la premiere.
 
-Classes : `.bsheet__handle`, `.bsheet__main-row`, `.bsheet__amount`, `.bsheet__meta-row`, `.bsheet__tool-pill`, `.bsheet__expand`, `.bsheet__bottom-row`, `.bsheet__action-pill`
+Classes : `.k-bsheet__handle`, `.k-bsheet__main-row`, `.k-bsheet__amount`, `.k-bsheet__meta-row`, `.k-bsheet__tool-pill`, `.k-bsheet__expand`, `.k-bsheet__bottom-row`, `.k-bsheet__action-pill`
 
 ### Empty state
 
@@ -161,7 +161,7 @@ Selecteur de categorie dedie au contexte bottom-sheet. Remplace l'ancien `app-ca
 Contrat signals-first : `value` (model via CVA `formControlName`), `categories` (input — liste prechargee par le parent), outputs `selected` (id), `created` (nouvelle categorie), `isCreating` (bascule list ↔ create).
 
 Comportement :
-- Rendu inline dans un `bsheet__expand` (aucun overlay, aucun second bottom-sheet)
+- Rendu inline dans un `k-bsheet__expand` (aucun overlay, aucun second bottom-sheet)
 - Recherche insensible a la casse et aux accents (helper partage `normalize()` — NFD + suppression diacritiques)
 - Scroll interne `max-height: 60vh` + `overflow-y: auto` sur la liste — footer du sheet toujours accessible
 - Bouton `+ Creer « terme »` quand la recherche ne matche aucune categorie
@@ -173,7 +173,7 @@ Comportement :
 
 Integration cote parent : precharger les categories via `toSignal(CategoryService.getAll())` converti en signal mutable, ecouter `(created)` pour ajouter la nouvelle categorie au cache local, `(selected)` pour collapser l'expand (`expandedSection.set(null)`), `(isCreating)` pour desactiver le footer du sheet.
 
-Style : tokens uniquement, pattern `.cs__*` derive de `_list-patterns.scss` (icon-circle 36px avec fond colore a 15% via suffixe hex `+ '26'`, selection en `--k-primary-subtle`).
+Style : tokens uniquement, pattern `.cs__*` derive des patterns de liste de `k-patterns.css` (icon-circle 36px avec fond colore a 15% via suffixe hex `+ '26'`, selection en `--k-primary-subtle`).
 
 Composant : `<app-category-select>` dans `app/src/app/shared/components/category-select/`
 
@@ -181,7 +181,7 @@ Composant : `<app-category-select>` dans `app/src/app/shared/components/category
 
 Imite la forme du contenu reel. Cercle 36px + lignes largeurs variees. Animation pulse 1.5s.
 
-Classes : `.skeleton-item`, `.skeleton-circle`, `.skeleton-line`, `.skeleton-hero`
+Classes : `.k-skeleton-item`, `.k-skeleton-circle`, `.k-skeleton-line`, `.k-skeleton-hero`
 
 ## Tokens interactifs
 
@@ -205,6 +205,10 @@ Classes : `.skeleton-item`, `.skeleton-circle`, `.skeleton-line`, `.skeleton-her
 |---------|---------|
 | `styles/k/k-tokens.css` | Tokens k-design (`--k-*`), copie generee, ne pas editer (k-design D14). Charge avant `styles.scss` par `angular.json`. Theme : `data-theme="dark|light"` sur `<html>`, sombre par defaut, pose par `ThemeService` |
 | `styles/_app-tokens.scss` | Tokens propres a K-Budget, non portes par k-design : zones sures, hauteurs d'en-tete et de barre basse, durees et easings (KKS-597) |
-| `styles/_list-patterns.scss` | Hero, section-header, list-group, list-row, skeleton |
-| `styles/_bottom-sheet.scss` | Bottom sheet 4 rows, pills, expand, actions |
-| `styles/_forms.scss` | Inputs, selects, textareas, utilities |
+| `styles/k/k-base.css` | Socle k-design (D25) : reset, corps, titres, focus clavier, selection, champs natifs. Copie generee, ne pas editer. Charge apres `k-tokens.css` (KKS-619) |
+| `styles/k/k-patterns.css` | Patterns partages k-design en `.k-` : boutons, hero, page-header, section-header, list-group, list-row, group-label, date-label, skeleton, etats, spinner, bottom sheet (coque). Copie generee, ne pas editer. Charge avant `styles.scss` |
+| `styles/_list-patterns.scss` | Part metier de K-Budget (D25) : dette remboursee (`.k-date-label--repaid`, `.k-list-row.repaid`) |
+| `styles/_bottom-sheet.scss` | Part metier de K-Budget (D25) : bascule depense/revenu, montant hero et devise (`.k-bsheet__type-toggle`, `.k-bsheet__amount*`, `.k-bsheet__currency*`), rappel (`.k-bsheet__icon-btn.has-reminder`) |
+| `styles/_forms.scss` | Derogation au focus des champs de `k-base.css` : K-Budget garde l'anneau de D11 (outline 2px), au lieu du halo du socle, jusqu'a sa correction dans k-design |
+| `styles/_utilities.scss` | Montants metier (`.amount-income`, `.amount-expense`, `.amount-adjustment`) |
+| `styles/_review-patterns.scss` | Ecrans de revue d'import (`.review__*`) |

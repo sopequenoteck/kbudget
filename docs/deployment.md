@@ -199,7 +199,9 @@ clears its caches.
    ```
 
 3. **Wait for the devices to pick it up.** The browser re-reads
-   `/ngsw-worker.js` on each launch of the app (it is served `no-cache`), then
+   `/ngsw-worker.js` on each launch of the app (it is served `no-cache`, like
+   `safety-worker.js`, by the k-design `k-pwa-sw.conf` fragment that
+   `app/nginx.conf` includes), then
    the emergency worker unregisters itself. A device that has not opened the app
    yet is only fixed when it does. If a CDN or proxy sits in front, make sure it
    forwards `Cache-Control: no-cache` for that file.

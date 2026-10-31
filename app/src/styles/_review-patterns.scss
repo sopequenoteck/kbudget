@@ -1,12 +1,12 @@
 // =============================================================================
 // Review Patterns — Classes partagees par les ecrans de revue en liste
 // Utilise par : revue d'import (KKS-386), rattrapage de l'historique (KKS-387)
-// Un bloc a decider = `review__item` dans un `list-group`, jamais une card.
+// Un bloc a decider = `review__item` dans un `k-list-group`, jamais une card.
 // =============================================================================
 
 // Plusieurs en-tetes de section collants sur la page : un fond opaque (celui de la page)
 // evite qu'ils se superposent aux lignes qui defilent dessous.
-.review__section .section-header {
+.review__section .k-section-header {
   background-color: var(--k-bg-primary);
 }
 

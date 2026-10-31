@@ -17,5 +17,7 @@ FROM nginx:alpine
 
 COPY --from=build /app/dist/k-budget-app/browser/ /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Fragment commun de k-design (regles de cache du service worker), inclus par nginx.conf.
+COPY k-pwa/k-pwa-sw.conf /etc/nginx/k-pwa-sw.conf
 
 EXPOSE 80

@@ -132,15 +132,15 @@ describe('ImportReview', () => {
     importServiceMock.getDraft.mockReturnValue(pending);
     const fixture = await setup(null);
 
-    expect(q(fixture, '.skeleton-hero')).not.toBeNull();
-    expect(q(fixture, '.hero')).toBeNull();
+    expect(q(fixture, '.k-skeleton-hero')).not.toBeNull();
+    expect(q(fixture, '.k-hero')).toBeNull();
 
     pending.next(importDraft());
     pending.complete();
     await settle(fixture);
 
-    expect(q(fixture, '.skeleton-hero')).toBeNull();
-    expect(q(fixture, '.hero')).not.toBeNull();
+    expect(q(fixture, '.k-skeleton-hero')).toBeNull();
+    expect(q(fixture, '.k-hero')).not.toBeNull();
   });
 
   it('should_show_an_error_with_a_retry_when_the_draft_cannot_be_loaded', async () => {
@@ -153,7 +153,7 @@ describe('ImportReview', () => {
     click(fixture, '.empty-state__cta');
     await settle(fixture);
 
-    expect(q(fixture, '.hero')).not.toBeNull();
+    expect(q(fixture, '.k-hero')).not.toBeNull();
     expect(importServiceMock.getDraft).toHaveBeenCalledTimes(2);
   });
 
@@ -170,7 +170,7 @@ describe('ImportReview', () => {
       importDraft([], { statementBalance: 100, statementBalanceDate: '2026-10-01' }),
     );
 
-    expect(q(fixture, '.hero')).not.toBeNull();
+    expect(q(fixture, '.k-hero')).not.toBeNull();
     expect(fixture.componentInstance.currency()).toBe('EUR');
   });
 
@@ -187,7 +187,7 @@ describe('ImportReview', () => {
       }),
     );
 
-    expect(q(fixture, '.hero__amount-label')?.textContent).toContain('Courant · …1596');
+    expect(q(fixture, '.k-hero__amount-label')?.textContent).toContain('Courant · …1596');
     expect(q(fixture, '[data-testid="bank-balance"]')?.textContent?.replace(/\s/g, ' ')).toContain(
       '1 842,37',
     );
@@ -197,7 +197,7 @@ describe('ImportReview', () => {
   it('should_fall_back_to_the_suffix_of_the_account_when_the_file_has_none', async () => {
     const fixture = await setup(importDraft([superU()]));
 
-    expect(q(fixture, '.hero__amount-label')?.textContent).toContain('…1596');
+    expect(q(fixture, '.k-hero__amount-label')?.textContent).toContain('…1596');
   });
 
   it('should_hide_the_bank_balance_when_the_statement_gives_none', async () => {
@@ -257,7 +257,7 @@ describe('ImportReview', () => {
     expect(groups[0].textContent).toContain('-15,50');
     expect(groups[1].textContent).toContain('1 opération');
     expect(
-      q(fixture, '[data-testid="section-uncategorised"] .section-header__count')?.textContent,
+      q(fixture, '[data-testid="section-uncategorised"] .k-section-header__count')?.textContent,
     ).toContain('3');
   });
 
@@ -307,7 +307,7 @@ describe('ImportReview', () => {
     );
     fixture.detectChanges();
 
-    click(fixture, '.bsheet__action-pill--cancel');
+    click(fixture, '.k-bsheet__action-pill--cancel');
     fixture.detectChanges();
 
     expect(fixture.componentInstance.categoryTarget()).toBeNull();
@@ -589,7 +589,7 @@ describe('ImportReview', () => {
     expect(candidates[0].textContent).toContain('-4,50');
     expect(candidates[1].textContent).toContain('Petit dejeuner');
     expect(
-      q(fixture, '[data-testid="section-to-decide"] .section-header__count')?.textContent,
+      q(fixture, '[data-testid="section-to-decide"] .k-section-header__count')?.textContent,
     ).toContain('1');
   });
 
@@ -780,22 +780,22 @@ describe('ImportReview', () => {
     const fixture = await setup(importDraft(lines));
 
     for (const group of ['matched', 'auto', 'user', 'imported', 'skipped']) {
-      expect(q(fixture, `[data-testid="group-${group}"] .list-group`)).toBeNull();
+      expect(q(fixture, `[data-testid="group-${group}"] .k-list-group`)).toBeNull();
       expect(
-        q(fixture, `[data-testid="group-${group}"] .group-label`)?.getAttribute('aria-expanded'),
+        q(fixture, `[data-testid="group-${group}"] .k-group-label`)?.getAttribute('aria-expanded'),
       ).toBe('false');
     }
 
-    click(fixture, '[data-testid="group-matched"] .group-label');
+    click(fixture, '[data-testid="group-matched"] .k-group-label');
     fixture.detectChanges();
-    expect(q(fixture, '[data-testid="group-matched"] .list-group')).not.toBeNull();
+    expect(q(fixture, '[data-testid="group-matched"] .k-list-group')).not.toBeNull();
     expect(
-      q(fixture, '[data-testid="group-matched"] .group-label')?.getAttribute('aria-expanded'),
+      q(fixture, '[data-testid="group-matched"] .k-group-label')?.getAttribute('aria-expanded'),
     ).toBe('true');
 
-    click(fixture, '[data-testid="group-matched"] .group-label');
+    click(fixture, '[data-testid="group-matched"] .k-group-label');
     fixture.detectChanges();
-    expect(q(fixture, '[data-testid="group-matched"] .list-group')).toBeNull();
+    expect(q(fixture, '[data-testid="group-matched"] .k-list-group')).toBeNull();
   });
 
   it('should_show_the_group_counts_in_the_group_headers', async () => {
@@ -806,7 +806,7 @@ describe('ImportReview', () => {
       ]),
     );
 
-    expect(q(fixture, '[data-testid="group-imported"] .group-label__count')?.textContent).toContain(
+    expect(q(fixture, '[data-testid="group-imported"] .k-group-label__count')?.textContent).toContain(
       '2',
     );
   });
@@ -817,7 +817,7 @@ describe('ImportReview', () => {
       matchedTransaction: matchedTransaction({ libelle: 'Tabac', date: '2026-09-18' }),
     });
     const fixture = await setup(importDraft([line]));
-    click(fixture, '[data-testid="group-matched"] .group-label');
+    click(fixture, '[data-testid="group-matched"] .k-group-label');
     fixture.detectChanges();
 
     expect(q(fixture, '[data-testid="matched-line"]')?.textContent).toContain(
@@ -836,7 +836,7 @@ describe('ImportReview', () => {
     const fixture = await setup(
       importDraft([superU({ matchedTransactionId: 'tx-gone', matchedTransaction: null })]),
     );
-    click(fixture, '[data-testid="group-matched"] .group-label');
+    click(fixture, '[data-testid="group-matched"] .k-group-label');
     fixture.detectChanges();
 
     expect(q(fixture, '[data-testid="matched-line"]')?.textContent).toContain("n'existe plus");
@@ -851,7 +851,7 @@ describe('ImportReview', () => {
       categoryName: 'Loisirs',
     });
     const fixture = await setup(importDraft([rule, history]));
-    click(fixture, '[data-testid="group-auto"] .group-label');
+    click(fixture, '[data-testid="group-auto"] .k-group-label');
     fixture.detectChanges();
 
     const rows = qa(fixture, '[data-testid="auto-line"]');
@@ -874,7 +874,7 @@ describe('ImportReview', () => {
   it('should_let_the_user_change_a_category_picked_during_the_review', async () => {
     const line = superU({ categoryId: 'cat-1', categorySource: 'USER', categoryName: 'Courses' });
     const fixture = await setup(importDraft([line]));
-    click(fixture, '[data-testid="group-user"] .group-label');
+    click(fixture, '[data-testid="group-user"] .k-group-label');
     fixture.detectChanges();
 
     expect(q(fixture, '[data-testid="user-line"]')?.textContent).toContain('Courses');
@@ -891,7 +891,7 @@ describe('ImportReview', () => {
         superU({ status: 'SKIPPED', skipReason: 'ALREADY_IMPORTED', cleanLabel: 'FRAIS' }),
       ]),
     );
-    click(fixture, '[data-testid="group-imported"] .group-label');
+    click(fixture, '[data-testid="group-imported"] .k-group-label');
     fixture.detectChanges();
 
     const row = q(fixture, '[data-testid="imported-line"]')!;
@@ -902,7 +902,7 @@ describe('ImportReview', () => {
   it('should_restore_a_line_skipped_by_the_user', async () => {
     const line = superU({ status: 'SKIPPED' });
     const fixture = await setup(importDraft([line]));
-    click(fixture, '[data-testid="group-skipped"] .group-label');
+    click(fixture, '[data-testid="group-skipped"] .k-group-label');
     fixture.detectChanges();
 
     click(fixture, '[data-testid="restore-line"]');
@@ -921,7 +921,7 @@ describe('ImportReview', () => {
       readErrorValue: 'abc',
     });
     const fixture = await setup(importDraft([line]));
-    click(fixture, '[data-testid="group-skipped"] .group-label');
+    click(fixture, '[data-testid="group-skipped"] .k-group-label');
     fixture.detectChanges();
 
     const text = q(fixture, '[data-testid="skipped-line"]')?.textContent ?? '';
@@ -932,7 +932,7 @@ describe('ImportReview', () => {
   it('should_not_offer_to_restore_an_unreadable_skipped_line', async () => {
     const line = superU({ status: 'SKIPPED', statusMessage: 'Montant invalide: abc' });
     const fixture = await setup(importDraft([line]));
-    click(fixture, '[data-testid="group-skipped"] .group-label');
+    click(fixture, '[data-testid="group-skipped"] .k-group-label');
     fixture.detectChanges();
 
     expect(q(fixture, '[data-testid="restore-line"]')).toBeNull();
@@ -992,7 +992,7 @@ describe('ImportReview', () => {
   it('should_go_back_to_the_transactions_from_the_back_button', async () => {
     const fixture = await setup(importDraft([superU()]));
 
-    click(fixture, '.page-header__back');
+    click(fixture, '.k-page-header__back');
 
     expect(navigateSpy).toHaveBeenCalledWith(['/transactions']);
   });

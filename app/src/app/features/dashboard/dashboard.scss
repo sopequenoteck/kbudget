@@ -16,32 +16,32 @@
 // Hero section — patrimoine + résumé mensuel
 // =============================================================================
 
-.hero {
+.k-hero {
   display: flex;
   flex-direction: column;
   gap: var(--k-space-4);
 }
 
-.hero__top-row {
+.k-hero__top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.hero__greeting {
+.k-hero__greeting {
   font-size: var(--k-font-size-sm);
   font-weight: var(--k-font-weight-normal);
   color: var(--k-text-secondary);
 }
 
 // -- Montant principal --
-.hero__amount {
+.k-hero__amount {
   display: flex;
   flex-direction: column;
   gap: var(--k-space-1);
 }
 
-.hero__amount-label {
+.k-hero__amount-label {
   font-size: var(--k-font-size-xs);
   font-weight: var(--k-font-weight-medium);
   color: var(--k-text-secondary);
@@ -49,37 +49,37 @@
   letter-spacing: 0.05em;
 }
 
-.hero__amount-value-row {
+.k-hero__amount-value-row {
   display: flex;
   align-items: center;
   gap: var(--k-space-2);
 }
 
-.hero__amount-value {
+.k-hero__amount-value {
   font-size: var(--k-font-size-3xl);
   font-weight: var(--k-font-weight-bold);
   line-height: var(--k-line-height-tight);
 }
 
-.hero__converted {
+.k-hero__converted {
   font-size: var(--k-font-size-xs);
   color: var(--k-text-tertiary);
 }
 
-.hero__meta-row {
+.k-hero__meta-row {
   display: flex;
   align-items: flex-start;
   gap: var(--k-space-4);
   margin-top: var(--k-space-1);
 }
 
-.hero__meta-group {
+.k-hero__meta-group {
   display: flex;
   flex-direction: column;
   gap: 1px;
 }
 
-.hero__meta-line {
+.k-hero__meta-line {
   display: flex;
   align-items: center;
   gap: var(--k-space-1);
@@ -139,7 +139,7 @@
   cursor: default;
 }
 
-.state-loading--accounts {
+.k-state-loading--accounts {
   padding: var(--k-space-4);
 }
 
@@ -202,8 +202,8 @@
 // States
 // =============================================================================
 
-.state-loading,
-.state-error {
+.k-state-loading,
+.k-state-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -213,7 +213,7 @@
   color: var(--k-text-secondary);
 }
 
-.state-loading--summary {
+.k-state-loading--summary {
   padding: var(--k-space-4);
 }
 

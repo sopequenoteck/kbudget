@@ -8,6 +8,18 @@
     "dart/k_tokens.dart": "flutter/lib/src/theme/k_tokens.dart",
     "css/kbudget/k-base.css": "app/src/styles/k/k-base.css",
     "css/kbudget/k-patterns.css": "app/src/styles/k/k-patterns.css",
-    "pwa/": "k-design/pwa/"
+    "pwa/k-pwa-sw.conf": "app/k-pwa/k-pwa-sw.conf",
+    "pwa/k-pwa-check.mjs": "app/k-pwa/k-pwa-check.mjs",
+    "pwa/ecosystem.json": "app/k-pwa/ecosystem.json",
+    "pwa/README.md": "app/k-pwa/README.md",
+    "pwa/app-update.ts": "app/src/app/core/pwa/app-update.ts",
+    "pwa/app-update.spec.ts": "app/src/app/core/pwa/app-update.spec.ts"
+  },
+  "pwa": {
+    "packageJson": "app/package.json",
+    "index": "app/src/index.html",
+    "manifest": "app/public/manifest.webmanifest",
+    "ngswConfig": "app/ngsw-config.json",
+    "nginx": ["app/nginx.conf"]
   }
 }

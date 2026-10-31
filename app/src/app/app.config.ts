@@ -12,7 +12,8 @@ import { firstValueFrom } from 'rxjs';
 import { TranslocoService, provideTransloco } from '@jsverse/transloco';
 import { provideTranslocoMessageformat } from '@jsverse/transloco-messageformat';
 
-import { AppUpdateService } from './core/services/app-update';
+import { AppUpdateService } from './core/pwa/app-update';
+import { provideAppUpdateCanApply } from './core/pwa/app-update-can-apply';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import {
@@ -78,7 +79,10 @@ export const appConfig: ApplicationConfig = {
     // pour la justification du choix d'`ENVIRONMENT_INITIALIZER`.
     provideLanguageBootstrap(),
     // KKS-446 : recherche d'une nouvelle version au lancement et au retour au
-    // premier plan. Sans effet quand le service worker est inactif.
+    // premier plan. Sans effet quand le service worker est inactif. Service
+    // partage par k-design (KKS-619) ; le critere de K·Budget (parcours de
+    // tache) lui est fourni par `APP_UPDATE_CAN_APPLY`.
+    provideAppUpdateCanApply(),
     provideAppInitializer(() => inject(AppUpdateService).start()),
   ],
 };

@@ -54,7 +54,7 @@ jobs:
       - id: changed
         uses: ./.github/actions/changed
         with:
-          pattern: '^(app/|\.github/workflows/ci-app\.yml$|\.github/actions/changed/)'
+          pattern: '^(app/|k-design\.json$|\.github/workflows/ci-app\.yml$|\.github/actions/changed/)'
 
   # Tests sur runner GitHub : c'est le seul job de ce workflow qu'une PR de fork
   # peut executer, le self-hosted ayant le socket Docker (cf. PREREQUIS INFRA
@@ -72,6 +72,11 @@ jobs:
       image: node:24
     steps:
       - uses: actions/checkout@v4
+
+      # Socle PWA de k-design (KKS-619) : version d'Angular, coquille, manifeste, ngsw-config et
+      # include du fragment nginx. Joue depuis la racine du depot, ou se trouve k-design.json.
+      - name: Contrôle du socle PWA
+        run: node app/k-pwa/k-pwa-check.mjs
 
       - name: Install + tests
         working-directory: app

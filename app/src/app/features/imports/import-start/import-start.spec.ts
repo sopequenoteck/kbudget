@@ -161,7 +161,7 @@ describe('ImportStart', () => {
 
     await chooseFile(fixture);
 
-    const rows = Array.from(el(fixture).querySelectorAll('label.list-row'));
+    const rows = Array.from(el(fixture).querySelectorAll('label.k-list-row'));
     expect(rows).toHaveLength(2);
     expect(rows[0].textContent).not.toContain('…');
     expect(rows[1].textContent).toContain('…1596');

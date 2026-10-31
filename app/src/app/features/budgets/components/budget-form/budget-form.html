@@ -1,12 +1,12 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="k-bsheet">
   @if (errorMessage()) {
-    <div class="bsheet__error">{{ errorMessage() }}</div>
+    <div class="k-bsheet__error">{{ errorMessage() }}</div>
   }
 
   <!-- ROW 1: Handle bar + titre -->
-  <div class="bsheet__top">
-    <div class="bsheet__handle"></div>
-    <div class="bsheet__top-title">
+  <div class="k-bsheet__top">
+    <div class="k-bsheet__handle"></div>
+    <div class="k-bsheet__top-title">
       <ng-icon name="phosphorChartPie" size="16" />
       <span>{{ 'budgets.action.create' | transloco }}</span>
     </div>
@@ -16,16 +16,16 @@
     <!-- EMPTY STATE -->
     <div class="budget-form__empty-state">
       <p class="budget-form__empty-text">{{ 'budgets.empty.allCategoriesBudgeted' | transloco }}</p>
-      <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="onCancel()">
+      <button type="button" class="k-bsheet__action-pill k-bsheet__action-pill--cancel" (click)="onCancel()">
         {{ 'common.action.cancel' | transloco }}
       </button>
     </div>
   } @else {
     <!-- ROW 2: Montant hero + Catégorie pill -->
-    <div class="bsheet__main-row">
-      <div class="bsheet__amount-group">
+    <div class="k-bsheet__main-row">
+      <div class="k-bsheet__amount-group">
         <input
-          class="bsheet__amount bsheet__amount--expense input-naked"
+          class="k-bsheet__amount k-bsheet__amount--expense k-input-naked"
           [style.width]="amountWidth()"
           type="text"
           inputmode="decimal"
@@ -33,7 +33,7 @@
           placeholder="0"
           autocomplete="off"
         />
-        <span class="bsheet__currency bsheet__currency--expense">{{ currencySymbol() }}</span>
+        <span class="k-bsheet__currency k-bsheet__currency--expense">{{ currencySymbol() }}</span>
       </div>
       <button
         type="button"
@@ -50,25 +50,25 @@
     </div>
 
     <!-- ROW 3: Actif à gauche | Pills meta à droite -->
-    <div class="bsheet__meta-row">
-      <div class="bsheet__icons">
+    <div class="k-bsheet__meta-row">
+      <div class="k-bsheet__icons">
         @if (isEditing()) {
-          <button type="button" class="bsheet__action-pill bsheet__action-pill--status" [class.done]="actif()" (click)="toggleActif()">
+          <button type="button" class="k-bsheet__action-pill k-bsheet__action-pill--status" [class.done]="actif()" (click)="toggleActif()">
             <ng-icon [name]="actif() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
             {{ (actif() ? 'common.value.active' : 'common.value.inactive') | transloco }}
           </button>
         }
       </div>
-      <div class="bsheet__meta-pills">
-        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'frequency'" (click)="toggleSection('frequency')" [attr.aria-label]="'budgets.form.frequencyAria' | transloco">
+      <div class="k-bsheet__meta-pills">
+        <button type="button" class="k-bsheet__tool-pill" [class.active]="expandedSection() === 'frequency'" (click)="toggleSection('frequency')" [attr.aria-label]="'budgets.form.frequencyAria' | transloco">
           <ng-icon name="phosphorRepeat" size="16" style="color: var(--k-color-primary); opacity: 0.7" />
           <span>{{ frequencyLabelKey() | transloco }}</span>
         </button>
-        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'currency'" (click)="toggleSection('currency')" [attr.aria-label]="'budgets.form.currencyAria' | transloco">
+        <button type="button" class="k-bsheet__tool-pill" [class.active]="expandedSection() === 'currency'" (click)="toggleSection('currency')" [attr.aria-label]="'budgets.form.currencyAria' | transloco">
           <ng-icon name="phosphorCoins" size="16" style="color: var(--k-color-primary); opacity: 0.7" />
           <span>{{ form.get('currency')?.value || 'EUR' }}</span>
         </button>
-        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'threshold'" (click)="toggleSection('threshold')" [attr.aria-label]="'budgets.form.thresholdAria' | transloco">
+        <button type="button" class="k-bsheet__tool-pill" [class.active]="expandedSection() === 'threshold'" (click)="toggleSection('threshold')" [attr.aria-label]="'budgets.form.thresholdAria' | transloco">
           <ng-icon name="phosphorWarning" size="16" style="color: var(--k-color-primary); opacity: 0.7" />
           <span>{{ form.get('seuilNotification')?.value }}%</span>
         </button>
@@ -77,7 +77,7 @@
 
     <!-- EXPANDED SECTIONS -->
     @if (expandedSection() === 'category') {
-      <div class="bsheet__expand" @expandCollapse>
+      <div class="k-bsheet__expand" @expandCollapse>
         <select formControlName="categoryId" class="budget-form__select">
           <option value="" disabled>{{ 'budgets.form.categoryPlaceholder' | transloco }}</option>
           @for (cat of availableCategories(); track cat.id) {
@@ -87,7 +87,7 @@
       </div>
     }
     @if (expandedSection() === 'frequency') {
-      <div class="bsheet__expand" @expandCollapse>
+      <div class="k-bsheet__expand" @expandCollapse>
         <select formControlName="frequence" class="budget-form__select">
           @for (freq of frequencies; track freq.value) {
             <option [value]="freq.value">{{ freq.labelKey | transloco }}</option>
@@ -96,7 +96,7 @@
       </div>
     }
     @if (expandedSection() === 'currency') {
-      <div class="bsheet__expand" @expandCollapse>
+      <div class="k-bsheet__expand" @expandCollapse>
         <select formControlName="currency" class="budget-form__select">
           @for (cur of currencies(); track cur) {
             <option [value]="cur">{{ cur }}</option>
@@ -105,11 +105,11 @@
       </div>
     }
     @if (expandedSection() === 'threshold') {
-      <div class="bsheet__expand" @expandCollapse>
+      <div class="k-bsheet__expand" @expandCollapse>
         <input
           type="number"
           formControlName="seuilNotification"
-          class="bsheet__input input-naked"
+          class="k-bsheet__input k-input-naked"
           min="0"
           max="100"
           [placeholder]="'budgets.form.thresholdPlaceholder' | transloco"
@@ -118,19 +118,19 @@
     }
 
     <!-- ROW 4: Actions -->
-    <div class="bsheet__bottom-row">
-      <div class="bsheet__bottom-left">
+    <div class="k-bsheet__bottom-row">
+      <div class="k-bsheet__bottom-left">
         @if (isEditing()) {
-          <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" (click)="onDelete()">
+          <button type="button" class="k-bsheet__action-pill k-bsheet__action-pill--danger" (click)="onDelete()">
             <ng-icon name="phosphorTrash" size="16" />
           </button>
         } @else {
-          <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="onCancel()">
+          <button type="button" class="k-bsheet__action-pill k-bsheet__action-pill--cancel" (click)="onCancel()">
             {{ 'common.action.cancel' | transloco }}
           </button>
         }
       </div>
-      <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting()">
+      <button type="submit" class="k-bsheet__action-pill k-bsheet__action-pill--primary" [disabled]="submitting()">
         {{ submitting() ? '...' : (isEditing() ? ('common.action.edit' | transloco) : ('common.action.save' | transloco)) }}
       </button>
     </div>

@@ -3,7 +3,7 @@
   padding: var(--k-space-4);
 }
 
-.section-back {
+.k-section-back {
   display: inline-flex;
   align-items: center;
   gap: var(--k-space-2);
@@ -70,7 +70,7 @@
   }
 }
 
-.state-loading {
+.k-state-loading {
   display: flex;
   justify-content: center;
   padding: var(--k-space-4);
@@ -240,8 +240,8 @@
   border-top: 1px solid var(--k-border-default);
 }
 
-// Variante locale de .btn-outline (styles/_buttons.scss) : rayon lg, icone alignee (inline-flex + gap).
-.btn-outline {
+// Variante locale de .k-btn-outline (k-patterns.css) : rayon lg, icone alignee (inline-flex + gap).
+.k-btn-outline {
   display: inline-flex;
   align-items: center;
   gap: var(--k-space-1);
@@ -260,7 +260,7 @@
   }
 }
 
-.btn-primary {
+.k-btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -285,7 +285,7 @@
   }
 }
 
-.spinner {
+.k-spinner {
   width: 32px;
   height: 32px;
   border: 3px solid var(--k-border-default);
