@@ -7,6 +7,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.15.0] - 2026-10-31
+
 ### Added
 
 - **Shared PWA update service** (KKS-619): the web client now uses the update
@@ -319,7 +321,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.14.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.15.0...HEAD
+[6.15.0]: https://github.com/sopequenoteck/kbudget/compare/v6.14.0...v6.15.0
 [6.14.0]: https://github.com/sopequenoteck/kbudget/compare/v6.13.1...v6.14.0
 [6.13.1]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...v6.13.1
 [6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
